@@ -7,6 +7,7 @@
 import platform
 import os
 import time
+import threading
 
 if platform.system() == 'Windows':
     from lt.win32 import libtorrent
@@ -39,7 +40,10 @@ class Torrenter(object):
         self._session.add_dht_router('router.bittorrent.com', 6881)
         self._session.add_dht_router('router.utorrent.com', 6881)
         self._session.add_dht_router('router.bitcomet.com', 6881)
+        self._thread_lock = threading.Lock()
+        self._torrent_added = threading.Event()
         self._torrent = None  # Torrent handle for streamed torrent
+        self._files = []
 
     def __del__(self):
         """Class destructor"""
@@ -52,6 +56,25 @@ class Torrenter(object):
         :return: object
         """
         return self._torrent
+
+    @property
+    def torrent_added(self):
+        """
+        Torrent added flag
+        :return: bool
+        """
+        return self._torrent_added.is_set()
+
+    @property
+    def files(self):
+        """
+        The list of files in the torrent
+        :return:
+        """
+        files = []
+        for file_ in self.torrent.get_torrent_info().files():
+            files.append(file_.path)
+        return files
 
     def add_torrent(self, torrent, save_path):
         """
@@ -74,6 +97,19 @@ class Torrenter(object):
             time.sleep(0.1)
         self._torrent = torr_handle
 
+    def add_torrent_async(self, torrent, save_path):
+        """
+        Add torrent asynchronously in a thread-safe way.
+        :param torrent:
+        :param save_path:
+        :return:
+        """
+        self._thread_lock.acquire()
+        self._torrent_added.clear()
+        self.add_torrent(torrent, save_path)
+        self._torrent_added.set()
+        self._thread_lock.release()
+
     def remove_torrent(self, delete_files=False):
         """
         Delete streamed torrent
@@ -81,3 +117,4 @@ class Torrenter(object):
         :return:
         """
         self._session.remove_torrent(self._torrent, delete_files)
+
