@@ -75,7 +75,7 @@ class Torrenter(object):
         """
         files = []
         for file_ in self.torrent.get_torrent_info().files():
-            files.append(os.path.basename(file_.path))
+            files.append(file_.path)
         return files
 
     @property

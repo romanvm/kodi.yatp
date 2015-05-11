@@ -105,8 +105,12 @@ class TorrenterTestCase(unittest.TestCase):
         filename = 'the.big.bang.theory.824.hdtv-lol.mp4'
         self.torrenter = torrenter.Torrenter()
         self.torrenter.add_torrent(bbt_torrent_file, self.tempdir)
-        file_index = self.torrenter.files.index(filename)
-        self.assertEqual(self.torrenter.get_pieces_info(file_index), (0, 466))
+        i = 0
+        for file_ in self.torrenter.files:
+            if filename in file_:
+                break
+            i += 1
+        self.assertEqual(self.torrenter.get_pieces_info(i), (0, 466))
 
 
 if __name__ == '__main__':
