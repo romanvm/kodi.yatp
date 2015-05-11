@@ -42,6 +42,8 @@ class Torrenter(object):
         self._session.add_dht_router('router.bitcomet.com', 6881)
         self._thread_lock = threading.Lock()
         self._torrent_added = threading.Event()
+        self._buffering_complete = threading.Event()
+        self._abort_streaming = threading.Event()
         self._torrent = None  # Torrent handle for the streamed torrent
         self._files = []
 
@@ -75,6 +77,34 @@ class Torrenter(object):
         for file_ in self.torrent.get_torrent_info().files():
             files.append(os.path.basename(file_.path))
         return files
+
+    @property
+    def buffering_complete(self):
+        """
+        Buffering complete flag
+        :return: bool
+        """
+        return self._buffering_complete.is_set()
+
+    @property
+    def abort_streaming(self):
+        """
+        Abort streaming flag
+        :return:
+        """
+        return self._abort_streaming.is_set()
+
+    @abort_streaming.setter
+    def abort_streaming(self, value):
+        """
+        Abort streaming flag setter
+        :param value:
+        :return:
+        """
+        if value:
+            self._abort_streaming.set()
+        else:
+            self._abort_streaming.clear()
 
     def add_torrent(self, torrent, save_path):
         """
@@ -135,3 +165,65 @@ class Torrenter(object):
         num_pieces = peer_req.length / torr_info.piece_length()
         return start_piece, num_pieces
 
+    def stream_torrent_async(self, file_index, offset=0, buffer_percent=5.0):
+        """
+        Force sequential download of file for video playback.
+
+        This is an attempt to implement a fixed size sliding window.
+        This method should be run in a separate thread.
+        If the streaming thread needs to be stopped before download is complete
+        then set abort_streaming Event.
+        Always terminate the streaming thread when existing the main program.
+        use join() to wait until the thread terminates.
+        :param file_index: int - the numerical index of the file to be streamed.
+        :param buffer_percent: float - buffer size as % of the file size
+        :return:
+        """
+        # Get pieces info
+        start_piece, num_pieces = self.get_pieces_info(file_index)
+        # The index of the end piece in the file
+        end_piece = start_piece + num_pieces
+        # The number of pieces at the start of the file
+        # to be downloaded before the file can be played
+        buffer_length = int(round(num_pieces * (buffer_percent / 100)))
+        # Setup buffer download
+        # Max priorities for the start and 2 end pieces.
+        self.torrent.piece_priority(start_piece, 7)
+        self.torrent.piece_priority(end_piece - 1, 7)
+        self.torrent.piece_priority(end_piece, 7)
+        # Set priorities for the playback buffer
+        [self.torrent.piece_priority(i, 1) for i in xrange(start_piece + 1, start_piece + buffer_length + 1)]
+        # Set up sliding window boundaries
+        window_start = start_piece + offset
+        window_end = window_start + buffer_length
+        # Start loop
+        try:
+            # Loop until the end of the file
+            while window_start < end_piece - 1:
+                if self._abort_streaming.is_set():
+                    raise AbortRequest  # Abort streaming by external request
+                if self.torrent.have_piece(window_start):  # If the 1st piece in the window is downloaded...
+                    window_start += 1  # move window boundaries forward by 1 piece
+                    window_end += 1
+                    self.torrent.piece_priority(window_start, 7)
+                    if window_end < end_piece - 1:
+                        self.torrent.piece_priority(window_end, 1)
+                time.sleep(0.5)
+                # Check if the buffer is downloaded completely
+                if (not self._buffering_complete.is_set()
+                        and window_start > start_piece + buffer_length
+                        and self.have_piece(end_piece - 1)
+                        and self.have_piece(end_piece)):
+                    self.torrent.flush_cache()
+                    self._buffering_complete.set()  # Set event if the buffer is downloaded
+        except AbortRequest:
+            pass
+        self._thread_lock.release()
+
+    def have_piece(self, piece):
+        """
+        Check if the torrent has the piece
+        :param piece: int
+        :return: bool
+        """
+        return self.torrent.have_piece(piece)
