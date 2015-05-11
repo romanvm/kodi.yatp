@@ -42,7 +42,7 @@ class Torrenter(object):
         self._session.add_dht_router('router.bitcomet.com', 6881)
         self._thread_lock = threading.Lock()
         self._torrent_added = threading.Event()
-        self._torrent = None  # Torrent handle for streamed torrent
+        self._torrent = None  # Torrent handle for the streamed torrent
         self._files = []
 
     def __del__(self):
@@ -73,7 +73,7 @@ class Torrenter(object):
         """
         files = []
         for file_ in self.torrent.get_torrent_info().files():
-            files.append(file_.path)
+            files.append(os.path.basename(file_.path))
         return files
 
     def add_torrent(self, torrent, save_path):
@@ -117,4 +117,21 @@ class Torrenter(object):
         :return:
         """
         self._session.remove_torrent(self._torrent, delete_files)
+
+    def get_pieces_info(self, file_index):
+        """
+        Get the start piece and the number of pieces in the given file.
+        Returns a tuple (start_piece, num_pieces)
+        :param file_index: int
+        :return: tuple
+        """
+        torr_info = self.torrent.get_torrent_info()
+        # Pick the file to be streamed from the torrent files
+        file_entry = torr_info.files()[file_index]
+        peer_req = torr_info.map_file(file_index, 0, file_entry.size)
+        # Start piece of the file
+        start_piece = peer_req.piece
+        # The number of pieces in the file
+        num_pieces = peer_req.length / torr_info.piece_length()
+        return start_piece, num_pieces
 

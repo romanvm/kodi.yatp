@@ -88,10 +88,27 @@ class TorrenterTestCase(unittest.TestCase):
         thread_ = threading.Thread(target=self.torrenter.add_torrent_async, args=(bbt_torrent_file, self.tempdir))
         thread_.daemon = True
         thread_.start()
-        time.sleep(3.0)  # Wait reasonable amount of time for the torrent to be added
-        self.assertTrue(self.torrenter.torrent_added)
+        conut = 0
+        while not self.torrenter.torrent_added:
+            time.sleep(1.0)
+            conut += 1
+            if conut > 10:
+                # Raise exception if the operation takes too long
+                raise AssertionError('Max. waiting time exceeded!')
         self.assertEqual(str(self.torrenter.torrent.info_hash()), bbt_hash)
+
+    def test_getting_pieces_info(self):
+        """
+        Test getting pieces info for a videofile
+        :return:
+        """
+        filename = 'the.big.bang.theory.824.hdtv-lol.mp4'
+        self.torrenter = torrenter.Torrenter()
+        self.torrenter.add_torrent(bbt_torrent_file, self.tempdir)
+        file_index = self.torrenter.files.index(filename)
+        self.assertEqual(self.torrenter.get_pieces_info(file_index), (0, 466))
 
 
 if __name__ == '__main__':
+    print 'Running tests. This may take some time.'
     unittest.main()
