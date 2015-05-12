@@ -106,6 +106,71 @@ class Torrenter(object):
         else:
             self._abort_streaming.clear()
 
+    @property
+    def total_download(self):
+        """
+        Total download in MB
+        :return: int
+        """
+        try:
+            status = self.torrent.get_torrent_status()
+        except AttributeError:
+            return 0
+        else:
+            return int(status.total_done) / 1048576
+
+    @property
+    def totad_upload(self):
+        """
+        Total upload in MB
+        :return: int
+        """
+        try:
+            status = self.torrent.get_torrent_status()
+        except AttributeError:
+            return 0
+        else:
+            return int(status.total_payload_upload) / 1048576
+
+    @property
+    def dl_speed(self):
+        """
+        DL speed in KB/s
+        :return: int
+        """
+        try:
+            status = self.torrent.get_torrent_status()
+        except AttributeError:
+            return 0
+        else:
+            return status.download_payload_rate / 1024
+
+    @property
+    def ul_speed(self):
+        """
+        UL speed in KB/s
+        :return:
+        """
+        try:
+            status = self.torrent.get_torrent_status()
+        except AttributeError:
+            return 0
+        else:
+            return status.upload_payload_rate / 1024
+
+    @property
+    def num_peers(self):
+        """
+        The number of peers
+        :return: int
+        """
+        try:
+            status = self.torrent.get_torrent_status()
+        except AttributeError:
+            return 0
+        else:
+            return status.num_peers
+
     def add_torrent(self, torrent, save_path):
         """
         Add torrent to the session
@@ -169,7 +234,7 @@ class Torrenter(object):
         """
         Force sequential download of file for video playback.
 
-        This is an attempt to implement a fixed size sliding window.
+        This is a simple implementation of a fixed size sliding window.
         This method should be run in a separate thread.
         If the streaming thread needs to be stopped before download is complete
         then set abort_streaming Event.
