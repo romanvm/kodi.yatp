@@ -77,7 +77,7 @@ class TorrenterTestCase(unittest.TestCase):
         self.torrenter.add_torrent(bbt_magnet, self.tempdir)
         self.torrenter.remove_torrent(True)
         time.sleep(0.5)  # Wait until the torrent is completely removed.
-        self.assertFalse(self.torrenter.torrent.is_valid())
+        self.assertTrue(self.torrenter.torrent is None)
 
     def test_adding_torrent_asynchronously(self):
         """

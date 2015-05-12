@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <settings>
   <category label="General">
-    <setting id="save_folder" type="folder"
-        label="Folder for saving files" default="" />
+    <setting id="download_folder" type="folder"
+        label="Folder for downloading files" default="" />
     <setting id="keep_files" type="bool"
         label="Keep files after playing" default="false"/>
     <setting id="show_info" type="bool"

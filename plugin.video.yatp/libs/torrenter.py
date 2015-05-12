@@ -45,7 +45,6 @@ class Torrenter(object):
         self._buffering_complete = threading.Event()
         self._abort_streaming = threading.Event()
         self._torrent = None  # Torrent handle for the streamed torrent
-        self._files = []
 
     def __del__(self):
         """Class destructor"""
@@ -74,8 +73,9 @@ class Torrenter(object):
         :return:
         """
         files = []
-        for file_ in self.torrent.get_torrent_info().files():
-            files.append(file_.path)
+        if self.torrent is not None and self.torrent.is_valid():
+            for file_ in self.torrent.get_torrent_info().files():
+                files.append(file_.path)
         return files
 
     @property
@@ -106,93 +106,34 @@ class Torrenter(object):
         else:
             self._abort_streaming.clear()
 
-    @property
-    def total_download(self):
-        """
-        Total download in MB
-        :return: int
-        """
-        try:
-            status = self.torrent.get_torrent_status()
-        except AttributeError:
-            return 0
-        else:
-            return int(status.total_done) / 1048576
-
-    @property
-    def totad_upload(self):
-        """
-        Total upload in MB
-        :return: int
-        """
-        try:
-            status = self.torrent.get_torrent_status()
-        except AttributeError:
-            return 0
-        else:
-            return int(status.total_payload_upload) / 1048576
-
-    @property
-    def dl_speed(self):
-        """
-        DL speed in KB/s
-        :return: int
-        """
-        try:
-            status = self.torrent.get_torrent_status()
-        except AttributeError:
-            return 0
-        else:
-            return status.download_payload_rate / 1024
-
-    @property
-    def ul_speed(self):
-        """
-        UL speed in KB/s
-        :return:
-        """
-        try:
-            status = self.torrent.get_torrent_status()
-        except AttributeError:
-            return 0
-        else:
-            return status.upload_payload_rate / 1024
-
-    @property
-    def num_peers(self):
-        """
-        The number of peers
-        :return: int
-        """
-        try:
-            status = self.torrent.get_torrent_status()
-        except AttributeError:
-            return 0
-        else:
-            return status.num_peers
-
-    def add_torrent(self, torrent, save_path):
+    def add_torrent(self, torrent, save_path, zero_priorities=True):
         """
         Add torrent to the session
         :param torrent: str
         :param save_path: str
         :return:
         """
-        if torrent[:7] in ('magnet:', 'http://', 'https:/'):
-            add_torrent_params = {'url': torrent}
+        if self.torrent is None or not self.torrent.is_valid():
+            if torrent[:7] in ('magnet:', 'http://', 'https:/'):
+                add_torrent_params = {'url': torrent}
+            else:
+                try:
+                    add_torrent_params = {'ti': libtorrent.torrent_info(os.path.normpath(torrent))}
+                except RuntimeError:
+                    raise TorrenterError('Invalid path to the .torrent file!')
+            add_torrent_params['save_path'] = save_path
+            add_torrent_params['storage_mode'] = libtorrent.storage_mode_t.storage_mode_allocate
+            torr_handle = self._session.add_torrent(add_torrent_params)
+            while not torr_handle.has_metadata():  # Wait until torrent metadata are populated
+                time.sleep(0.1)
+            if zero_priorities:
+                # Assign 0 priorities to all pieces to postpone download
+                [torr_handle.piece_priority(i, 0) for i in xrange(torr_handle.get_torrent_info().num_pieces())]
+            self._torrent = torr_handle
         else:
-            try:
-                add_torrent_params = {'ti': libtorrent.torrent_info(os.path.normpath(torrent))}
-            except RuntimeError:
-                raise TorrenterError('Invalid path to the .torrent file!')
-        add_torrent_params['save_path'] = save_path
-        add_torrent_params['storage_mode'] = libtorrent.storage_mode_t.storage_mode_allocate
-        torr_handle = self._session.add_torrent(add_torrent_params)
-        while not torr_handle.has_metadata():  # Wait until torrent metadata are populated
-            time.sleep(0.1)
-        self._torrent = torr_handle
+            raise TorrenterError('Torrenter already has a torrent!')
 
-    def add_torrent_async(self, torrent, save_path):
+    def add_torrent_async(self, torrent, save_path, zero_priorities=True):
         """
         Add torrent asynchronously in a thread-safe way.
         :param torrent:
@@ -201,7 +142,7 @@ class Torrenter(object):
         """
         self._thread_lock.acquire()
         self._torrent_added.clear()
-        self.add_torrent(torrent, save_path)
+        self.add_torrent(torrent, save_path, zero_priorities)
         self._torrent_added.set()
         self._thread_lock.release()
 
@@ -211,7 +152,11 @@ class Torrenter(object):
         :param delete_files: bool
         :return:
         """
-        self._session.remove_torrent(self._torrent, delete_files)
+        if self.torrent is not None and self.torrent.is_valid():
+            self._session.remove_torrent(self.torrent, delete_files)
+            self._torrent = None
+        else:
+            raise TorrenterError('Torrenter has no valid torrent!')
 
     def get_pieces_info(self, file_index):
         """
@@ -220,15 +165,18 @@ class Torrenter(object):
         :param file_index: int
         :return: tuple
         """
-        torr_info = self.torrent.get_torrent_info()
-        # Pick the file to be streamed from the torrent files
-        file_entry = torr_info.files()[file_index]
-        peer_req = torr_info.map_file(file_index, 0, file_entry.size)
-        # Start piece of the file
-        start_piece = peer_req.piece
-        # The number of pieces in the file
-        num_pieces = peer_req.length / torr_info.piece_length()
-        return start_piece, num_pieces
+        if self.torrent is not None and self.torrent.is_valid():
+            torr_info = self.torrent.get_torrent_info()
+            # Pick the file to be streamed from the torrent files
+            file_entry = torr_info.files()[file_index]
+            peer_req = torr_info.map_file(file_index, 0, file_entry.size)
+            # Start piece of the file
+            start_piece = peer_req.piece
+            # The number of pieces in the file
+            num_pieces = peer_req.length / torr_info.piece_length()
+            return start_piece, num_pieces
+        else:
+            raise TorrenterError('Torrenter has no valid torrent!')
 
     def stream_torrent_async(self, file_index, offset=0, buffer_percent=5.0):
         """
@@ -277,18 +225,10 @@ class Torrenter(object):
                 # Check if the buffer is downloaded completely
                 if (not self._buffering_complete.is_set()
                         and window_start > start_piece + buffer_length
-                        and self.have_piece(end_piece - 1)
-                        and self.have_piece(end_piece)):
+                        and self.torrent.have_piece(end_piece - 1)
+                        and self.torrent.have_piece(end_piece)):
                     self.torrent.flush_cache()
                     self._buffering_complete.set()  # Set event if the buffer is downloaded
         except AbortRequest:
             pass
         self._thread_lock.release()
-
-    def have_piece(self, piece):
-        """
-        Check if the torrent has the piece
-        :param piece: int
-        :return: bool
-        """
-        return self.torrent.have_piece(piece)

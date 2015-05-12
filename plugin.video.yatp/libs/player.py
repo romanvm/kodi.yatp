@@ -4,11 +4,11 @@
 # Created on:  09.05.2015
 # Licence:     GPL v.3: http://www.gnu.org/copyleft/gpl.html
 
+import xbmc
 
-def play_torrent(torrent):
+
+class TorrentPlayer(xbmc.Player):
     """
-    Play .torrent file of a magnet link
-    :param torrent:
-    :return:
+    Torrent Player class
     """
     pass
