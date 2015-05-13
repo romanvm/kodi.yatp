@@ -10,10 +10,13 @@ import sys
 import shutil
 import time
 import threading
+import mock
 
 __cwd__ = os.path.dirname(__file__)
 sys.path.append(os.path.join(os.path.dirname(__cwd__), 'plugin.video.yatp'))
 import libs.torrenter as torrenter
+with mock.patch('sys.argv', ['plugin://plugin.video.yatp', '5', '']):
+    import main
 
 # The Big Bang Theory S08E24 HDTV x264-LOL[ettv].mp4
 # Files: 3
@@ -74,7 +77,7 @@ class TorrenterTestCase(unittest.TestCase):
         :return:
         """
         self.torrenter = torrenter.Torrenter()
-        self.torrenter.add_torrent(bbt_magnet, self.tempdir)
+        self.torrenter.add_torrent(bbt_torrent_file, self.tempdir)
         self.torrenter.remove_torrent(True)
         time.sleep(0.5)  # Wait until the torrent is completely removed.
         self.assertTrue(self.torrenter.torrent is None)
@@ -85,9 +88,9 @@ class TorrenterTestCase(unittest.TestCase):
         :return:
         """
         self.torrenter = torrenter.Torrenter()
-        thread_ = threading.Thread(target=self.torrenter.add_torrent_async, args=(bbt_torrent_file, self.tempdir))
-        thread_.daemon = True
-        thread_.start()
+        add_thread = threading.Thread(target=self.torrenter.add_torrent_async, args=(bbt_torrent_file, self.tempdir))
+        add_thread.daemon = True
+        add_thread.start()
         conut = 0
         while not self.torrenter.torrent_added:
             time.sleep(1.0)
@@ -111,6 +114,47 @@ class TorrenterTestCase(unittest.TestCase):
                 break
             i += 1
         self.assertEqual(self.torrenter.get_pieces_info(i), (0, 466))
+
+    @unittest.skip('Needs reworking')
+    def test_streaming_torrent(self):
+        """
+        Test streaming torrent
+        :return:
+        """
+        self.torrenter = torrenter.Torrenter()
+        self.torrenter.add_torrent(bbt_torrent_file, self.tempdir)
+        stream_theread = threading.Thread(target=self.torrenter.stream_torrent_async, args=(0, 1.0))
+        stream_theread.daemon = True
+        stream_theread.start()
+        while not self.torrenter.buffering_complete:
+            time.sleep(1.0)
+            print 'Peers: {0}; DL speed: {1}KB/s; Downloaded: {2}MB'.format(
+            self.torrenter.torrent.status().num_peers,
+            self.torrenter.torrent.status().download_payload_rate / 1024,
+            self.torrenter.torrent.status().total_done / 1048576)
+        self.torrenter.pause()
+        print 'Buffering complete!'
+        assert True
+
+
+class MainRouterTestCase(unittest.TestCase):
+    """
+    Test main.router function
+    """
+    @mock.patch('main.play_torrent')
+    @mock.patch('main.select_torrent')
+    @mock.patch('main.plugin_root')
+    def test_router_function_with_different_paramstrings(self, mock_plugin_root, mock_select_torrent, mock_play_torrent):
+        """
+        Test router function with different paramstring
+        :return:
+        """
+        main.router('')
+        mock_plugin_root.assert_called_with()
+        main.router('action=select_torrent')
+        mock_select_torrent.assert_called_with()
+        main.router('action=play&torrent=test')
+        mock_play_torrent.assert_called_with('test')
 
 
 if __name__ == '__main__':

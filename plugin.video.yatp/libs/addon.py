@@ -4,12 +4,23 @@
 # Created on:  09.05.2015
 # Licence:     GPL v.3: http://www.gnu.org/copyleft/gpl.html
 
+import os
 import xbmc
 import xbmcaddon
+import xbmcvfs
 
 
 class Addon(xbmcaddon.Addon):
     """Helper class to access addon parameters"""
+    def __init__(self):
+        """Class constructor"""
+        if self.getSetting('download_folder'):
+            self._dl_folder = self.getSetting('download_folder')
+        else:
+            self._dl_folder = os.path.join(xbmc.translatePath('special://temp').decode('utf-8'), 'torrents')
+        if not xbmcvfs.exists(self._dl_folder):
+            xbmcvfs.mkdir(self._dl_folder)
+
     def ui_string(self, string_id):
         """
         Return UI string by numeric ID
@@ -39,7 +50,7 @@ class Addon(xbmcaddon.Addon):
         Save folder
         :return: str
         """
-        return self.getSetting('download_folder')
+        return self._dl_folder
 
     @property
     def keep_files(self):
@@ -56,3 +67,19 @@ class Addon(xbmcaddon.Addon):
         :return: bool
         """
         return self.getSetting('show_info') == 'true'
+
+    @property
+    def addon_path(self):
+        """
+        Addon working folder
+        :return: str
+        """
+        return self.getAddonInfo('path').decode('utf-8')
+
+    @property
+    def icon_folder(self):
+        """
+        Folders for icons
+        :return:
+        """
+        return os.path.join(self.addon_path, 'resources', 'icons')

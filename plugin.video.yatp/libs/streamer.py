@@ -75,13 +75,13 @@ class Streamer(object):
                     videofile = videofiles[index]
                     torr_info = self._torrenter.torrent.get_torrent_info()
                     self._file_size = int(torr_info.files()[videofile[1]].size)
-                    buffer_size = self._file_size * buffer_percent / 100.0
                     self._stream_thread = threading.Thread(target=self._torrenter.stream_torrent_async,
                                                            args=(videofile[1], buffer_percent))
                     self._stream_thread.daemon = True
                     self._stream_thread.start()
                     while not self._torrenter.buffering_complete and not dialog_progress.iscanceled():
-                        dialog_progress.update(int(100 * self.total_download / buffer_size),
+                        dialog_progress.update(int(10000 * self._get_torrent_status().total_done /
+                                                   (self._file_size * buffer_percent)),
                                                'Downloaded: {0}MB'.format(self.total_download),
                                                'Download speed: {0}KB/s'.format(self.dl_speed),
                                                'Peers: {0}'.format(self.num_peers))
@@ -112,7 +112,7 @@ class Streamer(object):
         :return:
         """
         try:
-            return self._torrenter.torrent.get_torrent_status()
+            return self._torrenter.torrent.status()
         except AttributeError:
             return None
 
@@ -174,7 +174,6 @@ class Streamer(object):
         """
         status = self._get_torrent_status()
         if status is not None:
-            print type(status.num_peers)
             return status.num_peers
         else:
             return 0
