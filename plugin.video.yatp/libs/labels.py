@@ -7,13 +7,13 @@
 import xbmcgui
 
 
-class _ScreenLabel(object):
+class TopLeftLabel(object):
     """
-    Base class for on-screen label
+    On-screen label in the top left corner.
     """
-    def __init__(self, color='0xFFFFFF00'):
+    def __init__(self, text='', color='0x7FFFFF00'):
         self._window = xbmcgui.Window(12005)
-        self._label = xbmcgui.ControlLabel(-10, -10, 1, 1, '', textColor=color)
+        self._label = xbmcgui.ControlLabel(10, 10, 1900, 50, text, textColor=color)
         self._window.addControl(self._label)
 
     @property
@@ -38,28 +38,3 @@ class _ScreenLabel(object):
         Hide on-screen label
         """
         self._label.setVisible(False)
-
-
-class TopLeftLabel(_ScreenLabel):
-    """
-    Top Left label for torrent stats
-    """
-    def __init__(self, color='0x7FFFFF00'):
-        super(TopLeftLabel, self).__init__(color)
-        screen_width = self._window.getWidth()
-        self._label.setPosition(10, 10)
-        self._label.setWidth(screen_width - 20)
-        self._label.setHeight(50)
-
-
-class CentralLabel(_ScreenLabel):
-    """
-    Central label for "Buffering torrent..."
-    """
-    def __init__(self):
-        super(CentralLabel, self).__init__()
-        screen_width = self._window.getWidth()
-        screen_height = self._window.getHeight()
-        self._label.setPosition(screen_width / 2, screen_height / 2)
-        self._label.setWidth(100)
-        self._label.setHeight(25)

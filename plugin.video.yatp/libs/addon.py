@@ -29,12 +29,13 @@ class Addon(xbmcaddon.Addon):
         """
         return self.getLocalizedString(string_id).encode('utf-8')
 
-    def log(self, message):
+    @staticmethod
+    def log(message):
         """
         Write message to the Kodi log
         for debuging purposes.
         """
-        xbmc.log('{0}: {1}'.format(self.id, message.encode('utf-8')))
+        xbmc.log('plugin.video.yatp: {0}'.format(message.encode('utf-8')))
 
     @property
     def id(self):

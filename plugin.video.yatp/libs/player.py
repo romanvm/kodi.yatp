@@ -6,6 +6,7 @@
 
 import os
 import time
+import base64
 import xbmc
 import xbmcgui
 import xbmcvfs
@@ -20,10 +21,45 @@ class TorrentPlayer(xbmc.Player):
     pass
 
 
-def play_torrent(torrent, dl_folder, keep_files=False, onscreen_info=False):
+def add_params(list_item, params):
+    """
+    Add aditional parameters to list_item
+    :param list_item: ListItem
+    :param params: dict
+    :return:
+    """
+    info = {}
+    try:
+        info['title'] = params['title']
+    except KeyError:
+        pass
+    try:
+        info['season'] = int(params['season'])
+    except (KeyError, ValueError):
+        pass
+    try:
+        info['episode'] = int(params['episode'])
+    except (KeyError, ValueError):
+        pass
+    try:
+        thumb = base64.urlsafe_b64decode(params['thumb'])
+    except KeyError:
+        thumb = ''
+    if thumb:
+        list_item.setThumbnailImage(thumb)
+    if info:
+        list_item.setInfo('video', info)
+    return list_item
+
+
+def play_torrent(torrent, params, dl_folder, keep_files=False, onscreen_info=False):
     """
     Play .torrent file or a magnet link
     :param torrent: str
+    :param params: dict
+    :param dl_folder: str
+    :param keep_files: bool
+    :param onscreen_info: bool
     :return:
     """
     label = TopLeftLabel()
@@ -32,8 +68,12 @@ def play_torrent(torrent, dl_folder, keep_files=False, onscreen_info=False):
     path = streamer.stream(torrent)
     if path is not None:
         player = TorrentPlayer()
-        xbmcvfs.listdir(os.path.dirname(path))  # Magic function
-        player.play(path)
+        xbmcvfs.listdir(os.path.dirname(path))  # Magic function - refresh a directory listing
+        list_item = xbmcgui.ListItem(os.path.basename(path))
+        if params is not None:
+            list_item = add_params(list_item, params)
+        player.play(path, listitem=list_item)
+        time.sleep(0.5)  # Needed to open a file with ListItem present, otherwise player.isPlaying() returns False
         while player.isPlaying():
             time.sleep(0.5)
             if onscreen_info:
@@ -48,7 +88,7 @@ def play_torrent(torrent, dl_folder, keep_files=False, onscreen_info=False):
                 )
             else:
                 if streamer.is_seeding and trigger:
-                    xbmcgui.Dialog.notification('Note', 'Torrent is completely downloaded.', 'info', 3000)
+                    xbmcgui.Dialog().notification('Note', 'Torrent is completely downloaded.', 'info', 3000)
                     trigger = False
         label.hide()
         del label

@@ -20,11 +20,6 @@ class TorrenterError(Exception):
     pass
 
 
-class AbortRequest(Exception):
-    """Custom exception"""
-    pass
-
-
 class Torrenter(object):
     """The main Torrenter class"""
     def __init__(self, start_port=6681, end_port=6691):
@@ -152,8 +147,8 @@ class Torrenter(object):
         :param delete_files: bool
         :return:
         """
-        if self.torrent is not None and self.torrent.is_valid():
-            self._session.remove_torrent(self.torrent, delete_files)
+        if self._torrent is not None:
+            self._session.remove_torrent(self._torrent, delete_files)
             self._torrent = None
         else:
             raise TorrenterError('Torrenter has no valid torrent!')
@@ -211,28 +206,24 @@ class Torrenter(object):
         # Set up sliding window boundaries
         window_start = start_piece + offset
         window_end = window_start + buffer_length
-        # Start loop
-        try:
-            # Loop until the end of the file
-            while window_start < end_piece - 1:
-                if self._abort_streaming.is_set():
-                    raise AbortRequest  # Abort streaming by external request
-                if self.torrent.have_piece(window_start):  # If the 1st piece in the window is downloaded...
-                    window_start += 1  # move window boundaries forward by 1 piece
-                    window_end += 1
-                    self.torrent.piece_priority(window_start, 7)
-                    if window_end < end_piece - 1:
-                        self.torrent.piece_priority(window_end, 1)
-                time.sleep(0.5)
-                # Check if the buffer is downloaded completely
-                if (not self._buffering_complete.is_set()
-                        and window_start > start_piece + buffer_length
-                        and self.torrent.have_piece(end_piece - 1)
-                        and self.torrent.have_piece(end_piece)):
-                    self.torrent.flush_cache()
-                    self._buffering_complete.set()  # Set event if the buffer is downloaded
-        except AbortRequest:
-            pass
+        # Loop until the end of the file
+        while window_start < end_piece - 1:
+            if self._abort_streaming.is_set():
+                break  # Abort streaming by external request
+            if self.torrent.have_piece(window_start):  # If the 1st piece in the window is downloaded...
+                window_start += 1  # move window boundaries forward by 1 piece
+                window_end += 1
+                self.torrent.piece_priority(window_start, 7)
+                if window_end < end_piece - 1:
+                    self.torrent.piece_priority(window_end, 1)
+            time.sleep(0.5)
+            # Check if the buffer is downloaded completely
+            if (not self._buffering_complete.is_set()
+                    and window_start > start_piece + buffer_length
+                    and self.torrent.have_piece(end_piece - 1)
+                    and self.torrent.have_piece(end_piece)):
+                self.torrent.flush_cache()
+                self._buffering_complete.set()  # Set event if the buffer is downloaded
         self._thread_lock.release()
 
     def pause(self, graceful_pause=1):

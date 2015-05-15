@@ -38,17 +38,17 @@ def select_torrent():
     """
     torrent = xbmcgui.Dialog().browse(1, 'Select .torrent file to play', 'video', mask='.torrent')
     if torrent:
-        __addon__.log('Torrent selected: {0}'.format(torrent))
-        play_torrent(torrent)
+        Addon.log('Torrent selected: {0}'.format(torrent))
+        play_torrent(torrent, None)
 
 
-def play_torrent(torrent):
+def play_torrent(torrent, params):
     """
     Play torrent
     :param torrent:
     :return:
     """
-    player.play_torrent(torrent, __addon__.download_folder, __addon__.keep_files, __addon__.onscreen_info)
+    player.play_torrent(torrent, params, __addon__.download_folder, __addon__.keep_files, __addon__.onscreen_info)
 
 
 def router(paramstring):
@@ -63,16 +63,16 @@ def router(paramstring):
             select_torrent()
         elif params['action'][0] == 'play':
             torrent = params['torrent'][0]
-            __addon__.log('Torrent to play: {0}'.format(torrent))
-            play_torrent(torrent)
+            Addon.log('Torrent to play: {0}'.format(torrent))
+            play_torrent(torrent, params)
     else:
         plugin_root()
 
 
 if __name__ == '__main__':
-    __addon__.log(str(sys.argv))
+    Addon.log(str(sys.argv))
     try:
         router(sys.argv[2][1:])
     except KeyError as ex:
         xbmcgui.Dialog().notification('Error!', 'Invalid call parameters.', 'error', 3000)
-        __addon__.log(ex.message)
+        Addon.log(ex.message)

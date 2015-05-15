@@ -15,11 +15,11 @@ from torrenter import Torrenter, TorrenterError
 
 class Streamer(object):
     """Streamer Class"""
-    def __init__(self, download_dir, delete_files=True):
+    def __init__(self, download_dir, keep_files=False):
         """Class constructor"""
         self._torrenter = Torrenter(30000, 30010)
         self.download_dir = download_dir
-        self.delete_files = delete_files
+        self.delete_files = not keep_files
         if not xbmcvfs.exists(self.download_dir):
             xbmcvfs.mkdir(self.download_dir)
         self._add_torrent_thread = None
