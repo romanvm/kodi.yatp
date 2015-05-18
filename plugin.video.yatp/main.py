@@ -6,6 +6,7 @@
 
 import sys
 import os
+from base64 import urlsafe_b64decode
 from urlparse import parse_qs
 import xbmcgui
 import xbmcplugin
@@ -62,7 +63,7 @@ def router(paramstring):
         if params['action'][0] == 'select_torrent':
             select_torrent()
         elif params['action'][0] == 'play':
-            torrent = params['torrent'][0]
+            torrent = urlsafe_b64decode(params['torrent'][0])
             Addon.log('Torrent to play: {0}'.format(torrent))
             play_torrent(torrent, params)
     else:
