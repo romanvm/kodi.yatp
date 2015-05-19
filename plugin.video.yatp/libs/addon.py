@@ -5,6 +5,7 @@
 # Licence:     GPL v.3: http://www.gnu.org/copyleft/gpl.html
 
 import os
+#
 import xbmc
 import xbmcaddon
 import xbmcvfs
@@ -15,11 +16,11 @@ class Addon(xbmcaddon.Addon):
     def __init__(self):
         """Class constructor"""
         if self.getSetting('download_folder'):
-            self._dl_folder = self.getSetting('download_folder')
+            self._dl_dir = self.getSetting('download_folder')
         else:
-            self._dl_folder = os.path.join(xbmc.translatePath('special://temp').decode('utf-8'), 'torrents')
-        if not xbmcvfs.exists(self._dl_folder):
-            xbmcvfs.mkdir(self._dl_folder)
+            self._dl_dir = os.path.join(xbmc.translatePath('special://temp').decode('utf-8'), 'torrents')
+        if not xbmcvfs.exists(self._dl_dir):
+            xbmcvfs.mkdir(self._dl_dir)
 
     def ui_string(self, string_id):
         """
@@ -29,13 +30,12 @@ class Addon(xbmcaddon.Addon):
         """
         return self.getLocalizedString(string_id).encode('utf-8')
 
-    @staticmethod
-    def log(message):
+    def log(self, message):
         """
         Write message to the Kodi log
         for debuging purposes.
         """
-        xbmc.log('plugin.video.yatp: {0}'.format(message.encode('utf-8')))
+        xbmc.log('{0}: {1}'.format(self.id, message.encode('utf-8')))
 
     @property
     def id(self):
@@ -46,12 +46,12 @@ class Addon(xbmcaddon.Addon):
         return self.getAddonInfo('id')
 
     @property
-    def download_folder(self):
+    def download_dir(self):
         """
         Save folder
         :return: str
         """
-        return self._dl_folder
+        return self._dl_dir
 
     @property
     def keep_files(self):
@@ -70,7 +70,7 @@ class Addon(xbmcaddon.Addon):
         return self.getSetting('show_info') == 'true'
 
     @property
-    def addon_path(self):
+    def addon_dir(self):
         """
         Addon working folder
         :return: str
@@ -78,9 +78,9 @@ class Addon(xbmcaddon.Addon):
         return self.getAddonInfo('path').decode('utf-8')
 
     @property
-    def icon_folder(self):
+    def icon(self):
         """
-        Folders for icons
-        :return:
+        Addon icon
+        :return: str
         """
-        return os.path.join(self.addon_path, 'resources', 'icons')
+        return os.path.join(self.addon_dir, 'icon.png')

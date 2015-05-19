@@ -81,26 +81,6 @@ class Torrenter(object):
         """
         return self._buffering_complete.is_set()
 
-    @property
-    def abort_streaming(self):
-        """
-        Abort streaming flag
-        :return:
-        """
-        return self._abort_streaming.is_set()
-
-    @abort_streaming.setter
-    def abort_streaming(self, value):
-        """
-        Abort streaming flag setter
-        :param value:
-        :return:
-        """
-        if value:
-            self._abort_streaming.set()
-        else:
-            self._abort_streaming.clear()
-
     def add_torrent(self, torrent, save_path, zero_priorities=True):
         """
         Add torrent to the session
@@ -225,6 +205,13 @@ class Torrenter(object):
                 self.torrent.flush_cache()
                 self._buffering_complete.set()  # Set event if the buffer is downloaded
         self._thread_lock.release()
+
+    def abort_streaming(self):
+        """
+        Set abort streaming flag
+        :return:
+        """
+        self._abort_streaming.set()
 
     def pause(self, graceful_pause=1):
         """

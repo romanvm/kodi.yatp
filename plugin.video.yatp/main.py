@@ -7,9 +7,11 @@
 import sys
 import os
 from base64 import urlsafe_b64decode
-from urlparse import parse_qs
+from urlparse import parse_qsl
+#
 import xbmcgui
 import xbmcplugin
+#
 from libs import player
 from libs.addon import Addon
 
@@ -24,9 +26,7 @@ def plugin_root():
     Plugin root section
     :return:
     """
-    list_item = xbmcgui.ListItem(label='Select .torrent file to play...',
-                                 iconImage=os.path.join(__addon__.icon_folder, 'torrent.png'),
-                                 thumbnailImage=os.path.join(__addon__.icon_folder, 'torrent.png'))
+    list_item = xbmcgui.ListItem(label='Select .torrent file to play...', thumbnailImage=os.path.join(__addon__.icon))
     url = '{0}?action=select_torrent'.format(__url__)
     xbmcplugin.addDirectoryItem(handle=__handle__, url=url, listitem=list_item, isFolder=False)
     xbmcplugin.endOfDirectory(__handle__, True)
@@ -39,7 +39,7 @@ def select_torrent():
     """
     torrent = xbmcgui.Dialog().browse(1, 'Select .torrent file to play', 'video', mask='.torrent')
     if torrent:
-        Addon.log('Torrent selected: {0}'.format(torrent))
+        __addon__.log('Torrent selected: {0}'.format(torrent))
         play_torrent(torrent, None)
 
 
@@ -49,7 +49,7 @@ def play_torrent(torrent, params):
     :param torrent:
     :return:
     """
-    player.play_torrent(torrent, params, __addon__.download_folder, __addon__.keep_files, __addon__.onscreen_info)
+    player.play_torrent(torrent, params, __addon__.download_dir, __addon__.keep_files, __addon__.onscreen_info)
 
 
 def router(paramstring):
@@ -58,22 +58,20 @@ def router(paramstring):
     :param paramstring: str
     :return:
     """
-    params = parse_qs(paramstring)
+    params = dict(parse_qsl(paramstring[1:]))
     if params:
-        if params['action'][0] == 'select_torrent':
+        if params['action'] == 'select_torrent':
             select_torrent()
-        elif params['action'][0] == 'play':
-            torrent = urlsafe_b64decode(params['torrent'][0])
-            Addon.log('Torrent to play: {0}'.format(torrent))
+        elif params['action'] == 'play':
+            torrent = urlsafe_b64decode(params['torrent'])
+            __addon__.log('Torrent to play: {0}'.format(torrent))
             play_torrent(torrent, params)
+        else:
+            raise RuntimeError('Invalid action: {0}'.format(params['action']))
     else:
         plugin_root()
 
 
 if __name__ == '__main__':
-    Addon.log(str(sys.argv))
-    try:
-        router(sys.argv[2][1:])
-    except KeyError as ex:
-        xbmcgui.Dialog().notification('Error!', 'Invalid call parameters.', 'error', 3000)
-        Addon.log(ex.message)
+    __addon__.log(str(sys.argv))
+    router(sys.argv[2])

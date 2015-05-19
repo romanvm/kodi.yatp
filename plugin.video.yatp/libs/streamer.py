@@ -10,6 +10,7 @@ import time
 import threading
 import xbmcgui
 import xbmcvfs
+#
 from torrenter import Torrenter, TorrenterError
 
 
@@ -28,7 +29,7 @@ class Streamer(object):
 
     def __del__(self):
         """Class destructor"""
-        self._torrenter.abort_streaming = True
+        self._torrenter.abort_streaming()
         try:
             self._stream_thread.join()
         except (RuntimeError, AttributeError):
@@ -98,7 +99,7 @@ class Streamer(object):
             else:
                 xbmcgui.Dialog().notification('Error!', 'No videofiles to play.', 'error', 3000)
         if dialog_progress.iscanceled():
-            self._torrenter.abort_streaming = True
+            self._torrenter.abort_streaming()
             try:
                 self._stream_thread.join()
             except (RuntimeError, AttributeError):
