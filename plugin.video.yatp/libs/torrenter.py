@@ -276,7 +276,7 @@ class Torrenter(object):
         else:
             raise TorrenterError('Torrenter has no valid torrent!')
 
-    def stream_torrent_async(self, file_index, buffer_percent=5.0, offset=0):
+    def stream_torrent_async(self, file_index, buffer_percent=5.0):
         """
         Force sequential download of file for video playback.
 
@@ -288,7 +288,6 @@ class Torrenter(object):
         use join() to wait until the thread terminates.
         :param file_index: int - the numerical index of the file to be streamed.
         :param buffer_percent: float - buffer size as % of the file size
-        :param offset: int - starting piece
         :return:
         """
         # Lock thread
@@ -311,7 +310,7 @@ class Torrenter(object):
         # Set priorities for the playback buffer
         [self.torrent.piece_priority(i, 1) for i in xrange(start_piece + 1, start_piece + buffer_length + 1)]
         # Set up sliding window boundaries
-        window_start = start_piece + offset
+        window_start = start_piece
         window_end = window_start + buffer_length
         # Loop until the end of the file
         while window_start < end_piece - 1:
