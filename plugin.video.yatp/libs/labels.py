@@ -11,9 +11,9 @@ class TopLeftLabel(object):
     """
     On-screen label in the top left corner.
     """
-    def __init__(self, text='', color='0x7FFFFF00'):
+    def __init__(self, x=10, y=10, width=1900, height=50, text='', color='0xFFFFFF00'):
         self._window = xbmcgui.Window(12005)
-        self._label = xbmcgui.ControlLabel(10, 10, 1900, 50, text, textColor=color)
+        self._label = xbmcgui.ControlLabel(x, y, width, height, text, textColor=color)
         self._window.addControl(self._label)
 
     @property
