@@ -169,6 +169,9 @@ class Torrenter(object):
         """
         # Lock thread
         self._thread_lock.acquire()
+        # Clear flags
+        self._abort_streaming.clear()
+        self._buffering_complete.clear()
         # Get pieces info
         start_piece, num_pieces = self.get_pieces_info(file_index)
         # The index of the end piece in the file
