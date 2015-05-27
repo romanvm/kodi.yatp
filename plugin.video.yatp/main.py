@@ -40,10 +40,10 @@ def select_torrent():
     torrent = xbmcgui.Dialog().browse(1, 'Select .torrent file to play', 'video', mask='.torrent')
     if torrent:
         __addon__.log('Torrent selected: {0}'.format(torrent))
-        play_torrent(torrent, None)
+        play_torrent(torrent)
 
 
-def play_torrent(torrent, params):
+def play_torrent(torrent, params=None):
     """
     Play torrent
     :param torrent:

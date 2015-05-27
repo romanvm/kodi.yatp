@@ -14,6 +14,9 @@ import xbmcvfs
 #
 from labels import TopLeftLabel
 from streamer import Streamer
+from addon import Addon
+
+__addon__ = Addon()
 
 
 class TorrentPlayer(xbmc.Player):
@@ -90,7 +93,8 @@ def play_torrent(torrent, params, dl_folder, keep_files=False, onscreen_info=Fal
                 )
             else:
                 if streamer.is_seeding and trigger:
-                    xbmcgui.Dialog().notification('Note', 'Torrent is completely downloaded.', 'info', 3000)
+                    xbmcgui.Dialog().notification(__addon__.id, 'Torrent is completely downloaded.',
+                                                  __addon__.icon, 3000)
                     trigger = False
         label.hide()
         del label

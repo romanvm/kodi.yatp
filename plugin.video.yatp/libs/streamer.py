@@ -11,6 +11,9 @@ import xbmcgui
 import xbmcvfs
 #
 from torrenter import Torrenter, TorrenterError
+from addon import Addon
+
+__addon__ = Addon()
 
 
 class Streamer(Torrenter):
@@ -87,16 +90,16 @@ class Streamer(Torrenter):
                             video_path = os.path.join(self._download_dir, videofile[0])
                         return video_path
                 else:
-                    xbmcgui.Dialog().notification('Note!', 'A video is not selected', 'info', 3000)
+                    xbmcgui.Dialog().notification(__addon__.id, 'A video is not selected', __addon__.icon, 3000)
             else:
-                xbmcgui.Dialog().notification('Error!', 'No videofiles to play.', 'error', 3000)
+                xbmcgui.Dialog().notification(__addon__.id, 'No videofiles to play.', 'error', 3000)
         if dialog_progress.iscanceled() or not result:
             self.abort_streaming()
             try:
                 self._buffer_thread.join()
             except (RuntimeError, AttributeError):
                 pass
-            xbmcgui.Dialog().notification('Note!', 'Playback cancelled.', 'info', 3000)
+            xbmcgui.Dialog().notification(__addon__.id, 'Playback cancelled.', __addon__.icon, 3000)
         return None
 
     def pre_buffer_stream(self, buffer_percent):
@@ -206,6 +209,6 @@ class Streamer(Torrenter):
     def pieces_info(self):
         """
         Pieces info for the file being streamed
-        :return:
+        :return: tuple - start piece, # of pieces
         """
         return self.get_pieces_info(self.file_index)
