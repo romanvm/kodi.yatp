@@ -19,13 +19,6 @@ from addon import Addon
 __addon__ = Addon()
 
 
-class TorrentPlayer(xbmc.Player):
-    """
-    Torrent Player class
-    """
-    pass
-
-
 def add_params(list_item, params):
     """
     Add aditional parameters to list_item
@@ -72,7 +65,7 @@ def play_torrent(torrent, params, dl_folder, keep_files=False, onscreen_info=Fal
     streamer = Streamer(dl_folder, keep_files)
     path = streamer.stream(torrent)
     if path is not None:
-        player = TorrentPlayer()
+        player = xbmc.Player()
         xbmcvfs.listdir(os.path.dirname(path))  # Magic function - refresh a directory listing
         list_item = xbmcgui.ListItem(os.path.basename(path))
         if params is not None:

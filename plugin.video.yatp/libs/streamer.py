@@ -192,7 +192,7 @@ class Streamer(Torrenter):
     @property
     def file_index(self):
         """
-        Internal index of the fideofile being streamed
+        Internal index of the videofile being streamed
         :return:
         """
         return self._file_index
