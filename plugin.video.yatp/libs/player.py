@@ -19,7 +19,7 @@ from addon import Addon
 __addon__ = Addon()
 
 
-def add_params(list_item, params):
+def _add_params(list_item, params):
     """
     Add aditional parameters to list_item
     :param list_item: ListItem
@@ -69,7 +69,7 @@ def play_torrent(torrent, params, dl_folder, keep_files=False, onscreen_info=Fal
         xbmcvfs.listdir(os.path.dirname(path))  # Magic function - refresh a directory listing
         list_item = xbmcgui.ListItem(os.path.basename(path))
         if params is not None:
-            list_item = add_params(list_item, params)
+            list_item = _add_params(list_item, params)
         player.play(path, listitem=list_item)
         time.sleep(0.5)  # Needed to open a file with ListItem present, otherwise player.isPlaying() returns False
         while player.isPlaying():
