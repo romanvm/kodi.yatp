@@ -6,7 +6,7 @@
 
 import os
 import time
-import base64
+from base64 import urlsafe_b64decode
 #
 import xbmc
 import xbmcgui
@@ -28,7 +28,7 @@ def _add_params(list_item, params):
     """
     info = {}
     try:
-        info['title'] = params['title']
+        info['title'] = urlsafe_b64decode(params['title'])
     except KeyError:
         pass
     try:
@@ -39,12 +39,10 @@ def _add_params(list_item, params):
         info['episode'] = int(params['episode'])
     except (KeyError, ValueError):
         pass
-    try:
-        thumb = base64.urlsafe_b64decode(params['thumb'])
-    except KeyError:
-        thumb = ''
+    thumb = urlsafe_b64decode(params.get('thumb', ''))
     if thumb:
         list_item.setThumbnailImage(thumb)
+        list_item.setIconImage(thumb)
     if info:
         list_item.setInfo('video', info)
     return list_item
