@@ -203,6 +203,17 @@ class Torrenter(object):
         except AttributeError:
             return None
 
+    @property
+    def torrent_progress(self):
+        """
+        Get torrent download progress in %
+        :return:
+        """
+        try:
+            return int(self.torrent_status.progress * 100)
+        except AttributeError:
+            return 0
+
     def add_torrent(self, torrent, save_path, zero_priorities=True):
         """
         Add torrent to the session
