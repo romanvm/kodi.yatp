@@ -322,7 +322,7 @@ class Torrenter(object):
                 self.torrent.piece_priority(window_start, 7)
                 if window_end < end_piece - 1:
                     self.torrent.piece_priority(window_end, 1)
-            time.sleep(0.1)
+            time.sleep(0.5)
             # Check if the buffer is downloaded completely
             if (not self._buffering_complete.is_set()
                     and window_start > start_piece + buffer_length
@@ -330,7 +330,6 @@ class Torrenter(object):
                     and self.torrent.have_piece(end_piece)):
                 self.torrent.flush_cache()
                 self._buffering_complete.set()  # Set event if the buffer is downloaded
-        self._abort_streaming.clear()
         self._thread_lock.release()
 
     def bufer_torrent_async(self, file_index, buffer_percent=5.0, offset=0):
