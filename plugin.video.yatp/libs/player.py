@@ -79,7 +79,7 @@ def play_torrent(torrent, params, dl_folder, keep_files=False, onscreen_info=Fal
                 ul_speed=streamer.ul_speed,
                 total_dl=streamer.total_download,
                 total_ul=streamer.total_upload,
-                progress=streamer.progress,
+                progress=streamer.file_progress,
                 peers=streamer.num_peers
                 )
             else:

@@ -5,10 +5,12 @@
 # License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
 
 import os
+import sys
 import time
 import threading
 import xbmcgui
 import xbmcvfs
+import xbmc
 #
 from torrenter import Torrenter, TorrenterError
 from addon import Addon
@@ -51,18 +53,9 @@ class Streamer(Torrenter):
         :param buffer_percent: float - buffer size in %
         :return: str - a path to the videofile
         """
-        result = False
-        dialog_progress = xbmcgui.DialogProgress()
-        dialog_progress.create('Adding torrent...')
-        dialog_progress.update(0, 'This may take some time.', 'Please wait until download starts.')
-        self._add_torrent_thread = threading.Thread(target=self.add_torrent_async,
-                                                    args=(torrent_path, self._download_dir, True))
-        self._add_torrent_thread.daemon = True
-        self._add_torrent_thread.start()
-        # Adding a magnet link may take a while
-        while not self.torrent_added and not dialog_progress.iscanceled():
-            time.sleep(0.5)
-        if not dialog_progress.iscanceled():
+        buffering_complete = False
+        torent_added = self._add_torrent(torrent_path)
+        if torent_added:
             # Create a list of videofiles in a torrent.
             # Each element is a tuple (<file name>, <file index in a torrent>).
             videofiles = []
@@ -80,10 +73,10 @@ class Streamer(Torrenter):
                     self._file_index = videofile[1]
                     self._file_size = int(self.torrent_info.files()[self.file_index].size)
                     if streaming:
-                        result = self.pre_buffer_stream(buffer_percent)
+                        buffering_complete = self.pre_buffer_stream(buffer_percent)
                     else:
-                        result = self.buffer_file(buffer_percent)
-                    if result:
+                        buffering_complete = self.buffer_file(buffer_percent)
+                    if buffering_complete:
                         if len(self.files) > 1:
                             video_path = os.path.join(self._download_dir, self.torrent.name(), videofile[0])
                         else:
@@ -93,7 +86,7 @@ class Streamer(Torrenter):
                     xbmcgui.Dialog().notification(__addon__.id, 'A video is not selected', __addon__.icon, 3000)
             else:
                 xbmcgui.Dialog().notification(__addon__.id, 'No videofiles to play.', 'error', 3000)
-        if dialog_progress.iscanceled() or not result:
+        if not (torent_added and buffering_complete):
             self.abort_streaming()
             try:
                 self._buffer_thread.join()
@@ -101,6 +94,55 @@ class Streamer(Torrenter):
                 pass
             xbmcgui.Dialog().notification(__addon__.id, 'Playback cancelled.', __addon__.icon, 3000)
         return None
+
+    def download_torrent(self, torrent_path):
+        """
+        Download a torrent to a specified folder
+        :param torrent_path:
+        :return:
+        """
+        if self._add_torrent(torrent_path, False):
+            progress_thread = threading.Thread(target=self.download_progress_async, args=(self.torrent.name(),))
+            progress_thread.start()
+
+    def download_progress_async(self, torrent_name):
+        """
+        Download
+        :param torrent_name:
+        :return:
+        """
+        self._thread_lock.acquire()
+        progressbar = xbmcgui.DialogProgressBG()
+        progressbar.create('Downloading torrent: {0}'.format(torrent_name))
+        monitor = xbmc.Monitor()
+        while not (self.is_seeding or monitor.waitForAbort(1.0)):
+            progressbar.update(self.torrent_progress,
+                               message='DL: {0}MB, DL progr: {1}%; DL sp: {2}KB/s; Peers: {3}'.format(
+                                   self.total_download,
+                                   self.torrent_progress,
+                                   self.dl_speed,
+                                   self.num_peers))
+        progressbar.close()
+        self._thread_lock.release()
+        sys.exit()
+
+    def _add_torrent(self, torrent_path, zero_priorities=True):
+        """
+        Add a torrent
+        :return:
+        """
+        dialog_progress = xbmcgui.DialogProgress()
+        dialog_progress.create('Adding torrent...')
+        dialog_progress.update(0, 'This may take some time.', 'Please wait until download starts.')
+        self._add_torrent_thread = threading.Thread(target=self.add_torrent_async,
+                                                    args=(torrent_path, self._download_dir, zero_priorities))
+        self._add_torrent_thread.daemon = True
+        self._add_torrent_thread.start()
+        # Adding a magnet link may take a while
+        while not self.torrent_added and not dialog_progress.iscanceled():
+            time.sleep(0.5)
+        dialog_progress.close()
+        return not dialog_progress.iscanceled()
 
     def pre_buffer_stream(self, buffer_percent):
         """
@@ -198,7 +240,7 @@ class Streamer(Torrenter):
         return self._file_index
 
     @property
-    def progress(self):
+    def file_progress(self):
         """
         Download progress in %
         :return: int

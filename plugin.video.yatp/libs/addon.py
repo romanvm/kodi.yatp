@@ -84,3 +84,11 @@ class Addon(xbmcaddon.Addon):
         :return: str
         """
         return os.path.join(self.addon_dir, 'icon.png')
+
+    @property
+    def icon_dir(self):
+        """
+        Icons directory
+        :return: str
+        """
+        return os.path.join(self.addon_dir, 'resources', 'icons')
