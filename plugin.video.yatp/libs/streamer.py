@@ -54,7 +54,7 @@ class Streamer(Torrenter):
         :return: str - a path to the videofile
         """
         buffering_complete = False
-        torent_added = self._abort_streaming(torrent_path)
+        torent_added = self._add_torrent(torrent_path)
         if torent_added:
             # Create a list of videofiles in a torrent.
             # Each element is a tuple (<file name>, <file index in a torrent>).
