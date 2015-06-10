@@ -124,6 +124,11 @@ class Streamer(Torrenter):
                                    self.num_peers))
         progressbar.close()
         self._thread_lock.release()
+        xbmcgui.Dialog().notification(__addon__.id,
+                                      'Torrent {0} downloaded!'.format(torrent_name),
+                                      __addon__.icon,
+                                      3000)
+        del self._session
         sys.exit()
 
     def _add_torrent(self, torrent_path, zero_priorities=True):
