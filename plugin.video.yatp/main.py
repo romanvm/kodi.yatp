@@ -89,7 +89,7 @@ def router(paramstring):
             torrent = urlsafe_b64decode(params['torrent'])
             __addon__.log('Torrent to play: {0}'.format(torrent))
             play_torrent(torrent, params)
-        elif params['action'] == 'donwload':
+        elif params['action'] == 'download':
             torrent = urlsafe_b64decode(params['torrent'])
             save_path = urlsafe_b64decode(params.get('save_path', ''))
             download_torrent(torrent, save_path)
