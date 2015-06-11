@@ -46,11 +46,11 @@ class Streamer(Torrenter):
             pass
         super(Streamer, self).__del__()
 
-    def stream(self, torrent_path, buffer_percent=3.0, streaming=True):
+    def stream(self, torrent_path, buffer_size=__addon__.buffer_size):
         """
         Download a video torrent in a sequential way.
         :param torrent_path: str - a path to a .torrent file or a magnet link.
-        :param buffer_percent: float - buffer size in %
+        :param buffer_size: int - buffer size in MB
         :return: str - a path to the videofile
         """
         buffering_complete = False
@@ -72,10 +72,7 @@ class Streamer(Torrenter):
                     videofile = videofiles[index]
                     self._file_index = videofile[1]
                     self._file_size = int(self.torrent_info.files()[self.file_index].size)
-                    if streaming:
-                        buffering_complete = self.pre_buffer_stream(buffer_percent)
-                    else:
-                        buffering_complete = self.buffer_file(buffer_percent)
+                    buffering_complete = self.pre_buffer_stream(buffer_size)
                     if buffering_complete:
                         if len(self.files) > 1:
                             video_path = os.path.join(self._download_dir, self.torrent.name(), videofile[0])
@@ -149,41 +146,19 @@ class Streamer(Torrenter):
         dialog_progress.close()
         return not dialog_progress.iscanceled()
 
-    def pre_buffer_stream(self, buffer_percent):
+    def pre_buffer_stream(self, buffer_size):
         """
         Pre-buffer videofile
+        :param buffer_size: int - buffer size in MB
         :return:
         """
         dialog_progress = xbmcgui.DialogProgress()
         dialog_progress.create('Buffering torrent...')
-        self._buffer_thread = threading.Thread(target=self.stream_torrent_async, args=(self.file_index, buffer_percent))
+        self._buffer_thread = threading.Thread(target=self.stream_torrent_async, args=(self.file_index, buffer_size))
         self._buffer_thread.daemon = True
         self._buffer_thread.start()
         while not self.buffering_complete and not dialog_progress.iscanceled():
-            dialog_progress.update(int(10000 * self.torrent_status.total_done /
-                                       (self._file_size * buffer_percent)),
-                                   'Downloaded: {0}MB'.format(self.total_download),
-                                   'Download speed: {0}KB/s'.format(self.dl_speed),
-                                   'Peers: {0}'.format(self.num_peers))
-            time.sleep(1.0)
-        dialog_progress.close()
-        return not dialog_progress.iscanceled()
-
-    def buffer_file(self, buffer_percent, offset=0):
-        """
-        Buffer video file
-        :param buffer_percent: int
-        :param offset: int
-        :return:
-        """
-        dialog_progress = xbmcgui.DialogProgress()
-        dialog_progress.create('Buffering torrent...')
-        self._buffer_thread = threading.Thread(target=self.bufer_torrent_async,
-                                               args=(self.file_index, buffer_percent, offset))
-        self._buffer_thread.daemon = True
-        self._buffer_thread.start()
-        while not self.buffering_complete and not dialog_progress.iscanceled():
-            dialog_progress.update(self.data_buffer,
+            dialog_progress.update(100 * self.torrent_status.total_done / (buffer_size * 1048576),
                                    'Downloaded: {0}MB'.format(self.total_download),
                                    'Download speed: {0}KB/s'.format(self.dl_speed),
                                    'Peers: {0}'.format(self.num_peers))

@@ -92,3 +92,11 @@ class Addon(xbmcaddon.Addon):
         :return: str
         """
         return os.path.join(self.addon_dir, 'resources', 'icons')
+
+    @property
+    def buffer_size(self):
+        """
+        Buffer size in MB
+        :return:
+        """
+        return int(self.getSetting('buffer_size'))

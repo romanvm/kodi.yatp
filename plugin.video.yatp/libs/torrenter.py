@@ -287,7 +287,7 @@ class Torrenter(object):
         else:
             raise TorrenterError('Torrenter has no valid torrent!')
 
-    def stream_torrent_async(self, file_index, buffer_percent=5.0):
+    def stream_torrent_async(self, file_index, buffer_size=10):
         """
         Force sequential download of file for video playback.
 
@@ -298,7 +298,7 @@ class Torrenter(object):
         Always terminate the streaming thread when existing the main program.
         use join() to wait until the thread terminates.
         :param file_index: int - the numerical index of the file to be streamed.
-        :param buffer_percent: float - buffer size as % of the file size
+        :param buffer_size: int - buffer size in MB
         :return:
         """
         # Lock thread
@@ -312,7 +312,7 @@ class Torrenter(object):
         end_piece = start_piece + num_pieces
         # The number of pieces at the start of the file
         # to be downloaded before the file can be played
-        buffer_length = int(round(num_pieces * (buffer_percent / 100)))
+        buffer_length = 1048576 * buffer_size / self.torrent_info.piece_length() + 1
         # Setup buffer download
         # Max priorities for the start and 2 end pieces.
         self.torrent.piece_priority(start_piece, 7)
@@ -341,56 +341,6 @@ class Torrenter(object):
                     and self.torrent.have_piece(end_piece)):
                 self.torrent.flush_cache()
                 self._buffering_complete.set()  # Set event if the buffer is downloaded
-        self._abort_streaming.clear()
-        self._thread_lock.release()
-
-    def bufer_torrent_async(self, file_index, buffer_percent=5.0, offset=0):
-        """
-        Buffer torrent without further streaming
-
-        :param file_index: int - the numerical index of the file to be streamed.
-        :param buffer_percent: float - buffer size as % of the file size
-        :param offset: int - starting piece
-        :return:
-        """
-        # Lock thread
-        self._thread_lock.acquire()
-        # Clear flags
-        self._abort_streaming.clear()
-        self._buffering_complete.clear()
-        # Get pieces info
-        start_piece, num_pieces = self.get_pieces_info(file_index)
-        start_piece += offset
-        # The index of the end piece in the file
-        end_piece = start_piece + num_pieces
-        # The number of pieces at the start of the file
-        # to be downloaded before the file can be played
-        buffer_length = int(round(num_pieces * (buffer_percent / 100)))
-        # Setup buffer download
-        if start_piece + buffer_length <= end_piece - 2:
-            buffer_end = start_piece + buffer_length
-        else:
-            buffer_end = end_piece - 2
-        buffer_pieces = range(start_piece, buffer_end + 1)
-        buffer_pieces.append(end_piece - 1)
-        buffer_pieces.append(end_piece)
-        # Set priorities for the playback buffer
-        [self.torrent.piece_priority(i, 1) for i in buffer_pieces]
-        # self.torrent.piece_priority(end_piece, 1)
-        # Loop until buffer is downloaded
-        while buffer_pieces:
-            self.data_buffer = 100 * (buffer_length - len(buffer_pieces) + 3) / buffer_length
-            if self._abort_streaming.is_set():
-                break  # Abort streaming by external request
-            time.sleep(0.5)
-            for piece in buffer_pieces:
-                if self._torrent.have_piece(piece):
-                    del buffer_pieces[buffer_pieces.index(piece)]
-        else:
-            self.torrent.flush_cache()
-            # Set normal download priority for all pieces
-            [self.torrent.piece_priority(i, 1) for i in xrange(start_piece, start_piece + num_pieces)]
-            self._buffering_complete.set()  # Set event if the buffer is downloaded
         self._abort_streaming.clear()
         self._thread_lock.release()
 
