@@ -32,7 +32,7 @@ def plugin_root():
                                  iconImage=os.path.join(__addon__.icon_dir, 'play.png'))
     play_url = '{0}?action=select_torrent&then=play'.format(__url__)
     xbmcplugin.addDirectoryItem(handle=__handle__, url=play_url, listitem=play_item, isFolder=False)
-    download_item = xbmcgui.ListItem(label='Downloadd torrent...',
+    download_item = xbmcgui.ListItem(label='Download torrent...',
                                      thumbnailImage=os.path.join(__addon__.icon_dir, 'download.png'),
                                      iconImage=os.path.join(__addon__.icon_dir, 'download.png'))
     download_url = '{0}?action=select_torrent&then=download'.format(__url__)
@@ -63,7 +63,7 @@ def play_torrent(torrent, params=None):
     player.play_torrent(torrent, params, __addon__.download_dir, __addon__.keep_files, __addon__.onscreen_info)
 
 
-def download_torrent(torrent, save_path=''):
+def download_torrent(torrent, save_path=u''):
     """
     Download torrent
     :param torrent: str
@@ -86,12 +86,12 @@ def router(paramstring):
         if params['action'] == 'select_torrent':
             select_torrent(params['then'])
         elif params['action'] == 'play':
-            torrent = urlsafe_b64decode(params['torrent'])
+            torrent = unicode(urlsafe_b64decode(params['torrent']), 'utf-8')
             __addon__.log('Torrent to play: {0}'.format(torrent))
             play_torrent(torrent, params)
         elif params['action'] == 'download':
-            torrent = urlsafe_b64decode(params['torrent'])
-            save_path = urlsafe_b64decode(params.get('save_path', ''))
+            torrent = unicode(urlsafe_b64decode(params['torrent']), 'utf-8')
+            save_path = unicode(urlsafe_b64decode(params.get('save_path', '')), 'utf-8')
             download_torrent(torrent, save_path)
         else:
             raise RuntimeError('Invalid action: {0}'.format(params['action']))

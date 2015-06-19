@@ -28,7 +28,7 @@ def _add_params(list_item, params):
     """
     info = {}
     try:
-        info['title'] = urlsafe_b64decode(params['title'])
+        info['title'] = unicode(urlsafe_b64decode(params['title']), 'utf-8')
     except KeyError:
         pass
     try:
@@ -39,7 +39,7 @@ def _add_params(list_item, params):
         info['episode'] = int(params['episode'])
     except (KeyError, ValueError):
         pass
-    thumb = urlsafe_b64decode(params.get('thumb', ''))
+    thumb = unicode(urlsafe_b64decode(params.get('thumb', '')), 'utf-8')
     if thumb:
         list_item.setThumbnailImage(thumb)
         list_item.setIconImage(thumb)
@@ -73,15 +73,13 @@ def play_torrent(torrent, params, dl_folder, keep_files=False, onscreen_info=Fal
         while player.isPlaying():
             time.sleep(0.5)
             if onscreen_info:
-                label.text = \
-'DL speed: {dl_speed}KB/s; UL speed: {ul_speed}KB/s; Total DL: {total_dl}MB; Total UL: {total_ul}MB; DL progress: {progress}%; Peers: {peers}'.format(
-                dl_speed=streamer.dl_speed,
-                ul_speed=streamer.ul_speed,
-                total_dl=streamer.total_download,
-                total_ul=streamer.total_upload,
-                progress=streamer.file_progress,
-                peers=streamer.num_peers
-                )
+                label.text = '; '.join(('DL speed: {0}KB/s'.format(streamer.dl_speed),
+                                        'UL speed: {0}KB/s'.format(streamer.ul_speed),
+                                        'Total DL: {0}MB'.format(streamer.total_download),
+                                        'Total UL: {0}MB'.format(streamer.total_upload),
+                                        'DL progress: {0}%'.format(streamer.file_progress),
+                                        'Peers: {0}'.format(streamer.num_peers),
+                                        ))
             else:
                 if streamer.is_seeding and trigger:
                     xbmcgui.Dialog().notification(__addon__.id, 'Torrent is completely downloaded.',
