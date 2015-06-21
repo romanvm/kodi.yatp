@@ -39,7 +39,7 @@ def _add_params(list_item, params):
         info['episode'] = int(params['episode'])
     except (KeyError, ValueError):
         pass
-    thumb = unicode(urlsafe_b64decode(params.get('thumb', '')), 'utf-8')
+    thumb = urlsafe_b64decode(params.get('thumb', ''))
     if thumb:
         list_item.setThumbnailImage(thumb)
         list_item.setIconImage(thumb)
