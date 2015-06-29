@@ -158,28 +158,26 @@ class Torrenter(object):
     def data_buffer(self):
         """
         Get data buffer contents
+
         :return:
         """
-        self._data_buffer_lock.acquire()
         if self._data_buffer.full():
             contents = self._data_buffer.get_nowait()
         else:
             contents = None
-        self._data_buffer_lock.release()
         return contents
 
     @data_buffer.setter
     def data_buffer(self, item):
         """
         Set data buffer contents
+
         :param item: item to put in the data buffer
         :return:
         """
-        self._data_buffer_lock.acquire()
         if self._data_buffer.full():
             self._data_buffer.get_nowait()  # Clear data buffer
         self._data_buffer.put_nowait(item)
-        self._data_buffer_lock.release()
 
     @property
     def torrent_status(self):
@@ -341,6 +339,47 @@ class Torrenter(object):
                     and self.torrent.have_piece(end_piece)):
                 self.torrent.flush_cache()
                 self._buffering_complete.set()  # Set event if the buffer is downloaded
+        self._abort_streaming.clear()
+        self._thread_lock.release()
+
+    def buffer_torrent_async(self, file_index, buffer_percent=5.0):
+        """
+        Buffer a videofile in torrent for playback
+
+        :param file_index: int - file index in torrent
+        :param buffer_size: int - buffer size in MB
+        :return:
+        """
+        # Lock thread
+        self._thread_lock.acquire()
+        # Clear flags
+        self._abort_streaming.clear()
+        self._buffering_complete.clear()
+        # Get pieces info
+        start_piece, num_pieces = self.get_pieces_info(file_index)
+        # The index of the end piece in the file
+        end_piece = start_piece + num_pieces
+        # The number of pieces at the start of the file
+        # to be downloaded before the file can be played
+        buffer_length = int(num_pieces * buffer_percent / 100.0)
+        # Setup buffer download
+        pieces_pool = range(start_piece, buffer_length + 1)
+        pieces_pool.append(end_piece - 1)
+        pieces_pool.append(end_piece)
+        [self.torrent.piece_priority(piece, 1) for piece in pieces_pool]
+        while len(pieces_pool) > 0:
+            self.data_buffer = int(100 * (buffer_length + 3 - len(pieces_pool)) / (buffer_length + 3.0))
+            if self._abort_streaming.is_set():
+                break
+            for index, piece in enumerate(pieces_pool):
+                if self.torrent.have_piece(piece):
+                    del pieces_pool[index]
+            time.sleep(0.1)
+        else:
+            self.torrent.flush_cache()
+            self._buffering_complete.set()
+            [self.torrent.piece_priority(piece, 1) for piece in xrange(start_piece + buffer_length + 1, end_piece - 1)]
+            self.torrent.set_sequential_download()
         self._abort_streaming.clear()
         self._thread_lock.release()
 

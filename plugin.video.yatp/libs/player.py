@@ -22,6 +22,7 @@ __addon__ = Addon()
 def _add_params(list_item, params):
     """
     Add aditional parameters to list_item
+
     :param list_item: ListItem
     :param params: dict
     :return:
@@ -51,6 +52,7 @@ def _add_params(list_item, params):
 def play_torrent(torrent, params, dl_folder, keep_files=False, onscreen_info=False):
     """
     Play .torrent file or a magnet link
+
     :param torrent: str
     :param params: dict
     :param dl_folder: str

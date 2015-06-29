@@ -49,6 +49,7 @@ class Streamer(Torrenter):
     def stream(self, torrent_path, buffer_size=__addon__.buffer_size):
         """
         Download a video torrent in a sequential way.
+
         :param torrent_path: str - a path to a .torrent file or a magnet link.
         :param buffer_size: int - buffer size in MB
         :return: str - a path to the videofile
@@ -60,7 +61,8 @@ class Streamer(Torrenter):
             # Each element is a tuple (<file name>, <file index in a torrent>).
             videofiles = []
             for file_index in xrange(len(self.files)):
-                if os.path.splitext(self.files[file_index].lower())[1] in ('.avi', '.mkv', '.mp4', '.ts', '.m2ts', '.mov'):
+                if os.path.splitext(self.files[file_index].lower())[1] in ('.avi', '.mkv', '.mp4',
+                                                                           '.ts', '.m2ts', '.mov'):
                     videofiles.append((os.path.basename(self.files[file_index]), file_index))
             if videofiles:
                 if len(videofiles) > 1:
@@ -72,7 +74,7 @@ class Streamer(Torrenter):
                     videofile = videofiles[index]
                     self._file_index = videofile[1]
                     self._file_size = int(self.torrent_info.files()[self.file_index].size)
-                    buffering_complete = self.pre_buffer_stream(buffer_size)
+                    buffering_complete = self.buffer_stream(buffer_size)
                     if buffering_complete:
                         if len(self.files) > 1:
                             video_path = os.path.join(self._download_dir, self.torrent.name(), videofile[0])
@@ -95,6 +97,7 @@ class Streamer(Torrenter):
     def download_torrent(self, torrent_path):
         """
         Download a torrent to a specified folder
+
         :param torrent_path:
         :return:
         """
@@ -104,7 +107,8 @@ class Streamer(Torrenter):
 
     def download_progress_async(self, torrent_name):
         """
-        Download
+        Show download progress in background
+
         :param torrent_name:
         :return:
         """
@@ -131,6 +135,7 @@ class Streamer(Torrenter):
     def _add_torrent(self, torrent_path, zero_priorities=True):
         """
         Add a torrent
+
         :return:
         """
         dialog_progress = xbmcgui.DialogProgress()
@@ -148,7 +153,8 @@ class Streamer(Torrenter):
 
     def pre_buffer_stream(self, buffer_size):
         """
-        Pre-buffer videofile
+        Pre-buffer videofile with sliding window
+
         :param buffer_size: int - buffer size in MB
         :return:
         """
@@ -159,6 +165,28 @@ class Streamer(Torrenter):
         self._buffer_thread.start()
         while not self.buffering_complete and not dialog_progress.iscanceled():
             dialog_progress.update(100 * self.torrent_status.total_done / (buffer_size * 1048576),
+                                   'Downloaded: {0}MB'.format(self.total_download),
+                                   'Download speed: {0}KB/s'.format(self.dl_speed),
+                                   'Peers: {0}'.format(self.num_peers))
+            time.sleep(1.0)
+        dialog_progress.close()
+        return not dialog_progress.iscanceled()
+
+    def buffer_stream(self, buffer_size=5.0):
+        """
+        Pre-buffer videofile with sequential download
+
+        :param buffer_size:
+        :return:
+        """
+        dialog_progress = xbmcgui.DialogProgress()
+        dialog_progress.create('Buffering torrent...')
+        self._buffer_thread = threading.Thread(target=self.buffer_torrent_async, args=(self.file_index, buffer_size))
+        self._buffer_thread.daemon = True
+        self._buffer_thread.start()
+        while not self.buffering_complete and not dialog_progress.iscanceled():
+            buffer_ = self.data_buffer
+            dialog_progress.update(buffer_ if buffer_ is not None else 0,
                                    'Downloaded: {0}MB'.format(self.total_download),
                                    'Download speed: {0}KB/s'.format(self.dl_speed),
                                    'Peers: {0}'.format(self.num_peers))

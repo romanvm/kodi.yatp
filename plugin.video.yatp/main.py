@@ -25,6 +25,7 @@ __handle__ = int(sys.argv[1])
 def plugin_root():
     """
     Plugin root section
+
     :return:
     """
     play_item = xbmcgui.ListItem(label='Play .torrent file...',
@@ -43,6 +44,7 @@ def plugin_root():
 def select_torrent(then):
     """
     Select a torrent file to play
+
     :return:
     """
     torrent = xbmcgui.Dialog().browse(1, 'Select .torrent file', 'video', mask='.torrent')
@@ -57,6 +59,7 @@ def select_torrent(then):
 def play_torrent(torrent, params=None):
     """
     Play torrent
+
     :param torrent:
     :return:
     """
@@ -66,6 +69,7 @@ def play_torrent(torrent, params=None):
 def download_torrent(torrent, save_path=u''):
     """
     Download torrent
+
     :param torrent: str
     :param save_path: str
     :return:
@@ -78,6 +82,7 @@ def download_torrent(torrent, save_path=u''):
 def router(paramstring):
     """
     Router function
+
     :param paramstring: str
     :return:
     """
