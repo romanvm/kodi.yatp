@@ -8,12 +8,10 @@ import sys
 import os
 import time
 import threading
-from Queue import Queue
+from collections import deque
 
 if sys.platform == 'win32':
     from lt.win32 import libtorrent
-elif sys.platform == 'linux2':
-    import libtorrent
 else:
     raise RuntimeError('Your OS is not supported!')
 
@@ -28,6 +26,7 @@ class Torrenter(object):
     def __init__(self, start_port=6681, end_port=6691):
         """
         Class constructor
+
         :param start_port: int
         :param end_port: int
         :return:
@@ -38,12 +37,10 @@ class Torrenter(object):
         self._session.add_dht_router('router.bittorrent.com', 6881)
         self._session.add_dht_router('router.utorrent.com', 6881)
         self._session.add_dht_router('router.bitcomet.com', 6881)
-        self._thread_lock = threading.Lock()
-        self._data_buffer_lock = threading.Lock()
         self._torrent_added = threading.Event()
         self._buffering_complete = threading.Event()
         self._abort_streaming = threading.Event()
-        self._data_buffer = Queue(1)  # Thread-safe data buffer
+        self._data_buffer = deque([0], maxlen=1)  # Thread-safe data buffer
         self._torrent = None  # Torrent handle for the streamed torrent
 
     def __del__(self):
@@ -54,6 +51,7 @@ class Torrenter(object):
     def torrent(self):
         """
         Get streamed torrent handle
+
         :return: object
         """
         return self._torrent
@@ -62,6 +60,7 @@ class Torrenter(object):
     def torrent_added(self):
         """
         Torrent added flag
+
         :return: bool
         """
         return self._torrent_added.is_set()
@@ -70,6 +69,7 @@ class Torrenter(object):
     def files(self):
         """
         The list of files in the torrent
+
         :return:
         """
         files = []
@@ -82,6 +82,7 @@ class Torrenter(object):
     def buffering_complete(self):
         """
         Buffering complete flag
+
         :return: bool
         """
         return self._buffering_complete.is_set()
@@ -90,6 +91,7 @@ class Torrenter(object):
     def total_download(self):
         """
         Total download in MB
+
         :return: int
         """
         if self.torrent_status is not None:
@@ -103,6 +105,7 @@ class Torrenter(object):
     def total_upload(self):
         """
         Total upload in MB
+
         :return: int
         """
         if self.torrent_status is not None:
@@ -114,6 +117,7 @@ class Torrenter(object):
     def dl_speed(self):
         """
         DL speed in KB/s
+
         :return: int
         """
         if self.torrent_status is not None:
@@ -125,6 +129,7 @@ class Torrenter(object):
     def ul_speed(self):
         """
         UL speed in KB/s
+
         :return: int
         """
         if self.torrent_status is not None:
@@ -136,6 +141,7 @@ class Torrenter(object):
     def num_peers(self):
         """
         The number of peers
+
         :return: int
         """
         if self.torrent_status is not None:
@@ -147,6 +153,7 @@ class Torrenter(object):
     def is_seeding(self):
         """
         Seeding status as bool
+
         :return: bool
         """
         if self.torrent_status is not None:
@@ -161,28 +168,13 @@ class Torrenter(object):
 
         :return:
         """
-        if self._data_buffer.full():
-            contents = self._data_buffer.get_nowait()
-        else:
-            contents = None
-        return contents
-
-    @data_buffer.setter
-    def data_buffer(self, item):
-        """
-        Set data buffer contents
-
-        :param item: item to put in the data buffer
-        :return:
-        """
-        if self._data_buffer.full():
-            self._data_buffer.get_nowait()  # Clear data buffer
-        self._data_buffer.put_nowait(item)
+        return self._data_buffer[0]
 
     @property
     def torrent_status(self):
         """
         Get current torrent status
+
         :return:
         """
         try:
@@ -194,6 +186,7 @@ class Torrenter(object):
     def torrent_info(self):
         """
         Get current torrent info
+
         :return:
         """
         try:
@@ -205,6 +198,7 @@ class Torrenter(object):
     def torrent_progress(self):
         """
         Get torrent download progress in %
+
         :return:
         """
         try:
@@ -221,9 +215,12 @@ class Torrenter(object):
         :param zero_priorities: bool
         :return:
         """
+        self._torrent_added.clear()
         if self.torrent is None or not self.torrent.is_valid():
             if torrent[:7] in ('magnet:', 'http://', 'https:/'):
                 add_torrent_params = {'url': torrent}
+            elif torrent[:7] == 'https:/':
+                raise TorrenterError('HTTPS is not supported! For such links use external libraries, e.g. requests.')
             else:
                 try:
                     add_torrent_params = {'ti': libtorrent.torrent_info(os.path.normpath(torrent))}
@@ -238,25 +235,14 @@ class Torrenter(object):
                 # Assign 0 priorities to all pieces to postpone download
                 [torr_handle.piece_priority(i, 0) for i in xrange(torr_handle.get_torrent_info().num_pieces())]
             self._torrent = torr_handle
+            self._torrent_added.set()
         else:
             raise TorrenterError('Torrenter already has a torrent!')
-
-    def add_torrent_async(self, torrent, save_path, zero_priorities=True):
-        """
-        Add torrent asynchronously in a thread-safe way.
-        :param torrent:
-        :param save_path:
-        :return:
-        """
-        self._thread_lock.acquire()
-        self._torrent_added.clear()
-        self.add_torrent(torrent, save_path, zero_priorities)
-        self._torrent_added.set()
-        self._thread_lock.release()
 
     def remove_torrent(self, delete_files=False):
         """
         Delete streamed torrent
+
         :param delete_files: bool
         :return:
         """
@@ -269,6 +255,7 @@ class Torrenter(object):
     def get_pieces_info(self, file_index):
         """
         Get the start piece and the number of pieces in the given file.
+
         Returns a tuple (start_piece, num_pieces)
         :param file_index: int
         :return: tuple
@@ -285,73 +272,14 @@ class Torrenter(object):
         else:
             raise TorrenterError('Torrenter has no valid torrent!')
 
-    def stream_torrent_async(self, file_index, buffer_size=10):
-        """
-        Force sequential download of file for video playback.
-
-        This is a simple implementation of a fixed size sliding window.
-        This method should be run in a separate thread.
-        If the streaming thread needs to be stopped before download is complete
-        then set abort_streaming Event.
-        Always terminate the streaming thread when existing the main program.
-        use join() to wait until the thread terminates.
-        :param file_index: int - the numerical index of the file to be streamed.
-        :param buffer_size: int - buffer size in MB
-        :return:
-        """
-        # Lock thread
-        self._thread_lock.acquire()
-        # Clear flags
-        self._abort_streaming.clear()
-        self._buffering_complete.clear()
-        # Get pieces info
-        start_piece, num_pieces = self.get_pieces_info(file_index)
-        # The index of the end piece in the file
-        end_piece = start_piece + num_pieces
-        # The number of pieces at the start of the file
-        # to be downloaded before the file can be played
-        buffer_length = 1048576 * buffer_size / self.torrent_info.piece_length() + 1
-        # Setup buffer download
-        # Max priorities for the start and 2 end pieces.
-        self.torrent.piece_priority(start_piece, 7)
-        self.torrent.piece_priority(end_piece - 1, 7)
-        self.torrent.piece_priority(end_piece, 7)
-        # Set priorities for the playback buffer
-        [self.torrent.piece_priority(i, 1) for i in xrange(start_piece + 1, start_piece + buffer_length + 1)]
-        # Set up sliding window boundaries
-        window_start = start_piece
-        window_end = window_start + buffer_length
-        # Loop until the end of the file
-        while window_start < end_piece - 1:
-            if self._abort_streaming.is_set():
-                break  # Abort streaming by external request
-            if self.torrent.have_piece(window_start):  # If the 1st piece in the window is downloaded...
-                window_start += 1  # move window boundaries forward by 1 piece
-                window_end += 1
-                self.torrent.piece_priority(window_start, 7)
-                if window_end < end_piece - 1:
-                    self.torrent.piece_priority(window_end, 1)
-            time.sleep(0.1)
-            # Check if the buffer is downloaded completely
-            if (not self._buffering_complete.is_set()
-                    and window_start > start_piece + buffer_length
-                    and self.torrent.have_piece(end_piece - 1)
-                    and self.torrent.have_piece(end_piece)):
-                self.torrent.flush_cache()
-                self._buffering_complete.set()  # Set event if the buffer is downloaded
-        self._abort_streaming.clear()
-        self._thread_lock.release()
-
-    def buffer_torrent_async(self, file_index, buffer_percent=5.0):
+    def buffer_torrent(self, file_index, buffer_percent=5.0):
         """
         Buffer a videofile in torrent for playback
 
         :param file_index: int - file index in torrent
-        :param buffer_size: int - buffer size in MB
+        :param buffer_percent: int - buffer size in %
         :return:
         """
-        # Lock thread
-        self._thread_lock.acquire()
         # Clear flags
         self._abort_streaming.clear()
         self._buffering_complete.clear()
@@ -368,7 +296,7 @@ class Torrenter(object):
         pieces_pool.append(end_piece)
         [self.torrent.piece_priority(piece, 1) for piece in pieces_pool]
         while len(pieces_pool) > 0:
-            self.data_buffer = int(100 * (buffer_length + 3 - len(pieces_pool)) / (buffer_length + 3.0))
+            self._data_buffer.append(int(100 * (buffer_length + 3 - len(pieces_pool)) / (buffer_length + 3.0)))
             if self._abort_streaming.is_set():
                 break
             for index, piece in enumerate(pieces_pool):
@@ -381,11 +309,11 @@ class Torrenter(object):
             [self.torrent.piece_priority(piece, 1) for piece in xrange(start_piece + buffer_length + 1, end_piece - 1)]
             self.torrent.set_sequential_download()
         self._abort_streaming.clear()
-        self._thread_lock.release()
 
     def abort_streaming(self):
         """
         Set abort streaming flag
+
         :return:
         """
         self._abort_streaming.set()
@@ -393,6 +321,7 @@ class Torrenter(object):
     def pause(self, graceful_pause=1):
         """
         Pause torrent
+
         :return:
         """
         self.torrent.pause(graceful_pause)
@@ -400,6 +329,7 @@ class Torrenter(object):
     def resume(self):
         """
         Resume torrent
+
         :return:
         """
         self.torrent.resume()

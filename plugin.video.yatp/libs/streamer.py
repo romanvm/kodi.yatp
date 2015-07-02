@@ -11,7 +11,6 @@ import threading
 import xbmcgui
 import xbmcvfs
 import xbmc
-#
 from torrenter import Torrenter, TorrenterError
 from addon import Addon
 
@@ -31,7 +30,7 @@ class Streamer(Torrenter):
         self._buffer_thread = None
         self._file_size = 0
         self._file_index = None
-        self._secs_per_piece = 0.0
+        self._thread_lock = threading.Lock()
 
     def __del__(self):
         """Class destructor"""
@@ -74,7 +73,7 @@ class Streamer(Torrenter):
                     videofile = videofiles[index]
                     self._file_index = videofile[1]
                     self._file_size = int(self.torrent_info.files()[self.file_index].size)
-                    buffering_complete = self.buffer_stream(buffer_size)
+                    buffering_complete = self._buffer_stream(buffer_size)
                     if buffering_complete:
                         if len(self.files) > 1:
                             video_path = os.path.join(self._download_dir, self.torrent.name(), videofile[0])
@@ -141,7 +140,7 @@ class Streamer(Torrenter):
         dialog_progress = xbmcgui.DialogProgress()
         dialog_progress.create('Adding torrent...')
         dialog_progress.update(0, 'This may take some time.', 'Please wait until download starts.')
-        self._add_torrent_thread = threading.Thread(target=self.add_torrent_async,
+        self._add_torrent_thread = threading.Thread(target=self.add_torrent,
                                                     args=(torrent_path, self._download_dir, zero_priorities))
         self._add_torrent_thread.daemon = True
         self._add_torrent_thread.start()
@@ -151,28 +150,7 @@ class Streamer(Torrenter):
         dialog_progress.close()
         return not dialog_progress.iscanceled()
 
-    def pre_buffer_stream(self, buffer_size):
-        """
-        Pre-buffer videofile with sliding window
-
-        :param buffer_size: int - buffer size in MB
-        :return:
-        """
-        dialog_progress = xbmcgui.DialogProgress()
-        dialog_progress.create('Buffering torrent...')
-        self._buffer_thread = threading.Thread(target=self.stream_torrent_async, args=(self.file_index, buffer_size))
-        self._buffer_thread.daemon = True
-        self._buffer_thread.start()
-        while not self.buffering_complete and not dialog_progress.iscanceled():
-            dialog_progress.update(100 * self.torrent_status.total_done / (buffer_size * 1048576),
-                                   'Downloaded: {0}MB'.format(self.total_download),
-                                   'Download speed: {0}KB/s'.format(self.dl_speed),
-                                   'Peers: {0}'.format(self.num_peers))
-            time.sleep(1.0)
-        dialog_progress.close()
-        return not dialog_progress.iscanceled()
-
-    def buffer_stream(self, buffer_size=5.0):
+    def _buffer_stream(self, buffer_size=5.0):
         """
         Pre-buffer videofile with sequential download
 
@@ -181,7 +159,8 @@ class Streamer(Torrenter):
         """
         dialog_progress = xbmcgui.DialogProgress()
         dialog_progress.create('Buffering torrent...')
-        self._buffer_thread = threading.Thread(target=self.buffer_torrent_async, args=(self.file_index, buffer_size))
+        dialog_progress.update(0, '', '', '')
+        self._buffer_thread = threading.Thread(target=self.buffer_torrent, args=(self.file_index, buffer_size))
         self._buffer_thread.daemon = True
         self._buffer_thread.start()
         while not self.buffering_complete and not dialog_progress.iscanceled():
@@ -193,35 +172,6 @@ class Streamer(Torrenter):
             time.sleep(1.0)
         dialog_progress.close()
         return not dialog_progress.iscanceled()
-
-    def set_piece_deadlines(self, curr_time, total_time):
-        """
-        Set piece deadlines for the videofile being streamed
-        :param curr_time: float -
-        :param total_time:
-        :return:
-        """
-        self.set_secs_per_piece(total_time)
-        curr_piece = self.get_current_piece(curr_time)
-        msecs_per_piece_dl = 1000.0 * (total_time - curr_time) / (self.pieces_info[1] - curr_piece)
-        [self.torrent.set_piece_deadline(piece, int(msecs_per_piece_dl * (piece - curr_piece)))
-         for piece in xrange(curr_piece, self.pieces_info[1])]
-
-    def set_secs_per_piece(self, total_time):
-        """
-        Set seconds_per_piece parameter
-        :param total_time: float
-        :return:
-        """
-        self._secs_per_piece = total_time / self.pieces_info[1]
-
-    def get_current_piece(self, curr_time):
-        """
-        Get currently played piece
-        :param curr_time:
-        :return:
-        """
-        return self.pieces_info[0] + int(curr_time / self._secs_per_piece)
 
     def check_piece(self, piece):
         """

@@ -8,6 +8,6 @@
     <setting id="show_info" type="bool"
         label="Show on-screen torrent info" default="false"/>
     <setting id="buffer_size" type="number"
-        label="Buffer size (MB)" default="10"/>
+        label="Buffer size (%)" default="5"/>
   </category>
 </settings>
