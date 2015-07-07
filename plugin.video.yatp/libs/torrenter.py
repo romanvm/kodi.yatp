@@ -272,7 +272,7 @@ class Torrenter(object):
         else:
             raise TorrenterError('Torrenter has no valid torrent!')
 
-    def buffer_torrent(self, file_index, buffer_percent=5.0):
+    def stream_torrent(self, file_index, buffer_percent=5.0):
         """
         Buffer a videofile in torrent for playback
 
@@ -306,8 +306,24 @@ class Torrenter(object):
         else:
             self.torrent.flush_cache()
             self._buffering_complete.set()
-            [self.torrent.piece_priority(piece, 1) for piece in xrange(start_piece + buffer_length + 1, end_piece - 1)]
-            self.torrent.set_sequential_download()
+            # [self.torrent.piece_priority(piece, 1) for piece in xrange(start_piece + buffer_length + 1, end_piece - 1)]
+            # self.torrent.set_sequential_download()
+        if self.buffering_complete:
+            # Start sliding window
+            window_start = buffer_length + 1
+            window_end = window_start + buffer_length  # Sliding window size
+            [self.torrent.piece_priority(piece, 1) for piece in xrange(window_start + 1, window_end + 1)]
+            while window_start < end_piece - 1:
+                if self._abort_streaming.is_set():
+                    break
+                self.torrent.piece_priority(window_start, 7)
+                if self.torrent.have_piece(window_start):
+                    window_start += 1
+                    if window_end < end_piece - 1:
+                        window_end += 1
+                        self.torrent.piece_priority(window_end, 1)
+                time.sleep(0.5)
+                self.torrent.flush_cache()
         self._abort_streaming.clear()
 
     def abort_streaming(self):

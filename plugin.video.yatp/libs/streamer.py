@@ -27,7 +27,7 @@ class Streamer(Torrenter):
         if not xbmcvfs.exists(self._download_dir):
             xbmcvfs.mkdir(self._download_dir)
         self._add_torrent_thread = None
-        self._buffer_thread = None
+        self._stream_thread = None
         self._file_size = 0
         self._file_index = None
         self._thread_lock = threading.Lock()
@@ -36,7 +36,7 @@ class Streamer(Torrenter):
         """Class destructor"""
         self.abort_streaming()
         try:
-            self._buffer_thread.join()
+            self._stream_thread.join()
         except (RuntimeError, AttributeError):
             pass
         try:
@@ -87,7 +87,7 @@ class Streamer(Torrenter):
         if not (torent_added and buffering_complete):
             self.abort_streaming()
             try:
-                self._buffer_thread.join()
+                self._stream_thread.join()
             except (RuntimeError, AttributeError):
                 pass
             xbmcgui.Dialog().notification(__addon__.id, 'Playback cancelled.', __addon__.icon, 3000)
@@ -160,9 +160,9 @@ class Streamer(Torrenter):
         dialog_progress = xbmcgui.DialogProgress()
         dialog_progress.create('Buffering torrent...')
         dialog_progress.update(0, '', '', '')
-        self._buffer_thread = threading.Thread(target=self.buffer_torrent, args=(self.file_index, buffer_size))
-        self._buffer_thread.daemon = True
-        self._buffer_thread.start()
+        self._stream_thread = threading.Thread(target=self.stream_torrent, args=(self.file_index, buffer_size))
+        self._stream_thread.daemon = True
+        self._stream_thread.start()
         while not self.buffering_complete and not dialog_progress.iscanceled():
             buffer_ = self.data_buffer
             dialog_progress.update(buffer_ if buffer_ is not None else 0,
