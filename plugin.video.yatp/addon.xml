@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.yatp"
-version="1.2.0"
+version="2.0.0"
 name="Yet Another Torrent Player"
 provider-name="Roman V. M.">
 <requires>
-  <import addon="xbmc.python" version="2.14.0"/>
+    <import addon="xbmc.python" version="2.14.0"/>
 </requires>
 <extension point="xbmc.python.pluginsource" library="main.py">
-  <provides>video</provides>
+    <provides>video</provides>
+<extension point="xbmc.service" library="server.py" start="startup"/>
 </extension>
 <extension point="xbmc.addon.metadata">
-  <summary lang="en">Yet Another Torrent Player</summary>
-  <description lang="en">Yet another torrent player.</description>
-  <platform>windx</platform>
+      <summary lang="en">Yet Another Torrent Player</summary>
+      <description lang="en">Yet another torrent player.</description>
+      <platform>windx</platform>
 </extension>
 </addon>

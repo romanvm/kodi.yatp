@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-# Name:        __init__
-# Author:      Roman Miroshnychenko aka Roman V. M.
-# Created on:  09.05.2015
-# Licence:     GPL v.3: http://www.gnu.org/copyleft/gpl.html
+# Module: __init__.py
+# Author: Roman V.M.
+# Created on: 16.06.2015
+# License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
+
 

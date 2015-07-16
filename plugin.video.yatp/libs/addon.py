@@ -54,23 +54,7 @@ class Addon(xbmcaddon.Addon):
         return self._dl_dir
 
     @property
-    def keep_files(self):
-        """
-        Keep files after streaming
-        :return: bool
-        """
-        return self.getSetting('keep_files') == 'true'
-
-    @property
-    def onscreen_info(self):
-        """
-        Show on-screen torrent info
-        :return: bool
-        """
-        return self.getSetting('show_info') == 'true'
-
-    @property
-    def addon_dir(self):
+    def path(self):
         """
         Addon working folder
         :return: str
@@ -83,7 +67,7 @@ class Addon(xbmcaddon.Addon):
         Addon icon
         :return: str
         """
-        return os.path.join(self.addon_dir, 'icon.png')
+        return os.path.join(self.path, 'icon.png')
 
     @property
     def icon_dir(self):
@@ -91,12 +75,30 @@ class Addon(xbmcaddon.Addon):
         Icons directory
         :return: str
         """
-        return os.path.join(self.addon_dir, 'resources', 'icons')
+        return os.path.join(self.path, 'resources', 'icons')
 
     @property
     def buffer_size(self):
         """
-        Buffer size in MB
+        Buffer size in %
         :return:
         """
         return int(self.getSetting('buffer_size'))
+
+    @property
+    def ratio_limit(self):
+        """
+        Seeding ratio limit
+
+        :return:
+        """
+        return float(self.getSetting('ratio_limit'))
+
+    @property
+    def time_limit(self):
+        """
+        Seeding time limit
+
+        :return:
+        """
+        return  int(self.getSetting('time_limit'))

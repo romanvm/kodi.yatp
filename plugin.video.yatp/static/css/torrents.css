@@ -1,0 +1,15 @@
+.icon-pause {
+    background:url('/static/img/pause.png') no-repeat center center;
+    }
+.icon-resume {
+    background:url('/static/img/resume.png') no-repeat center center;
+    }
+.icon-delete {
+    background:url('/static/img/delete.png') no-repeat center center;
+    }
+.icon-delete {
+    background:url('/static/img/delete.png') no-repeat center center;
+    }
+.icon-magnet-plus {
+    background:url('/static/img/magnet_plus.png') no-repeat center center;
+    }
