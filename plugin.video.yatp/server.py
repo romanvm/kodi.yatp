@@ -10,7 +10,9 @@ Torrenter WSGI application and server
 import os
 from inspect import getmembers, isfunction
 from json import dumps
+from time import sleep
 import xbmc
+import xbmcgui
 from libs.addon import Addon
 from libs import methods
 from libs.bottle import Bottle, request, template, response, debug, static_file
@@ -139,12 +141,16 @@ def get_static(path):
 
 
 if __name__ == '__main__':
+    sleep(5.0)
+    start_trigger = True
     httpd = create_server(app, port=SERVER_PORT)
     httpd.timeout = 0.1
     limits_timer.start()
     # save_resume_timer.start()
     while not xbmc.abortRequested:
         httpd.handle_request()
+        if start_trigger:
+            xbmcgui.Dialog().notification('Note!', 'Torrent server started', __addon__.icon, 3000, False)
     limits_timer.abort()
     torrenter.abort_buffering()
     del torrenter

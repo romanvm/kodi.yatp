@@ -102,3 +102,12 @@ class Addon(xbmcaddon.Addon):
         :return:
         """
         return  int(self.getSetting('time_limit'))
+
+    @property
+    def torrenter_host(self):
+        """
+        Torrenter address
+
+        :return:
+        """
+        return 'http://{0}:8668'.format(self.getSetting('torrenter_host'))

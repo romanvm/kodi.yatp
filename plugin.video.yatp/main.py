@@ -6,20 +6,21 @@
 
 import sys
 import os
-from base64 import urlsafe_b64decode
 from urlparse import parse_qsl
 #
 import xbmcgui
 import xbmcplugin
 #
-from libs import player
-from libs import streamer
 from libs.addon import Addon
+from libs.streamer import get_path
 
 
 __addon__ = Addon()
 __url__ = sys.argv[0]
 __handle__ = int(sys.argv[1])
+
+json_url = __addon__.torrenter_host + '/json-rpc'
+media_url = __addon__.torrenter_host + '/media/'
 
 
 def plugin_root():
@@ -31,17 +32,13 @@ def plugin_root():
     play_item = xbmcgui.ListItem(label='Play .torrent file...',
                                  thumbnailImage=os.path.join(__addon__.icon_dir, 'play.png'),
                                  iconImage=os.path.join(__addon__.icon_dir, 'play.png'))
-    play_url = '{0}?action=select_torrent&then=play'.format(__url__)
+    play_url = '{0}?action=select_torrent'.format(__url__)
+    play_item.setProperty('IsPlayable', 'true')
     xbmcplugin.addDirectoryItem(handle=__handle__, url=play_url, listitem=play_item, isFolder=False)
-    download_item = xbmcgui.ListItem(label='Download torrent...',
-                                     thumbnailImage=os.path.join(__addon__.icon_dir, 'download.png'),
-                                     iconImage=os.path.join(__addon__.icon_dir, 'download.png'))
-    download_url = '{0}?action=select_torrent&then=download'.format(__url__)
-    xbmcplugin.addDirectoryItem(handle=__handle__, url=download_url, listitem=download_item, isFolder=False)
     xbmcplugin.endOfDirectory(__handle__)
 
 
-def select_torrent(then):
+def select_torrent():
     """
     Select a torrent file to play
 
@@ -50,33 +47,20 @@ def select_torrent(then):
     torrent = xbmcgui.Dialog().browse(1, 'Select .torrent file', 'video', mask='.torrent')
     if torrent:
         __addon__.log('Torrent selected: {0}'.format(torrent))
-        if then == 'play':
-            play_torrent(torrent)
-        else:
-            download_torrent(torrent)
+        play_torrent(torrent)
 
 
-def play_torrent(torrent, params=None):
+def play_torrent(torrent):
     """
     Play torrent
 
     :param torrent:
     :return:
     """
-    player.play_torrent(torrent, params, __addon__.download_dir, __addon__.keep_files, __addon__.onscreen_info)
-
-
-def download_torrent(torrent, save_path=u''):
-    """
-    Download torrent
-
-    :param torrent: str
-    :param save_path: str
-    :return:
-    """
-    save_path = __addon__.download_dir if not save_path else save_path
-    torrenter = streamer.Streamer(save_path, keep_files=True)
-    torrenter.download_torrent(torrent)
+    path = get_path(torrent)
+    success = path is not None
+    li = xbmcgui.ListItem(path=path)
+    xbmcplugin.setResolvedUrl(__handle__, success, li)
 
 
 def router(paramstring):
@@ -89,15 +73,11 @@ def router(paramstring):
     params = dict(parse_qsl(paramstring[1:]))
     if params:
         if params['action'] == 'select_torrent':
-            select_torrent(params['then'])
+            select_torrent()
         elif params['action'] == 'play':
-            torrent = unicode(urlsafe_b64decode(params['torrent']), 'utf-8')
+            torrent = sys.argv[2].split('&torrent=')[1]
             __addon__.log('Torrent to play: {0}'.format(torrent))
-            play_torrent(torrent, params)
-        elif params['action'] == 'download':
-            torrent = unicode(urlsafe_b64decode(params['torrent']), 'utf-8')
-            save_path = unicode(urlsafe_b64decode(params.get('save_path', '')), 'utf-8')
-            download_torrent(torrent, save_path)
+            play_torrent(torrent)
         else:
             raise RuntimeError('Invalid action: {0}'.format(params['action']))
     else:
