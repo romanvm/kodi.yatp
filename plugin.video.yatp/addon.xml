@@ -9,8 +9,8 @@ provider-name="Roman V. M.">
 </requires>
 <extension point="xbmc.python.pluginsource" library="main.py">
     <provides>video</provides>
-<extension point="xbmc.service" library="server.py" start="startup"/>
 </extension>
+<extension point="xbmc.service" library="server.py" start="[login|startup]"/>
 <extension point="xbmc.addon.metadata">
       <summary lang="en">Yet Another Torrent Player</summary>
       <description lang="en">Yet another torrent player.</description>

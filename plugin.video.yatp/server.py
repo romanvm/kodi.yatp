@@ -15,7 +15,7 @@ import xbmc
 import xbmcgui
 from libs.addon import Addon
 from libs import methods
-from libs.bottle import Bottle, request, template, response, debug, static_file
+from libs.bottle import Bottle, request, template, response, debug, static_file, TEMPLATE_PATH
 from libs.wsgi_server import create_server
 from libs.torrenter import Torrenter
 from libs.timers import Timer, check_seeding_limits  #, save_resume_data
@@ -24,6 +24,7 @@ from libs.timers import Timer, check_seeding_limits  #, save_resume_data
 __addon__ = Addon()
 
 DEBUG = True
+TEMPLATE_PATH.insert(0, os.path.join(__addon__.path, 'views'))
 debug(DEBUG)
 app = Bottle()
 cwd = os.path.dirname(__file__)
@@ -77,8 +78,8 @@ def json():
     :return:
     """
     if DEBUG:
-        print '***** JSON request *****'
-        print request.body.read()
+        __addon__.log('***** JSON request *****')
+        __addon__.log(request.body.read())
     data = request.json
     # Use the default download dir if param[2] == ''
     if data['method'] == 'add_torrent' and len(data['params']) >= 2 and not data['params'][1]:
@@ -86,11 +87,16 @@ def json():
     # Use the default download dir if param[2] is missing
     elif data['method'] == 'add_torrent' and len(data['params']) == 1:
         data['params'].append(torrent_dir)
+    if data['method'] == 'add_torrent' and len(data['params']) == 2:
+        data['params'].append(True)
     reply = {'jsonrpc': '2.0', 'id': data.get('id', '1')}
     try:
-        reply['result'] = getattr(methods, data['method'])(torrenter, data['params'])
+        reply['result'] = getattr(methods, data['method'])(torrenter, data.get('params'))
     except Exception, ex:
         reply['error'] = '{0}: {1}'.format(str(ex.__class__)[7:-2], ex.message)
+    if DEBUG:
+        __addon__.log('***** JSON response *****')
+        __addon__.log(str(reply))
     return reply
 
 
@@ -141,7 +147,8 @@ def get_static(path):
 
 
 if __name__ == '__main__':
-    sleep(5.0)
+    __addon__.log('***** Torrent Server starting... *******')
+    sleep(3.0)
     start_trigger = True
     httpd = create_server(app, port=SERVER_PORT)
     httpd.timeout = 0.1
@@ -150,7 +157,10 @@ if __name__ == '__main__':
     while not xbmc.abortRequested:
         httpd.handle_request()
         if start_trigger:
-            xbmcgui.Dialog().notification('Note!', 'Torrent server started', __addon__.icon, 3000, False)
+            xbmcgui.Dialog().notification('YATP', 'Torrent server started', __addon__.icon, 3000, False)
+            __addon__.log('***** Torrent Server started *******')
+            start_trigger = False
     limits_timer.abort()
     torrenter.abort_buffering()
     del torrenter
+    __addon__.log('***** Torrent Server stopped *******')

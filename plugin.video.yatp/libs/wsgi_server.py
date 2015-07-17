@@ -8,6 +8,13 @@ from wsgiref.simple_server import WSGIServer, WSGIRequestHandler
 from SocketServer import ThreadingMixIn
 
 
+class CustomWSGIRequestHandler(WSGIRequestHandler):
+    """Custom WSGI Request Handler"""
+    def log_message(self, format, *args):
+        """Disable log messages"""
+        pass
+
+
 class ThreadedWSGIServer(ThreadingMixIn, WSGIServer):
     """Multi-threaded WSGI server"""
     daemon_threads = True
@@ -17,6 +24,6 @@ def create_server(app, host='', port=8000):
     """
     Create a new WSGI server listening on 'host' and 'port' for WSGI app
     """
-    httpd = ThreadedWSGIServer((host, port), WSGIRequestHandler)
+    httpd = ThreadedWSGIServer((host, port), CustomWSGIRequestHandler)
     httpd.set_app(app)
     return httpd
