@@ -13,3 +13,9 @@
 .icon-magnet-plus {
     background:url('/static/img/magnet_plus.png') no-repeat center center;
     }
+.icon-pause-red {
+    background:url('/static/img/pause-red.png') no-repeat center center;
+    }
+.icon-resume-red {
+    background:url('/static/img/resume-red.png') no-repeat center center;
+    }

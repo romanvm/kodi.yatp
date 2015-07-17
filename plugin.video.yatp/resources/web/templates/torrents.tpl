@@ -25,7 +25,11 @@
         <a href="javascript:void(0)" class="easyui-linkbutton"
            iconCls="icon-resume" plain="true" onclick="resume_torrent()">Resume</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"
-           iconCls="icon-delete" plain="true" onclick="confirm_remove_torrent()">Delete</a>
+           iconCls="icon-pause-red" plain="true" onclick="pause_all()">Pause All</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"
+           iconCls="icon-resume-red" plain="true" onclick="resume_all()">Resume All</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"
+           iconCls="icon-delete" plain="true" onclick="confirm_remove_torrent()">Delete Torrent</a>
     </div>
     <div id="add_magnet_dlg" style="padding:10px">
         <p>Insert a torrent magnet link in the field below:</p>

@@ -25,7 +25,7 @@ def get_path(torrent):
     jsonrc.add_torrent(torrent)
     progress_dialog = xbmcgui.DialogProgress()
     progress_dialog.create('Buffering torrent', 'Adding torrent...', 'This may take some time.')
-    while not progress_dialog.iscanceled() or jsonrc.check_torrent_added():
+    while not (progress_dialog.iscanceled() or jsonrc.check_torrent_added()):
         sleep(1.0)
     if not progress_dialog.iscanceled():
         torrent_data = jsonrc.get_data_buffer()
@@ -45,7 +45,7 @@ def get_path(torrent):
                 # Select a vileofile to play
                 selected_file_index = videofiles[index][0]
                 jsonrc.stream_torrent(torrent_data['info_hash'], selected_file_index,  __addon__.buffer_size)
-                while not progress_dialog.iscanceled() or jsonrc.check_buffering_complete():
+                while not (progress_dialog.iscanceled() or jsonrc.check_buffering_complete()):
                     buffer_progress = jsonrc.get_data_buffer()
                     torrent_info = jsonrc.get_torrent_info(torrent_data['info_hash'])
                     progress_dialog.update(buffer_progress,

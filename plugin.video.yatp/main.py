@@ -7,6 +7,7 @@
 import sys
 import os
 from urlparse import parse_qsl
+from urllib import unquote_plus
 #
 import xbmcgui
 import xbmcplugin
@@ -75,7 +76,7 @@ def router(paramstring):
         if params['action'] == 'select_torrent':
             select_torrent()
         elif params['action'] == 'play':
-            torrent = sys.argv[2].split('&torrent=')[1]
+            torrent = params['torrent']
             __addon__.log('Torrent to play: {0}'.format(torrent))
             play_torrent(torrent)
         else:

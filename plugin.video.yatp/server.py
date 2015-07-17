@@ -20,16 +20,13 @@ from libs.wsgi_server import create_server
 from libs.torrenter import Torrenter
 from libs.timers import Timer, check_seeding_limits  #, save_resume_data
 
+DEBUG = True
 
 __addon__ = Addon()
-
-DEBUG = True
-TEMPLATE_PATH.insert(0, os.path.join(__addon__.path, 'views'))
+static_path = os.path.join(__addon__.path, 'resources', 'web')
+TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))
 debug(DEBUG)
 app = Bottle()
-cwd = os.path.dirname(__file__)
-static_dir = os.path.join(cwd, 'static')
-
 # These are the main torrent server parameters.
 # Here they are hardcoded but in other implementations they can be read e.g. from a config file.
 torrent_dir = __addon__.download_dir
@@ -38,7 +35,7 @@ max_ratio = __addon__.ratio_limit
 max_time = __addon__.time_limit
 TORRENT_PORT = 25335
 SERVER_PORT = 8668
-
+#-------------------------------------
 torrenter = Torrenter(TORRENT_PORT, TORRENT_PORT + 10)
 limits_timer = Timer(10, check_seeding_limits, torrenter, max_ratio, max_time)
 #save_resume_timer = Timer(20, save_resume_data, torrenter)
@@ -143,7 +140,7 @@ def get_static(path):
     :param path: relative path to a static file
     :return:
     """
-    return static_file(path, root=static_dir)
+    return static_file(path, root=static_path)
 
 
 if __name__ == '__main__':

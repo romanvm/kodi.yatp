@@ -70,6 +70,28 @@ function add_magnet()
     } // end if
 } // end add_magnet
 
+function pause_all()
+{
+    $.ajax({
+            type:'POST',
+            url:'/json-rpc',
+            data:'{"method": "pause_all"}',
+            contentType:'application/json',
+            dataType:'json'
+        }); // end ajax
+} // end pause_all
+
+function resume_all()
+{
+    $.ajax({
+            type:'POST',
+            url:'/json-rpc',
+            data:'{"method": "resume_all"}',
+            contentType:'application/json',
+            dataType:'json'
+        }); // end ajax
+} // end resume_all
+
 function grid_refresh()
 {
     $('#torrents').datagrid('reload'); // reload grid

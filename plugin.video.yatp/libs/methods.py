@@ -145,3 +145,27 @@ def get_data_buffer(torrenter, params=None):
     :return: data buffer contents
     """
     return torrenter.data_buffer
+
+
+def pause_all(torrenter, params=None):
+    """
+    Pause all torrents
+
+    :return:
+    """
+    torrents = torrenter.get_all_torrents_info()
+    for torrent in torrents:
+        torrenter.pause_torrent(torrent['info_hash'])
+    return 'OK'
+
+
+def resume_all(torrenter, params=None):
+    """
+    Resume all torrents
+
+    :return:
+    """
+    torrents = torrenter.get_all_torrents_info()
+    for torrent in torrents:
+        torrenter.resume_torrent(torrent['info_hash'])
+    return 'OK'
