@@ -4,7 +4,6 @@
 # Author:      Roman Miroshnychenko aka Roman V. M.
 # Created on:  13.12.2014
 # Licence:     GPL v.3: http://www.gnu.org/copyleft/gpl.html
-# todo: refactor module to set-up proper interface
 
 DEBUG = False  # Set to True to print Torrenter debug messages
 
@@ -487,6 +486,24 @@ class Torrenter(object):
         for info_hash in self._torrents_pool.iterkeys():
             listing.append(self.get_torrent_info(info_hash))
         return listing
+
+    def pause_all(self, graceful_pause=1):
+        """
+        Pause all torrents
+
+        :return:
+        """
+        for info_hash in self._torrents_pool.iterkeys():
+            self.pause_torrent(info_hash, graceful_pause)
+
+    def resume_all(self):
+        """
+        Resume all torrents
+
+        :return:
+        """
+        for info_hash in self._torrents_pool.iterkeys():
+            self.resume_torrent(info_hash)
 
     @property
     def torrent_added(self):

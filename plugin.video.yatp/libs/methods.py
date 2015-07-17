@@ -151,11 +151,9 @@ def pause_all(torrenter, params=None):
     """
     Pause all torrents
 
-    :return:
+    :return: 'OK'
     """
-    torrents = torrenter.get_all_torrents_info()
-    for torrent in torrents:
-        torrenter.pause_torrent(torrent['info_hash'])
+    torrenter.pause_all()
     return 'OK'
 
 
@@ -163,9 +161,7 @@ def resume_all(torrenter, params=None):
     """
     Resume all torrents
 
-    :return:
+    :return: 'OK'
     """
-    torrents = torrenter.get_all_torrents_info()
-    for torrent in torrents:
-        torrenter.resume_torrent(torrent['info_hash'])
+    torrenter.resume_all()
     return 'OK'
