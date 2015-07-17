@@ -151,7 +151,7 @@ class Torrenter(object):
         :param resume_data: str - bencoded torrent resume data
         :return: object - torr_handle
         """
-        if torrent[:6] == 'magnet':
+        if torrent[:7] == 'magnet:':
             add_torrent_params = {'url': torrent}
         elif torrent[:7] in ('http://', 'https:/'):
             # Here external http/https client is used in case if libtorrent module is compiled without OpenSSL
