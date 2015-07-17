@@ -18,7 +18,7 @@ from libs import methods
 from libs.bottle import Bottle, request, template, response, debug, static_file, TEMPLATE_PATH
 from libs.wsgi_server import create_server
 from libs.torrenter import Torrenter
-from libs.timers import Timer, check_seeding_limits  #, save_resume_data
+from libs.timers import Timer, check_seeding_limits, save_resume_data
 
 DEBUG = True
 
@@ -30,15 +30,17 @@ app = Bottle()
 # These are the main torrent server parameters.
 # Here they are hardcoded but in other implementations they can be read e.g. from a config file.
 torrent_dir = __addon__.download_dir
-# resume_dir = os.path.join(cwd, 'resume')
+resume_dir = os.path.join(__addon__.config_dir, 'torrents')
+if not os.path.exists(resume_dir):
+    os.mkdir(resume_dir)
 max_ratio = __addon__.ratio_limit
 max_time = __addon__.time_limit
 TORRENT_PORT = 25335
 SERVER_PORT = 8668
 #-------------------------------------
-torrenter = Torrenter(TORRENT_PORT, TORRENT_PORT + 10)
+torrenter = Torrenter(TORRENT_PORT, TORRENT_PORT + 10, True, resume_dir)
 limits_timer = Timer(10, check_seeding_limits, torrenter, max_ratio, max_time)
-#save_resume_timer = Timer(20, save_resume_data, torrenter)
+save_resume_timer = Timer(20, save_resume_data, torrenter)
 
 
 @app.route('/')
@@ -150,7 +152,7 @@ if __name__ == '__main__':
     httpd = create_server(app, port=SERVER_PORT)
     httpd.timeout = 0.1
     limits_timer.start()
-    # save_resume_timer.start()
+    save_resume_timer.start()
     while not xbmc.abortRequested:
         httpd.handle_request()
         if start_trigger:

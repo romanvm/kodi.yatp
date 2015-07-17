@@ -59,8 +59,8 @@ def play_torrent(torrent):
     :return:
     """
     path = get_path(torrent)
-    success = path is not None
     li = xbmcgui.ListItem(path=path)
+    success = True if path else False
     xbmcplugin.setResolvedUrl(__handle__, success, li)
 
 

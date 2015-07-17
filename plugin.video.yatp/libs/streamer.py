@@ -24,7 +24,8 @@ def get_path(torrent):
     """
     jsonrc.add_torrent(torrent)
     progress_dialog = xbmcgui.DialogProgress()
-    progress_dialog.create('Buffering torrent', 'Adding torrent...', 'This may take some time.')
+    progress_dialog.create('Buffering torrent')
+    progress_dialog.update(0, 'Adding torrent...', 'This may take some time.')
     while not (progress_dialog.iscanceled() or jsonrc.check_torrent_added()):
         sleep(1.0)
     if not progress_dialog.iscanceled():
@@ -58,7 +59,7 @@ def get_path(torrent):
                     return media_url + torrent_data['files'][selected_file_index].replace('\\', '/')
                 else:
                     jsonrc.abort_buffering()
-                    if (jsonrc.get_torrent_info(torrent_data['info_hash'])['progress'] <= __addon__.buffer_size):
+                    if jsonrc.get_torrent_info(torrent_data['info_hash'])['state'] == 'downloading':
                         sleep(0.5)
                         jsonrc.remove_torrent(torrent_data['info_hash'], True)
             else:
@@ -68,4 +69,5 @@ def get_path(torrent):
     if not (jsonrc.check_torrent_added() and jsonrc.check_buffering_complete()):
         xbmcgui.Dialog().notification(__addon__.id, 'Playback cancelled.', __addon__.icon, 3000)
     progress_dialog.close()
-    return None
+    del progress_dialog
+    return ''

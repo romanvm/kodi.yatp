@@ -15,6 +15,9 @@ class Addon(xbmcaddon.Addon):
     """Helper class to access addon parameters"""
     def __init__(self):
         """Class constructor"""
+        self._configdir = xbmc.translatePath('special://profile/addon_data/{0}'.format(self.id)).decode('utf-8')
+        if not os.path.exists(self._configdir):
+            os.mkdir(self._configdir)
         if self.getSetting('download_folder'):
             self._dl_dir = self.getSetting('download_folder')
         else:
@@ -44,6 +47,15 @@ class Addon(xbmcaddon.Addon):
         :return: str
         """
         return self.getAddonInfo('id')
+
+    @property
+    def config_dir(self):
+        """
+        Addon config dir
+
+        :return:
+        """
+        return self._configdir
 
     @property
     def download_dir(self):
