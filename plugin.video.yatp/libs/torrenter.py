@@ -67,6 +67,8 @@ class Torrenter(object):
         self._persistent = persistent
         # The directory where session and torrent data are stored
         self._resume_dir = resume_dir
+        self._add_torrent_thread = None
+        self._stream_torrent_thread = None
         self._torrent_added = threading.Event()
         self._buffering_complete = threading.Event()
         self._abort_buffering = threading.Event()
@@ -98,6 +100,14 @@ class Torrenter(object):
         if self._persistent:
             self.save_all_resume_data()
             self._save_session_state()
+        try:
+            self._add_torrent_thread.join()
+        except (RuntimeError, AttributeError):
+            pass
+        try:
+            self._stream_torrent_thread.join()
+        except (RuntimeError, AttributeError):
+            pass
         del self._session
 
     def add_torrent(self, torrent, save_path, zero_priorities=False):
@@ -109,6 +119,7 @@ class Torrenter(object):
         :param zero_priorities: bool
         :return: dict {'name': str, 'info_hash': str, 'files': list}
         """
+        self._torrent_added.clear()
         _log('Adding torrent...')
         _log('Torrent: {}'.format(torrent))
         _log('Save path: {}'.format(save_path))
@@ -124,13 +135,15 @@ class Torrenter(object):
         result['files'] = files
         if zero_priorities:
             [torr_handle.piece_priority(i, 0) for i in xrange(torr_info.num_pieces())]
+        self._data_buffer.append(result)
+        self._torrent_added.set()
         return result
 
     def add_torrent_async(self, torrent, save_path, zero_priorities=False):
         """
         Add a torrent in a non-blocking way.
 
-        This method should be run in a separate thread. After calling the method,
+        This method will add a torrent in a separate thread. After calling the method,
         the caller should periodically check torrent_added flag and, when
         the flag is set, retrieve results from data_buffer.
         :param torrent: str - path to a .torrent file or a magnet link
@@ -138,10 +151,9 @@ class Torrenter(object):
         :param zero_priorities: bool
         :return:
         """
-        self._torrent_added.clear()
-        result = self.add_torrent(torrent, save_path, zero_priorities)
-        self._data_buffer.append(result)
-        self._torrent_added.set()
+        self._add_torrent_thread = threading.Thread(target=self.add_torrent, args=(torrent, save_path, zero_priorities))
+        self._add_torrent_thread.daemon = True
+        self._add_torrent_thread.run()
 
     def _add_torrent(self, torrent, save_path, resume_data=None):
         """
@@ -178,9 +190,23 @@ class Torrenter(object):
         """
         Force sequential download of file for video playback.
 
-        This method should be run in a separate thread. The caller should periodically
+        This method will stream a torrent in a separate thread. The caller should periodically
         check buffering_complete flag. If buffering needs to be terminated,
         the caller should call abort_buffering method.
+        :param info_hash: str
+        :param file_index: int - the numerical index of the file to be streamed.
+        :param buffer_percent: float - buffer size as % of the file size
+        :return:
+        """
+        self._stream_torrent_thread = threading.Thread(target=self.stream_torrent,
+                                                       args=(info_hash, file_index, buffer_percent))
+        self._stream_torrent_thread.daemon = True
+        self._stream_torrent_thread.run()
+
+    def stream_torrent(self, info_hash, file_index, buffer_percent=5.0):
+        """
+        Force sequential download of file for video playback.
+
         :param info_hash: str
         :param file_index: int - the numerical index of the file to be streamed.
         :param buffer_percent: float - buffer size as % of the file size
@@ -435,6 +461,10 @@ class Torrenter(object):
         :return:
         """
         self._abort_buffering.set()
+        try:
+            self._stream_torrent_thread.join()
+        except (RuntimeError, AttributeError):
+            pass
 
     def get_torrent_info(self, info_hash):
         """

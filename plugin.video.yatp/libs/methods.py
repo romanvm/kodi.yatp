@@ -27,9 +27,7 @@ def add_torrent(torrenter, params):
     params[2] - bool - zero priorities (do not start download immediately, optional, default - True)
     :return: 'OK'
     """
-    thread = threading.Thread(target=torrenter.add_torrent_async, args=tuple(params))
-    thread.daemon = True
-    thread.start()
+    torrenter.add_torrent_async(params[0], params[1], params[2])
     return 'OK'
 
 
@@ -113,9 +111,7 @@ def stream_torrent(torrenter, params):
     params[2] - buffer size in % (default - 5.0%)
     :return: 'OK'
     """
-    thread = threading.Thread(target=torrenter.stream_torrent_async, args=tuple(params))
-    thread.daemon = True
-    thread.start()
+    torrenter.stream_torrent_async(params[0], params[1], params[2])
     return 'OK'
 
 
