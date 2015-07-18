@@ -99,7 +99,6 @@ class Torrenter(object):
         self._abort_buffering.set()
         if self._persistent:
             self.save_all_resume_data()
-            self._save_session_state()
         try:
             self._add_torrent_thread.join()
         except (RuntimeError, AttributeError):
@@ -222,12 +221,13 @@ class Torrenter(object):
         torr_info = torr_handle.get_torrent_info()
         # Pick the file to be streamed from the torrent files
         file_entry = torr_info.files()[file_index]
-        peer_req = torr_info.map_file(file_index, 0, file_entry.size)
+        _log(str(file_entry.size))
+        peer_req = torr_info.map_file(file_index, 0, 1048576)  # 1048576 (1MB) is a dummy value to avoid C int overflow
         # Start piece of the file
         start_piece = peer_req.piece
         _log('Start piece: {}'.format(start_piece))
         # The number of pieces in the file
-        num_pieces = peer_req.length / torr_info.piece_length()
+        num_pieces = file_entry.size / torr_info.piece_length()
         _log('Num pieces: {}'.format(num_pieces))
         # The number of pieces at the start of the file
         # to be downloaded before the file can be played
@@ -397,8 +397,9 @@ class Torrenter(object):
         :return:
         """
         if self._persistent:
-            for key in self._torrents_pool.keys():
+            for key in self._torrents_pool.iterkeys():
                 self._save_resume_data(key, force_save)
+            self._session.save_state()
         else:
             raise TorrenterError('Trying to save torrent metadata for a non-persistent instance!')
 
