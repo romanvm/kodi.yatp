@@ -2,8 +2,8 @@
 # Module: methods
 # Created on: 02.07.2015
 # Author: Roman Miroshnychenko aka Roman V.M. (romanvm@yandex.ua)
+"""JSON-RPC methdos implementation"""
 
-import threading
 
 def ping(torrenter, params=None):
     """
@@ -50,6 +50,7 @@ def get_added_torrent_info(torrenter, params=None):
     """
     return torrenter.data_buffer
 
+
 def get_torrent_info(torrenter, params):
     """
     Get torrent info
@@ -58,6 +59,7 @@ def get_torrent_info(torrenter, params):
     :return: dict - extended torrent info
     """
     return torrenter.get_torrent_info(params[0])
+
 
 def get_all_torrent_info(torrenter, params=None):
     """

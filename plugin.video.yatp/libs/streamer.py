@@ -60,7 +60,6 @@ def get_path(torrent):
                 else:
                     jsonrc.abort_buffering()
                     if jsonrc.get_torrent_info(torrent_data['info_hash'])['state'] == 'downloading':
-                        sleep(0.5)
                         jsonrc.remove_torrent(torrent_data['info_hash'], True)
             else:
                 xbmcgui.Dialog().notification(__addon__.id, 'A video is not selected', __addon__.icon, 3000)

@@ -5,7 +5,7 @@
 # Created on:  13.12.2014
 # Licence:     GPL v.3: http://www.gnu.org/copyleft/gpl.html
 
-DEBUG = False  # Set to True to print Torrenter debug messages
+DEBUG = True  # Set to True to print Torrenter debug messages
 
 import os
 import sys
@@ -96,7 +96,7 @@ class Torrenter(object):
         Always delete the Torrenter instance when
         exiting the main program.
         """
-        # self.session.pause()
+        self._abort_buffering.set()
         if self._persistent:
             self.save_all_resume_data()
             self._save_session_state()
@@ -153,7 +153,7 @@ class Torrenter(object):
         """
         self._add_torrent_thread = threading.Thread(target=self.add_torrent, args=(torrent, save_path, zero_priorities))
         self._add_torrent_thread.daemon = True
-        self._add_torrent_thread.run()
+        self._add_torrent_thread.start()
 
     def _add_torrent(self, torrent, save_path, resume_data=None):
         """
@@ -201,7 +201,7 @@ class Torrenter(object):
         self._stream_torrent_thread = threading.Thread(target=self.stream_torrent,
                                                        args=(info_hash, file_index, buffer_percent))
         self._stream_torrent_thread.daemon = True
-        self._stream_torrent_thread.run()
+        self._stream_torrent_thread.start()
 
     def stream_torrent(self, info_hash, file_index, buffer_percent=5.0):
         """
@@ -212,7 +212,7 @@ class Torrenter(object):
         :param buffer_percent: float - buffer size as % of the file size
         :return:
         """
-        _log(str((info_hash, file_index, buffer_percent)))
+        _log('Streaming torrent: ' + str((info_hash, file_index, buffer_percent)))
         # Clear flags
         self._buffering_complete.clear()
         self._abort_buffering.clear()

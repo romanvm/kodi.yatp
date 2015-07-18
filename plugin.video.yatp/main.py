@@ -7,7 +7,6 @@
 import sys
 import os
 from urlparse import parse_qsl
-from urllib import unquote_plus
 #
 import xbmcgui
 import xbmcplugin
@@ -19,9 +18,6 @@ from libs.streamer import get_path
 __addon__ = Addon()
 __url__ = sys.argv[0]
 __handle__ = int(sys.argv[1])
-
-json_url = __addon__.torrenter_host + '/json-rpc'
-media_url = __addon__.torrenter_host + '/media/'
 
 
 def plugin_root():
