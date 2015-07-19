@@ -5,7 +5,7 @@
 # Created on:  13.12.2014
 # Licence:     GPL v.3: http://www.gnu.org/copyleft/gpl.html
 
-DEBUG = True  # Set to True to print Torrenter debug messages
+DEBUG = False  # Set to True to print Torrenter debug messages
 
 import os
 import sys

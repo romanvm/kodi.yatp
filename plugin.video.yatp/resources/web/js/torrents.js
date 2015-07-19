@@ -47,6 +47,7 @@ function remove_torrent()
     }); // end ajax
     $('#delete_files').prop('checked',false);
     $('#remove_torrent_dlg').dialog('close');
+    $('#torrents').datagrid('clearSelections')
 } // end remove_torrent
 
 function add_magnet()
@@ -95,7 +96,7 @@ function resume_all()
 function grid_refresh()
 {
     $('#torrents').datagrid('reload'); // reload grid
-    setTimeout(grid_refresh, 1000); // schedule next refresh after 1sec
+    setTimeout(grid_refresh, 2000); // schedule next refresh after 2s
 } // end grid_refresh
 
 $(function()
@@ -152,7 +153,7 @@ $(function()
     $('#remove_torrent_dlg').dialog({
         title: 'Confirm Delete',
         iconCls: 'icon-delete',
-        width: 400,
+        width: 380,
         height: 200,
         closed: true,
         modal: true,
