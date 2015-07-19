@@ -55,9 +55,9 @@ def play_torrent(torrent):
     :return:
     """
     path = get_path(torrent)
-    li = xbmcgui.ListItem(path=path)
+    list_item = xbmcgui.ListItem(path=path)
     success = True if path else False
-    xbmcplugin.setResolvedUrl(__handle__, success, li)
+    xbmcplugin.setResolvedUrl(__handle__, success, list_item)
 
 
 def router(paramstring):

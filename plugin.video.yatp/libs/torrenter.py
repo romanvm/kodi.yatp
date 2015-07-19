@@ -5,8 +5,6 @@
 # Created on:  13.12.2014
 # Licence:     GPL v.3: http://www.gnu.org/copyleft/gpl.html
 
-DEBUG = False  # Set to True to print Torrenter debug messages
-
 import os
 import sys
 import time
@@ -33,12 +31,6 @@ if sys.platform == 'win32':
     from lt.win32 import libtorrent
 else:
     raise RuntimeError('Your OS is not supported!')
-
-
-def _log(message):
-    """Debug logger"""
-    if DEBUG:
-        print '!!!*** {0} ***!!!'.format(message)
 
 
 class TorrenterError(Exception):
@@ -119,10 +111,6 @@ class Torrenter(object):
         :return: dict {'name': str, 'info_hash': str, 'files': list}
         """
         self._torrent_added.clear()
-        _log('Adding torrent...')
-        _log('Torrent: {}'.format(torrent))
-        _log('Save path: {}'.format(save_path))
-        _log('Zero priorities: {}'.format(zero_priorities))
         torr_handle = self._add_torrent(torrent, save_path)
         if self._persistent:
             self._save_torrent_info(torr_handle)
@@ -211,7 +199,6 @@ class Torrenter(object):
         :param buffer_percent: float - buffer size as % of the file size
         :return:
         """
-        _log('Streaming torrent: ' + str((info_hash, file_index, buffer_percent)))
         # Clear flags
         self._buffering_complete.clear()
         self._abort_buffering.clear()
@@ -221,18 +208,14 @@ class Torrenter(object):
         torr_info = torr_handle.get_torrent_info()
         # Pick the file to be streamed from the torrent files
         file_entry = torr_info.files()[file_index]
-        _log(str(file_entry.size))
         peer_req = torr_info.map_file(file_index, 0, 1048576)  # 1048576 (1MB) is a dummy value to avoid C int overflow
         # Start piece of the file
         start_piece = peer_req.piece
-        _log('Start piece: {}'.format(start_piece))
         # The number of pieces in the file
         num_pieces = file_entry.size / torr_info.piece_length()
-        _log('Num pieces: {}'.format(num_pieces))
         # The number of pieces at the start of the file
         # to be downloaded before the file can be played
         buffer_length = int(round(num_pieces * (buffer_percent / 100)))
-        _log('Buffer length: {}'.format(buffer_length))
         # The index of the end piece in the file
         end_piece = start_piece + num_pieces
         # Check if the torrent has been buffered earlier
@@ -242,8 +225,6 @@ class Torrenter(object):
         pieces_pool.append(end_piece)
         [torr_handle.piece_priority(piece, 1) for piece in pieces_pool]
         while len(pieces_pool) > 0:
-            _log('Abort buffering: {}'.format(self._abort_buffering.is_set()))
-            _log(str(pieces_pool))
             if self._abort_buffering.is_set():
                 break
             self._data_buffer.append(int(100 * (buffer_length + 3 - len(pieces_pool)) / (buffer_length + 3.0)))
@@ -252,17 +233,14 @@ class Torrenter(object):
                     del pieces_pool[index]
             time.sleep(0.1)
         else:
-            _log('Buffering complete')
             torr_handle.flush_cache()
             self._buffering_complete.set()
         if self._buffering_complete.is_set():
-            _log('Start sliding window')
             # Start sliding window
             window_start = buffer_length + 1
             window_end = window_start + buffer_length  # Sliding window size
             [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start + 1, window_end + 1)]
             while window_start < end_piece - 1:
-                _log('Window start: {}'.format(window_start))
                 if self._abort_buffering.is_set():
                     break
                 torr_handle.piece_priority(window_start, 7)

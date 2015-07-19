@@ -54,8 +54,8 @@ def get_path(torrent):
                                     'Download speed: {0}KB/s'.format(torrent_info['dl_speed']),
                                     'Seeds: {0}'.format(torrent_info['num_seeds']))
                     sleep(1.0)
-                progress_dialog.close()
                 if not progress_dialog.iscanceled():
+                    progress_dialog.close()
                     return media_url + torrent_data['files'][selected_file_index].replace('\\', '/')
                 else:
                     jsonrc.abort_buffering()
@@ -67,6 +67,6 @@ def get_path(torrent):
             xbmcgui.Dialog().notification(__addon__.id, 'No videofiles to play.', 'error', 3000)
     if not (jsonrc.check_torrent_added() and jsonrc.check_buffering_complete()):
         xbmcgui.Dialog().notification(__addon__.id, 'Playback cancelled.', __addon__.icon, 3000)
-    progress_dialog.close()
-    del progress_dialog
+    if not progress_dialog.iscanceled():
+        progress_dialog.close()
     return ''
