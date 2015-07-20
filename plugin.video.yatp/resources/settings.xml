@@ -6,7 +6,7 @@
         <setting id="download_folder" type="folder"
                  label="Folder for downloading files" default="" />
         <setting id="buffer_size" type="number"
-                 label="Buffer size (%)" default="5"/>
+                 label="Buffer size (MB)" default="35"/>
         <setting id="ratio_limit" type="labelenum"
                  label="Seeding ratio limit (0 - no limit)" values="0|1|1.5|2|3|4|5" default="1.5" />
         <setting id="time_limit" type="number"

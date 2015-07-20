@@ -11,7 +11,7 @@ import time
 import threading
 import datetime
 import cPickle as pickle
-from collections import deque, OrderedDict
+from collections import deque
 try:
     from requests import get
 
@@ -190,13 +190,13 @@ class Torrenter(object):
         self._stream_torrent_thread.daemon = True
         self._stream_torrent_thread.start()
 
-    def stream_torrent(self, info_hash, file_index, buffer_percent=5.0):
+    def stream_torrent(self, info_hash, file_index, buffer_size=35):
         """
         Force sequential download of file for video playback.
 
         :param info_hash: str
         :param file_index: int - the numerical index of the file to be streamed.
-        :param buffer_percent: float - buffer size as % of the file size
+        :param buffer_size: int - buffer size in MB
         :return:
         """
         # Clear flags
@@ -215,14 +215,14 @@ class Torrenter(object):
         num_pieces = file_entry.size / torr_info.piece_length()
         # The number of pieces at the start of the file
         # to be downloaded before the file can be played
-        buffer_length = int(round(num_pieces * (buffer_percent / 100)))
+        buffer_length = (buffer_size * 1048576) / torr_info.piece_length()
         # The index of the end piece in the file
         end_piece = start_piece + num_pieces
         # Check if the torrent has been buffered earlier
         # Setup buffer download
-        pieces_pool = range(start_piece, buffer_length + 1)
-        pieces_pool.append(end_piece - 1)
-        pieces_pool.append(end_piece)
+        # Download the last 2+MB
+        end_offset = 2097152 / torr_info.piece_length() + 2  # Experimentally tested
+        pieces_pool = range(start_piece, buffer_length + 1) + range(end_piece - end_offset, end_piece + 1)
         [torr_handle.piece_priority(piece, 1) for piece in pieces_pool]
         while len(pieces_pool) > 0:
             if self._abort_buffering.is_set():
@@ -240,7 +240,7 @@ class Torrenter(object):
             window_start = buffer_length + 1
             window_end = window_start + buffer_length  # Sliding window size
             [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start + 1, window_end + 1)]
-            while window_start < end_piece - 1:
+            while window_start < end_piece - end_offset:
                 if self._abort_buffering.is_set():
                     break
                 torr_handle.piece_priority(window_start, 7)
@@ -464,27 +464,25 @@ class Torrenter(object):
         completed_time - see above
         info_hash - torrent's info_hash hexdigest in lowecase
         :param info_hash: str
-        :return: OrderedDict - torrent info
+        :return: dict - torrent info
         """
-        info = OrderedDict()
         torr_info = self._get_torrent_info(info_hash)
         torr_status = self._get_torrent_status(info_hash)
-        info['name'] = torr_info.name()
-        info['size'] = torr_info.total_size() / 1048576
-        info['state'] = str(torr_status.state) if not torr_status.paused else 'paused'
-        info['progress'] = int(torr_status.progress * 100)
-        info['dl_speed'] = torr_status.download_payload_rate / 1024
-        info['ul_speed'] = torr_status.upload_payload_rate / 1024
-        info['total_download'] = torr_status.total_done / 1048576
-        info['total_upload'] = torr_status.total_payload_upload / 1048576
-        info['num_seeds'] = torr_status.num_seeds
-        info['num_peers'] = torr_status.num_peers
-        # Timestamp in 'YYYY-MM-DD HH:MM:SS' format
-        info['added_time'] = str(datetime.datetime.fromtimestamp(int(torr_status.added_time)))
         completed_time = str(datetime.datetime.fromtimestamp(int(torr_status.completed_time)))
-        info['completed_time'] = completed_time if completed_time[:10] != '1970-01-01' else '-'
-        info['info_hash'] = info_hash
-        return info
+        return {'name': torr_info.name(),
+                'size': torr_info.total_size() / 1048576,
+                'state': str(torr_status.state) if not torr_status.paused else 'paused',
+                'progress': int(torr_status.progress * 100),
+                'dl_speed': torr_status.download_payload_rate / 1024,
+                'ul_speed': torr_status.upload_payload_rate / 1024,
+                'total_download': torr_status.total_done / 1048576,
+                'total_upload': torr_status.total_payload_upload / 1048576,
+                'num_seeds': torr_status.num_seeds,
+                'num_peers': torr_status.num_peers,
+                 # Timestamp in 'YYYY-MM-DD HH:MM:SS' format
+                'added_time': str(datetime.datetime.fromtimestamp(int(torr_status.added_time))),
+                'completed_time': completed_time if completed_time[:10] != '1970-01-01' else '-',
+                'info_hash': info_hash}
 
     def get_all_torrents_info(self):
         """

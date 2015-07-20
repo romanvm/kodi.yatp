@@ -92,10 +92,10 @@ class Addon(xbmcaddon.Addon):
     @property
     def buffer_size(self):
         """
-        Buffer size in %
+        Buffer size in MB
         :return:
         """
-        return float(self.getSetting('buffer_size'))
+        return int(self.getSetting('buffer_size'))
 
     @property
     def ratio_limit(self):

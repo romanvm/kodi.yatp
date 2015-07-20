@@ -38,7 +38,7 @@
     <div id="remove_torrent_dlg" style="padding:10px">
         <p><strong>Are you sure you want to delete the torrent?</strong></p>
         <p><input id="delete_files" type="checkbox" name="delete_files" value=""> Also delete files from disc.</p>
-        <p><strong>WARNING!</strong> The files will be deleted permanently.</p>
+        <p><strong>WARNING:</strong> The files will be deleted permanently!</p>
     </div>
 </body>
 </html>
