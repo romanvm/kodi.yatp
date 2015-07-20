@@ -451,6 +451,7 @@ class Torrenter(object):
 
         The following info is returned:
         name - torrent's name
+        size - MB
         state - torrent's current state
         dl_speed - KB/s
         ul_speed - KB/s
@@ -469,6 +470,7 @@ class Torrenter(object):
         torr_info = self._get_torrent_info(info_hash)
         torr_status = self._get_torrent_status(info_hash)
         info['name'] = torr_info.name()
+        info['size'] = torr_info.total_size() / 1048576
         info['state'] = str(torr_status.state) if not torr_status.paused else 'paused'
         info['progress'] = int(torr_status.progress * 100)
         info['dl_speed'] = torr_status.download_payload_rate / 1024
@@ -529,8 +531,3 @@ class Torrenter(object):
     def data_buffer(self):
         """Data buffer contents"""
         return self._data_buffer[0]
-
-    # @property
-    # def locked(self):
-    #     """Check the thread lock status"""
-    #     return self._thread_lock.locked()

@@ -30,6 +30,7 @@ function confirm_remove_torrent()
 {
     if ($('#torrents').datagrid('getSelected') != null)
     {
+        $('#delete_files').prop('checked',false);
         $('#remove_torrent_dlg').dialog('open');
     } // end if
 } // end confirm remove torrent
@@ -45,7 +46,6 @@ function remove_torrent()
         contentType:'application/json',
         dataType:'json'
     }); // end ajax
-    $('#delete_files').prop('checked',false);
     $('#remove_torrent_dlg').dialog('close');
     $('#torrents').datagrid('clearSelections')
 } // end remove_torrent
@@ -112,6 +112,7 @@ $(function()
         toolbar:'#toolbar',
         columns:[[
             {field:'name',title:'Torrent Name',sortable:true,width:400},
+            {field:'size',title:'Size (MB)',width:70,align:'right'},
             {field:'state',title:'State',width:100},
             {field:'progress',title:'%',width:35,align:'right'},
             {field:'dl_speed',title:'DL (KB/s)',width:70,align:'right'},
@@ -122,7 +123,7 @@ $(function()
             {field:'num_peers',title:'Peers',width:50,align:'right'},
             {field:'added_time',title:'Added on',sortable:true,width:150},
             {field:'completed_time',title:'Completed on',width:150},
-            {field:'info_hash',title:'Hash',width:350}
+            {field:'info_hash',title:'Hash',width:300}
         ]] // end columns
     }); // end datagrid
     $('#torrents').datagrid('sort', 'added_time');
@@ -153,8 +154,8 @@ $(function()
     $('#remove_torrent_dlg').dialog({
         title: 'Confirm Delete',
         iconCls: 'icon-delete',
-        width: 380,
-        height: 200,
+        width: 330,
+        height: 180,
         closed: true,
         modal: true,
         buttons: [{
