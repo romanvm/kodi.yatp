@@ -96,6 +96,7 @@ function resume_all()
 function grid_refresh()
 {
     $('#torrents').datagrid('reload'); // reload grid
+    $('#torrents').datagrid('loaded'); // hide 'loading' message
     setTimeout(grid_refresh, 2000); // schedule next refresh after 2s
 } // end grid_refresh
 
