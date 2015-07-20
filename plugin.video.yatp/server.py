@@ -160,6 +160,7 @@ if __name__ == '__main__':
             __addon__.log('***** Torrent Server started *******')
             start_trigger = False
     limits_timer.abort()
+    save_resume_timer.abort()
     torrenter.abort_buffering()
     del torrenter
     __addon__.log('***** Torrent Server stopped *******')
