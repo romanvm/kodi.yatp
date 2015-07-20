@@ -7,13 +7,19 @@
 Torrenter WSGI application and server
 """
 
+import sys
+from libs.addon import Addon
+
+__addon__ = Addon()
+if __addon__.remote_mode:
+    sys.exit()
+
 import os
 from inspect import getmembers, isfunction
 from json import dumps
 from time import sleep
 import xbmc
 import xbmcgui
-from libs.addon import Addon
 from libs import methods
 from libs.bottle import Bottle, request, template, response, debug, static_file, TEMPLATE_PATH
 from libs.wsgi_server import create_server
@@ -22,10 +28,10 @@ from libs.timers import Timer, check_seeding_limits, save_resume_data
 
 DEBUG = True
 
-__addon__ = Addon()
 static_path = os.path.join(__addon__.path, 'resources', 'web')
 TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))
 debug(DEBUG)
+# Create Bottle WSGI application
 app = Bottle()
 # Torrent server parameters
 torrent_dir = __addon__.download_dir

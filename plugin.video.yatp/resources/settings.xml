@@ -19,7 +19,9 @@
                  label="Torrent server host" default="localhost" />
                <setting id="server_port" type="number"
                  label="Torrent server port" default="8668"/>
+        <setting id="remote_mode" type="bool"
+                 label="Remote mode (local torrent server won't start)" default="false" />
         <setting id="torrent_port" type="number"
-                 label="Torrent port" default="25335"/>
+                 label="Torrent port" default="25335" enable="eq(-1,false)" />
     </category>
 </settings>

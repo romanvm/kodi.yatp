@@ -139,3 +139,7 @@ class Addon(xbmcaddon.Addon):
     @property
     def server_port(self):
         return int(self.getSetting('server_port'))
+
+    @property
+    def remote_mode(self):
+        return self.getSetting('remote_mode') == 'true'
