@@ -110,7 +110,7 @@ def stream_torrent(torrenter, params):
 
     params[0] - torrent info-hash in lowercase
     params[1] - the index of the file to be streamed
-    params[2] - buffer size in MB (default - 35MB)
+    params[2] - buffer size in MB
     :return: 'OK'
     """
     torrenter.stream_torrent_async(params[0], params[1], params[2])

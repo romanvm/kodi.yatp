@@ -122,4 +122,20 @@ class Addon(xbmcaddon.Addon):
 
         :return:
         """
-        return 'http://{0}:8668'.format(self.getSetting('torrenter_host'))
+        return 'http://{0}:{1}'.format(self.getSetting('torrenter_host'), self.getSetting('server_port'))
+
+    @property
+    def expired_action(self):
+        return self.getSetting('expired_action')
+
+    @property
+    def delete_expired_files(self):
+        return self.getSetting('delete_expired_files') == 'true'
+
+    @property
+    def torrent_port(self):
+        return int(self.getSetting('torrent_port'))
+
+    @property
+    def server_port(self):
+        return int(self.getSetting('server_port'))

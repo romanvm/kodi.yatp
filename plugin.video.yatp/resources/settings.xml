@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <settings>
     <category label="General">
-        <setting id="torrenter_host" type="text"
-                 label="Torrenter host" default="localhost" />
         <setting id="download_folder" type="folder"
                  label="Folder for downloading files" default="" />
         <setting id="buffer_size" type="number"
@@ -11,5 +9,17 @@
                  label="Seeding ratio limit (0 - no limit)" values="0|1|1.5|2|3|4|5" default="1.5" />
         <setting id="time_limit" type="number"
                  label="Seeding time limit in hours (0 - no limit)" default="0" />
+        <setting id="expired_action" type="labelenum"
+                 label="Action for expired torrents (only for time limit)" values="pause|delete" default="pause" />
+        <setting id="delete_expired_files" type="bool"
+                 label="Delete files for expired torrents" enable="eq(-1,1)" default="false"/>
+    </category>
+    <category label="Advanced">
+        <setting id="torrenter_host" type="text"
+                 label="Torrent server host" default="localhost" />
+               <setting id="server_port" type="number"
+                 label="Torrent server port" default="8668"/>
+        <setting id="torrent_port" type="number"
+                 label="Torrent port" default="25335"/>
     </category>
 </settings>

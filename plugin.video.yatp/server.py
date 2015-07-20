@@ -27,19 +27,19 @@ static_path = os.path.join(__addon__.path, 'resources', 'web')
 TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))
 debug(DEBUG)
 app = Bottle()
-# These are the main torrent server parameters.
-# Here they are hardcoded but in other implementations they can be read e.g. from a config file.
+# Torrent server parameters
 torrent_dir = __addon__.download_dir
 resume_dir = os.path.join(__addon__.config_dir, 'torrents')
 if not os.path.exists(resume_dir):
     os.mkdir(resume_dir)
 max_ratio = __addon__.ratio_limit
 max_time = __addon__.time_limit
-TORRENT_PORT = 25335
-SERVER_PORT = 8668
+torrent_port = __addon__.torrent_port
+server_port = __addon__.server_port
 #-------------------------------------
-torrenter = Torrenter(TORRENT_PORT, TORRENT_PORT + 10, True, resume_dir)
-limits_timer = Timer(10, check_seeding_limits, torrenter, max_ratio, max_time)
+torrenter = Torrenter(torrent_port, torrent_port + 10, True, resume_dir)
+limits_timer = Timer(10, check_seeding_limits, torrenter, max_ratio, max_time,
+                     __addon__.expired_action, __addon__.delete_expired_files)
 save_resume_timer = Timer(20, save_resume_data, torrenter)
 
 
@@ -149,7 +149,7 @@ if __name__ == '__main__':
     __addon__.log('***** Torrent Server starting... *******')
     sleep(3.0)
     start_trigger = True
-    httpd = create_server(app, port=SERVER_PORT)
+    httpd = create_server(app, port=server_port)
     httpd.timeout = 0.1
     limits_timer.start()
     save_resume_timer.start()

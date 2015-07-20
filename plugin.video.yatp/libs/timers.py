@@ -55,7 +55,7 @@ class Timer(object):
         self._abort_flag.set()
 
 
-def check_seeding_limits(torrenter, max_ratio=0, max_time=0):
+def check_seeding_limits(torrenter, max_ratio, max_time, expired_action, delete_expired):
     """
     Check seding limits
 
@@ -76,7 +76,10 @@ def check_seeding_limits(torrenter, max_ratio=0, max_time=0):
                 and max_time
                 and datetime.now() - datetime.strptime(torrent['completed_time'], '%Y-%m-%d %H:%M:%S')
                     >= timedelta(hours=max_time)):
-                torrenter.pause_torrent(torrent['info_hash'])
+                if expired_action == 'pause':
+                    torrenter.pause_torrent(torrent['info_hash'])
+                else:
+                    torrenter.remove_torrent(torrent['info_hash'], delete_expired)
         except ValueError:
             pass
 
