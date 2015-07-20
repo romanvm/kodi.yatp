@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Torrents</title>
-    <link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/themes/default/easyui.css">
-    <link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/themes/icon.css">
-    <link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/demo/demo.css">
-    <script src="http://code.jquery.com/jquery-1.6.min.js"></script>
-    <script src="http://www.jeasyui.com/easyui/jquery.easyui.min.js"></script>
-    <script src="http://www.jeasyui.com/easyui/jquery.edatagrid.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/static/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/static/easyui/demo.css">
+    <script src="/static/js/jquery-1.6.min.js"></script>
+    <script src="/static/easyui/jquery.easyui.min.js"></script>
+    <script src="/static/easyui/plugins/jquery.datagrid.js"></script>
     <!-- Custom css and js -->
     <link rel="stylesheet" type="text/css" href="/static/css/torrents.css">
     <script src="/static/js/torrents.js"></script>
