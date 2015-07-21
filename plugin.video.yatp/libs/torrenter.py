@@ -114,11 +114,11 @@ class Torrenter(object):
         torr_handle = self._add_torrent(torrent, save_path)
         if self._persistent:
             self._save_torrent_info(torr_handle)
-        result = {'name': torr_handle.name(), 'info_hash': str(torr_handle.info_hash())}
+        result = {'name': torr_handle.name().decode('utf-8'), 'info_hash': str(torr_handle.info_hash())}
         torr_info = torr_handle.get_torrent_info()
         files = []
         for file_ in torr_info.files():
-            files.append(file_.path)
+            files.append(file_.path.decode('utf-8'))
         result['files'] = files
         if zero_priorities:
             [torr_handle.piece_priority(i, 0) for i in xrange(torr_info.num_pieces())]
@@ -469,7 +469,7 @@ class Torrenter(object):
         torr_info = self._get_torrent_info(info_hash)
         torr_status = self._get_torrent_status(info_hash)
         completed_time = str(datetime.datetime.fromtimestamp(int(torr_status.completed_time)))
-        return {'name': torr_info.name(),
+        return {'name': torr_info.name().decode('utf-8'),
                 'size': torr_info.total_size() / 1048576,
                 'state': str(torr_status.state) if not torr_status.paused else 'paused',
                 'progress': int(torr_status.progress * 100),

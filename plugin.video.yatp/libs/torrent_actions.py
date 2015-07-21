@@ -60,7 +60,7 @@ def buffer_torrent(torrent):
                     sleep(1.0)
                 if not progress_dialog.iscanceled():
                     progress_dialog.close()
-                    return media_url + torrent_data['files'][selected_file_index].replace('\\', '/')
+                    return media_url + quote(torrent_data['files'][selected_file_index].replace('\\', '/').encode('utf-8'))
                 else:
                     jsonrc.abort_buffering()
                     if jsonrc.get_torrent_info(torrent_data['info_hash'])['state'] == 'downloading':
