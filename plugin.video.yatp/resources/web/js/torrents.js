@@ -50,24 +50,24 @@ function remove_torrent()
     $('#torrents').datagrid('clearSelections')
 } // end remove_torrent
 
-function add_magnet()
+function add_torrent()
 {
-    var magnet_link = $('#magnet_text').textbox('getValue');
-    if (magnet_link && magnet_link.slice(0, 7) == 'magnet:')
+    var torrent_link = $('#torrent_link').textbox('getValue');
+    if (torrent_link && (torrent_link.slice(0, 7) == 'magnet:' || torrent_link.slice(0, 4) == 'http'))
     {
         $.ajax({
             type:'POST',
             url:'/json-rpc',
-            data:'{"method": "add_torrent", "params":["' + magnet_link + '", "", false]}',
+            data:'{"method": "add_torrent", "params":["' + torrent_link + '","", false]}',
             contentType:'application/json',
             dataType:'json'
         }); // end ajax
-        $('#magnet_text').textbox('clear');
-        $('#add_magnet_dlg').dialog('close');
+        $('#torrent_link').textbox('clear');
+        $('#add_torrent_dlg').dialog('close');
     }
     else
     {
-        $.messager.alert('Error','Invalid magnet link!','error');
+        $.messager.alert('Error','Invalid torrent link!','error');
     } // end if
 } // end add_magnet
 
@@ -99,9 +99,10 @@ function grid_refresh()
     $('#torrents').datagrid('loaded'); // hide 'loading' message
 } // end grid_refresh
 
+// Start JQuery document_ready
 $(function()
 {
-    $('#torrents').attr('title','Torrents on ' + window.location.host)
+    $('#torrents').attr('title','Torrents on ' + window.location.host);
     $('#torrents').datagrid({
         singleSelect:true,
         url:'torrents-json',
@@ -136,9 +137,9 @@ $(function()
         ]] // end columns
     }); // end datagrid
     $('#torrents').datagrid('sort', 'added_time');
-    $('#add_magnet_dlg').dialog({
-        title: 'Add Magnet Link',
-        iconCls: 'icon-magnet-plus',
+    $('#add_torrent_dlg').dialog({
+        title: 'Add Torrent Link',
+        iconCls: 'icon-link-add',
         width: 500,
         height: 180,
         closed: true,
@@ -148,14 +149,14 @@ $(function()
             iconCls: 'icon-ok',
             handler: function()
                 {
-                    add_magnet();
+                    add_torrent();
                 }
             }, // end button
             {
             text: 'Cancel',
             handler: function()
                 {
-                    $('#add_magnet_dlg').dialog('close');
+                    $('#add_torrent_dlg').dialog('close');
                 } // end function
             } // end button
         ] // end buttons
