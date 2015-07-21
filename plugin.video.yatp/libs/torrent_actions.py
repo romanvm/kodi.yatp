@@ -9,6 +9,7 @@ Torrent actions
 
 import os
 from time import sleep
+from urllib import quote
 import xbmcgui
 import json_requests as jsonrc
 from addon import Addon

@@ -19,6 +19,7 @@ import os
 from inspect import getmembers, isfunction
 from json import dumps
 from time import sleep
+from urllib import unquote
 import xbmc
 import xbmcgui
 from libs import methods
@@ -125,6 +126,7 @@ def get_media(path):
     :param path: relative path to a media file
     :return:
     """
+    path = path.decode('utf-8')
     __addon__.log('Playing media: ' + path)
     if os.path.splitext(path)[1] == '.mkv':
         mime = 'video/x-matroska'
