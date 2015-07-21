@@ -101,6 +101,7 @@ function grid_refresh()
 
 $(function()
 {
+    $('#torrents').attr('title','Torrents on ' + window.location.host)
     $('#torrents').datagrid({
         singleSelect:true,
         url:'torrents-json',
