@@ -15,7 +15,7 @@ import xbmcgui
 import xbmcplugin
 #
 from libs.addon import Addon
-from libs.streamer import buffer_torrent
+from libs.torrent_actions import buffer_torrent
 
 
 __addon__ = Addon()
