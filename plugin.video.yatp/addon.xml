@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.yatp"
-version="2.0.0a"
+version="2.0.0b"
 name="Yet Another Torrent Player"
 provider-name="Roman V. M.">
 <requires>
@@ -14,6 +14,6 @@ provider-name="Roman V. M.">
 <extension point="xbmc.addon.metadata">
       <summary lang="en">Yet Another Torrent Player</summary>
       <description lang="en">Yet another torrent player.</description>
-      <platform>windx</platform>
+      <platform>all</platform>
 </extension>
 </addon>
