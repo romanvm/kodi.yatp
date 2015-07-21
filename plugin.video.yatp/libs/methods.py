@@ -65,6 +65,8 @@ def get_all_torrent_info(torrenter, params=None):
     """
     Get info for all torrents in the session
 
+    Note: The torrents are listed in random order,
+    it us up to a client to sort the list accordingly.
     :return: list - the list of torrent info dicts
     """
     return torrenter.get_all_torrents_info()

@@ -2,6 +2,7 @@
 # Module: timers
 # Created on: 14.07.2015
 # Author: Roman Miroshnychenko aka Roman V.M. (romanvm@yandex.ua)
+
 from __future__ import division
 import threading
 from datetime import datetime, timedelta
@@ -9,13 +10,17 @@ from time import sleep
 
 
 class Timer(object):
-    """Timer class"""
+    """
+    Timer class
+
+    Implements a repeating timer to call some function in regular intervals.
+    """
     def __init__(self, interval, func, *args, **kwargs):
         """
         Class constructor
 
-        :param interval: int timer interval in seconds
-        :param func: a callable object
+        :param interval: int - timer interval in seconds
+        :param func: a callable function
         :param args: function positional args
         :param kwargs: function kwargs
         """
@@ -69,22 +74,21 @@ def check_seeding_limits(torrenter, max_ratio, max_time, expired_action, delete_
             ratio = torrent['total_upload'] / torrent['total_download']
         except ZeroDivisionError:
             ratio = 0
-        if torrent['state'] == 'seeding' and max_ratio and ratio >= max_ratio:
+        if max_ratio and torrent['state'] == 'seeding' and ratio >= max_ratio:
             torrenter.pause_torrent(torrent['info_hash'])
         try:
-            if (torrent['state'] == 'seeding'
-                and max_time
-                and datetime.now() - datetime.strptime(torrent['completed_time'], '%Y-%m-%d %H:%M:%S')
-                    >= timedelta(hours=max_time)):
-                if expired_action == 'pause':
+            if (max_time and
+                (datetime.now() - datetime.strptime(torrent['completed_time'], '%Y-%m-%d %H:%M:%S') >=
+                     timedelta(hours=max_time))):
+                if expired_action == 'pause' and torrent['state'] == 'seeding':
                     torrenter.pause_torrent(torrent['info_hash'])
-                else:
+                elif expired_action == 'delete' and torrent['state'] in ('seeding', 'paused'):
                     torrenter.remove_torrent(torrent['info_hash'], delete_expired)
         except ValueError:
             pass
 
 
-def save_resume_data(torrenter):  # Not used yet.
+def save_resume_data(torrenter):
     """
     Save torrents resume data
 

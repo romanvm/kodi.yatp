@@ -8,9 +8,9 @@
         <setting id="ratio_limit" type="labelenum"
                  label="Seeding ratio limit (0 - no limit)" values="0|1|1.5|2|3|4|5" default="1.5" />
         <setting id="time_limit" type="number"
-                 label="Seeding time limit in hours (0 - no limit)" default="0" />
+                 label="Keep torrents for (hours, 0 - no limit)" default="0" />
         <setting id="expired_action" type="labelenum"
-                 label="Action for expired torrents (only for time limit)" values="pause|delete" default="pause" />
+                 label="Action for expired torrents" values="pause|delete" default="pause" />
         <setting id="delete_expired_files" type="bool"
                  label="Delete files for expired torrents" enable="eq(-1,1)" default="false"/>
     </category>
