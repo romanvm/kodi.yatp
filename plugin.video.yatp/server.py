@@ -11,7 +11,7 @@ import sys
 from libs.addon import Addon
 
 __addon__ = Addon()
-if __addon__.remote_mode:
+if __addon__.remote_mode or sys.platform != 'win32':
     sys.exit()
 __addon__.log('***** Torrent Server starting... *******')
 
