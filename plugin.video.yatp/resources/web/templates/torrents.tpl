@@ -6,7 +6,7 @@
     <link rel="stylesheet" type="text/css" href="/static/easyui/themes/default/easyui.css">
     <link rel="stylesheet" type="text/css" href="/static/easyui/themes/icon.css">
     <link rel="stylesheet" type="text/css" href="/static/easyui/demo.css">
-    <script src="/static/js/jquery-1.6.min.js"></script>
+    <script src="/static/js/jquery-1.6.4.min.js"></script>
     <script src="/static/easyui/jquery.easyui.min.js"></script>
     <script src="/static/easyui/plugins/jquery.datagrid.js"></script>
     <!-- Custom css and js -->
