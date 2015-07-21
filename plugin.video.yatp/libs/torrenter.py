@@ -4,6 +4,12 @@
 # Author:      Roman Miroshnychenko aka Roman V. M.
 # Created on:  13.12.2014
 # Licence:     GPL v.3: http://www.gnu.org/copyleft/gpl.html
+"""
+Torrent client
+
+The module implements a simple torrent client based on python-libtorrent library
+and with torrent media streaming capability.
+"""
 
 import os
 import sys

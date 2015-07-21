@@ -3,6 +3,9 @@
 # Author: Roman V.M.
 # Created on: 12.05.2015
 # License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
+"""
+Torrent actions
+"""
 
 import os
 from time import sleep
@@ -15,9 +18,9 @@ __addon__ = Addon()
 media_url = __addon__.torrenter_host + '/media/'
 
 
-def get_path(torrent):
+def buffer_torrent(torrent):
     """
-    Resolve a playable path from torrent
+    Buffer a torrent and resolve a playable path from it
 
     :param torrent: str - magnet link or .torrent file URL
     :return:

@@ -3,6 +3,9 @@
 # Created on: 01.07.2015
 # Author: Roman Miroshnychenko aka Roman V.M. (romanvm@yandex.ua)
 # License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
+"""
+Custom WSGI Server and RequestHandler
+"""
 
 from wsgiref.simple_server import WSGIServer, WSGIRequestHandler
 from SocketServer import ThreadingMixIn

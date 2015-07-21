@@ -2,6 +2,9 @@
 # Module: json_requests
 # Created on: 17.07.2015
 # Author: Roman Miroshnychenko aka Roman V.M. (romanvm@yandex.ua)
+"""
+JSON-RPC requests to the Torrent Server
+"""
 
 from requests import post
 from addon import Addon

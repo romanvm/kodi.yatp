@@ -13,6 +13,7 @@ from libs.addon import Addon
 __addon__ = Addon()
 if __addon__.remote_mode:
     sys.exit()
+__addon__.log('***** Torrent Server starting... *******')
 
 import os
 from inspect import getmembers, isfunction
@@ -152,7 +153,6 @@ def get_static(path):
 
 
 if __name__ == '__main__':
-    __addon__.log('***** Torrent Server starting... *******')
     sleep(3.0)
     start_trigger = True
     httpd = create_server(app, port=server_port)

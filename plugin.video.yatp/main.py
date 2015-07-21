@@ -3,6 +3,9 @@
 # Author:      Roman Miroshnychenko aka Roman V. M.
 # Created on:  09.05.2015
 # Licence:     GPL v.3: http://www.gnu.org/copyleft/gpl.html
+"""
+Plugin main module
+"""
 
 import sys
 import os
@@ -12,7 +15,7 @@ import xbmcgui
 import xbmcplugin
 #
 from libs.addon import Addon
-from libs.streamer import get_path
+from libs.streamer import buffer_torrent
 
 
 __addon__ = Addon()
@@ -54,7 +57,7 @@ def play_torrent(torrent):
     :param torrent:
     :return:
     """
-    path = get_path(torrent)
+    path = buffer_torrent(torrent)
     list_item = xbmcgui.ListItem(path=path)
     success = True if path else False
     xbmcplugin.setResolvedUrl(__handle__, success, list_item)
