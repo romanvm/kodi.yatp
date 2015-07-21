@@ -12,25 +12,16 @@ import threading
 import datetime
 import cPickle as pickle
 from collections import deque
-try:
-    from requests import get
-
-    def load_torrent(url):
-        return get(url).content
-except ImportError:
-    from urllib2 import urlopen
-
-    def load_torrent(url):
-        resp = urlopen(url)
-        content = resp.read()
-        resp.close()
-        return content
-
+from requests import get
 
 if sys.platform == 'win32':
     from lt.win32 import libtorrent
 else:
     raise RuntimeError('Your OS is not supported!')
+
+
+def load_torrent(url):
+        return get(url).content
 
 
 class TorrenterError(Exception):
