@@ -23,7 +23,10 @@ from requests import get
 if sys.platform == 'win32':
     from lt.win32 import libtorrent
 else:
-    raise RuntimeError('Your OS is not supported!')
+    try:
+        import libtorrent
+    except ImportError:
+        raise RuntimeError('Your OS is not supported!')
 
 
 def load_torrent(url):
