@@ -125,7 +125,7 @@ def get_media(path):
     :param path: relative path to a media file
     :return:
     """
-    print path
+    __addon__.log('Playing media: ' + path)
     if os.path.splitext(path)[1] == '.mkv':
         mime = 'video/x-matroska'
     elif os.path.splitext(path)[1] == '.mp4':
