@@ -7,8 +7,6 @@
 Torrenter WSGI application and server
 """
 
-import sys
-from cStringIO import StringIO
 from libs.addon import Addon
 
 __addon__ = Addon()
@@ -16,15 +14,16 @@ if __addon__.remote_mode:
     sys.exit()
 __addon__.log('***** Torrent Server starting... *******')
 
+import sys
 import os
+from cStringIO import StringIO
 from inspect import getmembers, isfunction
 from json import dumps
 from time import sleep
-from urllib import unquote
 import xbmc
 import xbmcgui
 from libs import methods
-from libs.bottle import Bottle, request, template, response, debug, static_file, TEMPLATE_PATH
+from libs.bottle import Bottle, request, template, response, debug, static_file, TEMPLATE_PATH, HTTPError
 from libs.wsgi_server import create_server
 from libs.torrenter import Torrenter, libtorrent
 from libs.timers import Timer, check_seeding_limits, save_resume_data
@@ -59,7 +58,13 @@ def root():
 
     :return:
     """
-    return template('torrents')
+    user, password = request.auth or (None, None)
+    if __addon__.pass_protect and (user is None or (user, password) != __addon__.credentials):
+        error = HTTPError(401, 'Access denied')
+        error.add_header('WWW-Authenticate', 'Basic realm="private"')
+        return error
+    else:
+        return template('torrents')
 
 
 @app.route('/json-rpc', method='GET')

@@ -146,3 +146,11 @@ class Addon(xbmcaddon.Addon):
     @property
     def remote_mode(self):
         return self.getSetting('remote_mode') == 'true'
+
+    @property
+    def credentials(self):
+        return self.getSetting('web_login'), self.getSetting('web_pass')
+
+    @property
+    def pass_protect(self):
+        return self.getSetting('pass_protect') == 'true'
