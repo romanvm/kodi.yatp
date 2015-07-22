@@ -19,7 +19,7 @@
     </div>
     <div id="toolbar">
         <a href="javascript:void(0)" class="easyui-linkbutton"
-           iconCls="icon-link-add" plain="true" onclick="$('#add_torrent_dlg').dialog('open')">Add torrent link</a>
+           iconCls="icon-link-add" plain="true" onclick="$('#add_link_dlg').dialog('open')">Add torrent link</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"
            iconCls="icon-pause" plain="true" onclick="pause_torrent()">Pause</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"
@@ -31,7 +31,7 @@
         <a href="javascript:void(0)" class="easyui-linkbutton"
            iconCls="icon-delete" plain="true" onclick="confirm_remove_torrent()">Delete torrent</a>
     </div>
-    <div id="add_torrent_dlg" style="padding:10px">
+    <div id="add_link_dlg" style="padding:10px">
         <p>Insert a link to a .torrent file or a magnet link into the field below:</p>
         <input id="torrent_link", class="easyui-textbox" style="width:100%;height:26px">
     </div>

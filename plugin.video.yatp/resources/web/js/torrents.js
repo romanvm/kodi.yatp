@@ -50,7 +50,7 @@ function remove_torrent()
     $('#torrents').datagrid('clearSelections')
 } // end remove_torrent
 
-function add_torrent()
+function add_torrent_link()
 {
     var torrent_link = $('#torrent_link').textbox('getValue');
     if (torrent_link && (torrent_link.slice(0, 7) == 'magnet:' || torrent_link.slice(0, 4) == 'http'))
@@ -63,7 +63,7 @@ function add_torrent()
             dataType:'json'
         }); // end ajax
         $('#torrent_link').textbox('clear');
-        $('#add_torrent_dlg').dialog('close');
+        $('#add_link_dlg').dialog('close');
     }
     else
     {
@@ -137,7 +137,7 @@ $(function()
         ]] // end columns
     }); // end datagrid
     $('#torrents').datagrid('sort', 'added_time');
-    $('#add_torrent_dlg').dialog({
+    $('#add_link_dlg').dialog({
         title: 'Add Torrent Link',
         iconCls: 'icon-link-add',
         width: 500,
@@ -149,14 +149,14 @@ $(function()
             iconCls: 'icon-ok',
             handler: function()
                 {
-                    add_torrent();
+                    add_torrent_link();
                 }
             }, // end button
             {
             text: 'Cancel',
             handler: function()
                 {
-                    $('#add_torrent_dlg').dialog('close');
+                    $('#add_link_dlg').dialog('close');
                 } // end function
             } // end button
         ] // end buttons
