@@ -151,8 +151,12 @@ class Torrenter(object):
         :param resume_data: str - bencoded torrent resume data
         :return: object - torr_handle
         """
+        add_torrent_params = {'save_path': save_path,
+                              'storage_mode': libtorrent.storage_mode_t.storage_mode_allocate}
+        if resume_data is not None:
+            add_torrent_params['resume_data'] = resume_data
         if torrent[:7] == 'magnet:':
-            add_torrent_params = {'url': torrent}
+            add_torrent_params['url'] = torrent
         elif torrent[:7] in ('http://', 'https:/'):
             # Here external http/https client is used in case if libtorrent module is compiled without OpenSSL
             add_torrent_params = {'ti': libtorrent.torrent_info(libtorrent.bdecode(load_torrent(torrent)))}
@@ -161,19 +165,15 @@ class Torrenter(object):
                 add_torrent_params = {'ti': libtorrent.torrent_info(os.path.normpath(torrent))}
             except RuntimeError:
                 raise TorrenterError('Invalid path to the .torrent file!')
-        add_torrent_params['save_path'] = save_path
-        add_torrent_params['storage_mode'] = libtorrent.storage_mode_t.storage_mode_allocate
-        if resume_data is not None:
-            add_torrent_params['resume_data'] = resume_data
         torr_handle = self._session.add_torrent(add_torrent_params)
-        torr_handle.auto_managed(False)
         while not torr_handle.has_metadata():  # Wait until torrent metadata are populated
             time.sleep(0.1)
+        torr_handle.auto_managed(False)
         info_hash = str(torr_handle.info_hash())
         self._torrents_pool[info_hash] = torr_handle
         return torr_handle
 
-    def stream_torrent_async(self, info_hash, file_index, buffer_percent=5.0):
+    def stream_torrent_async(self, info_hash, file_index, buffer_size=35):
         """
         Force sequential download of file for video playback.
 
@@ -182,11 +182,11 @@ class Torrenter(object):
         the caller should call abort_buffering method.
         :param info_hash: str
         :param file_index: int - the numerical index of the file to be streamed.
-        :param buffer_percent: float - buffer size as % of the file size
+        :param buffer_size: int - buffer size in MB
         :return:
         """
         self._stream_torrent_thread = threading.Thread(target=self.stream_torrent,
-                                                       args=(info_hash, file_index, buffer_percent))
+                                                       args=(info_hash, file_index, buffer_size))
         self._stream_torrent_thread.daemon = True
         self._stream_torrent_thread.start()
 
