@@ -156,7 +156,9 @@ class Torrenter(object):
                               'storage_mode': libtorrent.storage_mode_t.storage_mode_allocate}
         if resume_data is not None:
             add_torrent_params['resume_data'] = resume_data
-        if torrent[:7] == 'magnet:':
+        if isinstance(torrent, dict):
+            add_torrent_params['ti'] = libtorrent.torrent_info(torrent)
+        elif torrent[:7] == 'magnet:':
             add_torrent_params['url'] = torrent
         elif torrent[:7] in ('http://', 'https:/'):
             # Here external http/https client is used in case if libtorrent module is compiled without OpenSSL

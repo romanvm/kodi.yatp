@@ -8,6 +8,7 @@ Torrenter WSGI application and server
 """
 
 import sys
+from cStringIO import StringIO
 from libs.addon import Addon
 
 __addon__ = Addon()
@@ -25,7 +26,7 @@ import xbmcgui
 from libs import methods
 from libs.bottle import Bottle, request, template, response, debug, static_file, TEMPLATE_PATH
 from libs.wsgi_server import create_server
-from libs.torrenter import Torrenter
+from libs.torrenter import Torrenter, libtorrent
 from libs.timers import Timer, check_seeding_limits, save_resume_data
 
 DEBUG = True
@@ -153,6 +154,20 @@ def get_static(path):
     :return:
     """
     return static_file(path, root=static_path)
+
+
+@app.route('/add-torrent-file', method='POST')
+def add_torrent_file():
+    """
+    Add .torrent file
+
+    :return:
+    """
+    buffer = StringIO()
+    upload = request.files.get('torrent_file')
+    upload.save(buffer)
+    torrent = libtorrent.bdecode(buffer.getvalue())
+    torrenter.add_torrent(torrent, torrent_dir)
 
 
 if __name__ == '__main__':

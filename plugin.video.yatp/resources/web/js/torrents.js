@@ -50,6 +50,21 @@ function remove_torrent()
     $('#torrents').datagrid('clearSelections')
 } // end remove_torrent
 
+function add_torrent_file()
+{
+    var ext = $('#torr_path').filebox('getValue').split('.').pop();
+    if (ext == 'torrent')
+    {
+        $('#add_torr_file_form').form('submit');
+        $('#torr_path').filebox('clear');
+        $('#add_torrent_dlg').dialog('close');
+    }
+    else
+    {
+        $.messager.alert('Error','Invalid file selected!','error');
+    }
+}
+
 function add_torrent_link()
 {
     var torrent_link = $('#torrent_link').textbox('getValue');
@@ -137,11 +152,35 @@ $(function()
         ]] // end columns
     }); // end datagrid
     $('#torrents').datagrid('sort', 'added_time');
+    $('#add_torrent_dlg').dialog({
+        title: 'Add .torrent file',
+        iconCls: 'icon-torrent-add',
+        width: 450,
+        height: 130,
+        closed: true,
+        modal: true,
+        buttons: [{
+            text: 'Add',
+            iconCls: 'icon-ok',
+            handler: function()
+                {
+                    add_torrent_file();
+                } // end function
+            }, // end button
+            {
+            text: 'Cancel',
+            handler: function()
+                {
+                    $('#add_torrent_dlg').dialog('close');
+                } // end function
+            } // end button
+        ] // end buttons
+    }); // end dialog
     $('#add_link_dlg').dialog({
         title: 'Add Torrent Link',
         iconCls: 'icon-link-add',
-        width: 500,
-        height: 180,
+        width: 450,
+        height: 130,
         closed: true,
         modal: true,
         buttons: [{
@@ -150,7 +189,7 @@ $(function()
             handler: function()
                 {
                     add_torrent_link();
-                }
+                } // end function
             }, // end button
             {
             text: 'Cancel',

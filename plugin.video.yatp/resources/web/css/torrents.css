@@ -22,3 +22,6 @@
 .icon-link-add {
     background:url('/static/img/link_add.png') no-repeat center center;
     }
+.icon-torrent-add {
+    background:url('/static/img/folder_torrents.png') no-repeat center center;
+    }
