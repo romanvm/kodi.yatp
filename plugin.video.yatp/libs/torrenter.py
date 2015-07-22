@@ -157,10 +157,10 @@ class Torrenter(object):
             add_torrent_params['url'] = torrent
         elif torrent[:7] in ('http://', 'https:/'):
             # Here external http/https client is used in case if libtorrent module is compiled without OpenSSL
-            add_torrent_params = {'ti': libtorrent.torrent_info(libtorrent.bdecode(load_torrent(torrent)))}
+            add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(load_torrent(torrent)))
         else:
             try:
-                add_torrent_params = {'ti': libtorrent.torrent_info(os.path.normpath(torrent))}
+                add_torrent_params['ti'] = libtorrent.torrent_info(os.path.normpath(torrent))
             except RuntimeError:
                 raise TorrenterError('Invalid path to the .torrent file!')
         torr_handle = self._session.add_torrent(add_torrent_params)
