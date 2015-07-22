@@ -6,7 +6,7 @@ provider-name="Roman V. M.">
 <requires>
     <import addon="xbmc.python" version="2.14.0"/>
     <import addon="script.module.requests" version="2.6.0"/>
-    <import addon="script.module.libtorrent" version="0.5.0"/>
+    <import addon="script.module.libtorrent" version="0.15.0"/>
 </requires>
 <extension point="xbmc.python.pluginsource" library="main.py">
     <provides>video</provides>
