@@ -83,6 +83,18 @@ def pause_torrent(torrenter, params):
     return 'OK'
 
 
+def pause_group(torrenter, params):
+    """
+    Pause several torrents
+
+    params[0] - the list of info-hashes in lowercase
+    :return: 'OK'
+    """
+    for info_hash in params[0]:
+        torrenter.pause_torrent(info_hash)
+    return 'OK'
+
+
 def resume_torrent(torrenter, params):
     """
     Resume torrent
@@ -91,6 +103,18 @@ def resume_torrent(torrenter, params):
     :return: 'OK'
     """
     torrenter.resume_torrent(params[0])
+    return 'OK'
+
+
+def resume_group(torrenter, params):
+    """
+    Resume several torrents
+
+    params[0] - the list of info-hashes in lowercase
+    :return:
+    """
+    for info_hash in params[0]:
+        torrenter.resume_torrent(info_hash)
     return 'OK'
 
 
@@ -103,6 +127,18 @@ def remove_torrent(torrenter, params):
     :return: 'OK'
     """
     torrenter.remove_torrent(params[0], params[1])
+    return 'OK'
+
+
+def remove_group(torrenter, params):
+    """
+
+    params[0] - the list of info-hashes
+    params[1] - bool - also remvove files
+    :return:
+    """
+    for info_hash in params[0]:
+        torrenter.remove_torrent(info_hash, params[1])
     return 'OK'
 
 

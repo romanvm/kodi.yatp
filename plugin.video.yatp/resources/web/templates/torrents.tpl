@@ -25,18 +25,18 @@
            data-options="position:'right'" iconCls="icon-link-add" plain="true"
            onclick="$('#add_link_dlg').dialog('open')"></a>
         <span class="button-sep"></span>
-        <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Pause selected torrent"
-           data-options="position:'right'" iconCls="icon-pause" plain="true" onclick="pause_torrent()"></a>
-        <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Resume selected torrent"
-           data-options="position:'right'"iconCls="icon-resume" plain="true" onclick="resume_torrent()"></a>
+        <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Pause selected torrents"
+           data-options="position:'right'" iconCls="icon-pause" plain="true" onclick="pause_torrents()"></a>
+        <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Resume selected torrents"
+           data-options="position:'right'"iconCls="icon-resume" plain="true" onclick="resume_torrents()"></a>
         <span class="button-sep"></span>
         <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Pause all torrents"
            data-options="position:'right'" iconCls="icon-pause-red" plain="true" onclick="pause_all()"></a>
         <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Resume all torrents"
            data-options="position:'right'" iconCls="icon-resume-red" plain="true" onclick="resume_all()"></a>
         <span class="button-sep"></span>
-        <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Delete selected torrent"
-           data-options="position:'right'" iconCls="icon-delete" plain="true" onclick="confirm_remove_torrent()"></a>
+        <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Delete selected torrents"
+           data-options="position:'right'" iconCls="icon-delete" plain="true" onclick="confirm_remove_torrents()"></a>
     </div>
     <div id="add_torrent_dlg" style="padding:10px">
         <form id="add_torr_file_form" action="add-torrent/file" method="post" enctype="multipart/form-data">
@@ -59,7 +59,7 @@
         </form>
     </div>
     <div id="remove_torrent_dlg" style="padding:10px">
-        <p><strong>Are you sure you want to delete the torrent?</strong></p>
+        <p><strong>Are you sure you want to delete the selected torrents?</strong></p>
         <p><input id="delete_files" type="checkbox" name="delete_files" value=""> Also delete files from disc.</p>
         <p><strong>WARNING:</strong> The files will be deleted permanently!</p>
     </div>

@@ -164,8 +164,11 @@ def add_torrent(source):
         torrent = libtorrent.bdecode(buffer_.getvalue())
     else:
         torrent = request.forms.get('torrent_link')
-    path = os.path.join(download_dir, os.path.normpath(request.forms.get('sub_path')))
-    torrenter.add_torrent_async(torrent, path)
+    if request.forms.get('sub_path'):
+        path = os.path.join(download_dir, os.path.normpath(request.forms.get('sub_path')))
+    else:
+        path = download_dir
+    torrenter.add_torrent(torrent, path)
 
 
 application = default_app()
