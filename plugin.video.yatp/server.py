@@ -1,5 +1,5 @@
 # coding: utf-8
-# Module: main
+# Module: server
 # Created on: 01.07.2015
 # Author: Roman Miroshnychenko aka Roman V.M. (romanvm@yandex.ua)
 # License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
