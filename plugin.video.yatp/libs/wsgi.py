@@ -149,18 +149,23 @@ def get_static(path):
     return static_file(path, root=static_path)
 
 
-@route('/add-torrent-file', method='POST')
-def add_torrent_file():
+@route('/add-torrent/<source>', method='POST')
+def add_torrent(source):
     """
-    Add .torrent file
+    Add .torrent file or torrent link
 
+    :param source: 'file' or 'link'
     :return:
     """
-    buffer_ = StringIO()
-    upload = request.files.get('torrent_file')
-    upload.save(buffer_)
-    torrent = libtorrent.bdecode(buffer_.getvalue())
-    torrenter.add_torrent(torrent, download_dir)
+    if source == 'file':
+        buffer_ = StringIO()
+        upload = request.files.get('torrent_file')
+        upload.save(buffer_)
+        torrent = libtorrent.bdecode(buffer_.getvalue())
+    else:
+        torrent = request.forms.get('torrent_link')
+    path = os.path.join(download_dir, os.path.normpath(request.forms.get('sub_path')))
+    torrenter.add_torrent_async(torrent, path)
 
 
 application = default_app()
