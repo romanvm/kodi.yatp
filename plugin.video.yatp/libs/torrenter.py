@@ -238,25 +238,27 @@ class Torrenter(object):
             time.sleep(0.1)
         else:
             torr_handle.flush_cache()
-            [torr_handle.piece_priority(piece, 1) for piece in xrange(torr_info.num_pieces())]
-            torr_handle.set_sequential_download(True)
+            # [torr_handle.piece_priority(piece, 1) for piece in xrange(torr_info.num_pieces())]
+            # torr_handle.set_sequential_download(True)
             self._buffering_complete.set()
         # Sliding window
-        # if self._buffering_complete.is_set():
-        #     # Start sliding window
-        #     window_start = buffer_length + 1
-        #     window_end = window_start + buffer_length  # Sliding window size
-        #     [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start + 1, window_end + 1)]
-        #     while window_start < end_piece - end_offset:
-        #         if self._abort_buffering.is_set():
-        #             break
-        #         torr_handle.piece_priority(window_start, 7)
-        #         if torr_handle.have_piece(window_start):
-        #             window_start += 1
-        #             if window_end < end_piece - 1:
-        #                 window_end += 1
-        #                 torr_handle.piece_priority(window_end, 1)
-        #         time.sleep(0.1)
+        if self._buffering_complete.is_set():
+            # Start sliding window
+            window_start = buffer_length + 1
+            window_end = window_start + buffer_length  # Sliding window size
+            [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start + 1, window_end + 1)]
+            while window_start < end_piece - end_offset:
+                if self._abort_buffering.is_set():
+                    break
+                torr_handle.piece_priority(window_start, 7)
+                if torr_handle.have_piece(window_start):
+                    window_start += 1
+                    if window_end < end_piece - 1:
+                        window_end += 1
+                        torr_handle.piece_priority(window_end, 1)
+                time.sleep(0.1)
+            else:
+                [torr_handle.piece_priority(piece, 1) for piece in xrange(torr_info.num_pieces())]
         self._abort_buffering.clear()
 
     def _get_torrent_status(self, info_hash):
