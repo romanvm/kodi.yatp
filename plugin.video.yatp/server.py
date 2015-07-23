@@ -7,23 +7,25 @@
 Torrent streamer WSGI server
 """
 
+from time import sleep
+
+sleep(3.0)
+
 from libs.addon import Addon
+
 __addon__ = Addon()
 __addon__.log('***** Starting Torrent Server... *****')
 
-from time import sleep
 import xbmc
 import xbmcgui
 from libs import wsgi
 from libs.wsgi_server import create_server
 
-server_port = __addon__.server_port
-sleep(3.0)
-start_trigger = True
-httpd = create_server(wsgi.application, port=server_port)
+httpd = create_server(wsgi.application, port=__addon__.server_port)
 httpd.timeout = 0.1
 wsgi.limits_timer.start()
 wsgi.save_resume_timer.start()
+start_trigger = True
 while not xbmc.abortRequested:
     httpd.handle_request()
     if start_trigger:
