@@ -1,122 +1,123 @@
-function pause_torrent()
-{
-    var row = $('#torrents').datagrid('getSelected');
-    if (row != null)
+// Start JQuery document_ready
+$(function()
+{ // Start function declaration
+    function pause_torrent()
     {
-        $.ajax({type:'POST',
-                url:'/json-rpc',
-                data:'{"method":"pause_torrent", "params":["' + row.info_hash + '"]}',
-                contentType:'application/json',
-                dataType:'json'
-        }); // end ajax
-    } // end if
-} // end pause_torrent
+        var row = $('#torrents').datagrid('getSelected');
+        if (row != null)
+        {
+            $.ajax({type:'POST',
+                    url:'/json-rpc',
+                    data:'{"method":"pause_torrent", "params":["' + row.info_hash + '"]}',
+                    contentType:'application/json',
+                    dataType:'json'
+            }); // end ajax
+        } // end if
+    } // end pause_torrent
 
-function resume_torrent()
-{
-    var row = $('#torrents').datagrid('getSelected');
-    if (row != null)
+    function resume_torrent()
     {
-        $.ajax({type:'POST',
-                url:'/json-rpc',
-                data:'{"method":"resume_torrent", "params":["' + row.info_hash + '"]}',
-                contentType:'application/json',
-                dataType:'json'
-        }); // end ajax
-    } // end if
-} // end resume_torrent
+        var row = $('#torrents').datagrid('getSelected');
+        if (row != null)
+        {
+            $.ajax({type:'POST',
+                    url:'/json-rpc',
+                    data:'{"method":"resume_torrent", "params":["' + row.info_hash + '"]}',
+                    contentType:'application/json',
+                    dataType:'json'
+            }); // end ajax
+        } // end if
+    } // end resume_torrent
 
-function confirm_remove_torrent()
-{
-    if ($('#torrents').datagrid('getSelected') != null)
+    function confirm_remove_torrent()
     {
-        $('#delete_files').prop('checked',false);
-        $('#remove_torrent_dlg').dialog('open');
-    } // end if
-} // end confirm remove torrent
+        if ($('#torrents').datagrid('getSelected') != null)
+        {
+            $('#delete_files').prop('checked',false);
+            $('#remove_torrent_dlg').dialog('open');
+        } // end if
+    } // end confirm remove torrent
 
-function remove_torrent()
-{
-    var row = $('#torrents').datagrid('getSelected');
-    var delete_files = $('#delete_files').prop('checked');
-    $.ajax({
-        type:'POST',
-        url:'/json-rpc',
-        data:'{"method":"remove_torrent", "params":["' + row.info_hash + '",' + delete_files + ']}',
-        contentType:'application/json',
-        dataType:'json'
-    }); // end ajax
-    $('#remove_torrent_dlg').dialog('close');
-    $('#torrents').datagrid('clearSelections')
-} // end remove_torrent
-
-function add_torrent_file()
-{
-    var ext = $('#torr_path').filebox('getValue').split('.').pop();
-    if (ext == 'torrent')
+    function remove_torrent()
     {
-        $('#add_torr_file_form').form('submit');
-        $('#torr_path').filebox('clear');
-        $('#add_torrent_dlg').dialog('close');
-    }
-    else
-    {
-        $.messager.alert('Error','Invalid file selected!','error');
-    }
-}
-
-function add_torrent_link()
-{
-    var torrent_link = $('#torrent_link').textbox('getValue');
-    if (torrent_link && (torrent_link.slice(0, 7) == 'magnet:' || torrent_link.slice(0, 4) == 'http'))
-    {
+        var row = $('#torrents').datagrid('getSelected');
+        var delete_files = $('#delete_files').prop('checked');
         $.ajax({
             type:'POST',
             url:'/json-rpc',
-            data:'{"method": "add_torrent", "params":["' + torrent_link + '","", false]}',
+            data:'{"method":"remove_torrent", "params":["' + row.info_hash + '",' + delete_files + ']}',
             contentType:'application/json',
             dataType:'json'
         }); // end ajax
-        $('#torrent_link').textbox('clear');
-        $('#add_link_dlg').dialog('close');
-    }
-    else
+        $('#remove_torrent_dlg').dialog('close');
+        $('#torrents').datagrid('clearSelections')
+    } // end remove_torrent
+
+    function add_torrent_file()
     {
-        $.messager.alert('Error','Invalid torrent link!','error');
-    } // end if
-} // end add_magnet
+        var ext = $('#torr_path').filebox('getValue').split('.').pop();
+        if (ext == 'torrent')
+        {
+            $('#add_torr_file_form').form('submit');
+            $('#torr_path').filebox('clear');
+            $('#add_torrent_dlg').dialog('close');
+        }
+        else
+        {
+            $.messager.alert('Error','Invalid file selected!','error');
+        }
+    }
 
-function pause_all()
-{
-    $.ajax({
-            type:'POST',
-            url:'/json-rpc',
-            data:'{"method": "pause_all"}',
-            contentType:'application/json',
-            dataType:'json'
-        }); // end ajax
-} // end pause_all
+    function add_torrent_link()
+    {
+        var torrent_link = $('#torrent_link').textbox('getValue');
+        if (torrent_link && (torrent_link.slice(0, 7) == 'magnet:' || torrent_link.slice(0, 4) == 'http'))
+        {
+            $.ajax({
+                type:'POST',
+                url:'/json-rpc',
+                data:'{"method": "add_torrent", "params":["' + torrent_link + '","", false]}',
+                contentType:'application/json',
+                dataType:'json'
+            }); // end ajax
+            $('#torrent_link').textbox('clear');
+            $('#add_link_dlg').dialog('close');
+        }
+        else
+        {
+            $.messager.alert('Error','Invalid torrent link!','error');
+        } // end if
+    } // end add_magnet
 
-function resume_all()
-{
-    $.ajax({
-            type:'POST',
-            url:'/json-rpc',
-            data:'{"method": "resume_all"}',
-            contentType:'application/json',
-            dataType:'json'
-        }); // end ajax
-} // end resume_all
+    function pause_all()
+    {
+        $.ajax({
+                type:'POST',
+                url:'/json-rpc',
+                data:'{"method": "pause_all"}',
+                contentType:'application/json',
+                dataType:'json'
+            }); // end ajax
+    } // end pause_all
 
-function grid_refresh()
-{
-    $('#torrents').datagrid('reload'); // reload grid
-    $('#torrents').datagrid('loaded'); // hide 'loading' message
-} // end grid_refresh
+    function resume_all()
+    {
+        $.ajax({
+                type:'POST',
+                url:'/json-rpc',
+                data:'{"method": "resume_all"}',
+                contentType:'application/json',
+                dataType:'json'
+            }); // end ajax
+    } // end resume_all
 
-// Start JQuery document_ready
-$(function()
-{
+    function grid_refresh()
+    {
+        $('#torrents').datagrid('reload'); // reload grid
+        $('#torrents').datagrid('loaded'); // hide 'loading' message
+    } // end grid_refresh
+
+    // Start the main executable block
     $('#torrents').attr('title','Torrents on ' + window.location.host);
     $('#torrents').datagrid({
         singleSelect:true,
