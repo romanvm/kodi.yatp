@@ -43,6 +43,7 @@ def buffer_torrent(torrent):
                 videofiles.append((file_index, os.path.basename(file_)))
         if videofiles:
             if len(videofiles) > 1:
+                videofiles = sorted(videofiles, key=lambda i: i[1])
                 index = xbmcgui.Dialog().select('Select a videofile to play', [item[1] for item in videofiles])
             else:
                 index = 0

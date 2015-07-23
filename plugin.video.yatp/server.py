@@ -28,10 +28,10 @@ while not xbmc.abortRequested:
     httpd.handle_request()
     if start_trigger:
         xbmcgui.Dialog().notification('YATP', 'Torrent server started', __addon__.icon, 3000, False)
-        __addon__.log('***** Torrent Server started *******')
+        __addon__.log('***** Torrent Server started *****')
         start_trigger = False
 wsgi.limits_timer.abort()
 wsgi.save_resume_timer.abort()
 wsgi.torrenter.abort_buffering()
 del wsgi.torrenter
-__addon__.log('***** Torrent Server stopped *******')
+__addon__.log('***** Torrent Server stopped *****')
