@@ -1,1 +1,0 @@
-Statically compiled libtorrent Python module for win32 goes here.

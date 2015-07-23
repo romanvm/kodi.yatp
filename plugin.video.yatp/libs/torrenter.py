@@ -12,7 +12,6 @@ and with torrent media streaming capability.
 """
 
 import os
-import sys
 import time
 import threading
 import datetime
@@ -20,14 +19,11 @@ import cPickle as pickle
 from collections import deque
 from requests import get
 
-if sys.platform == 'win32':
-    from lt.win32 import libtorrent
-else:
-    try:
-        import libtorrent
-    except ImportError:
-        from python_libtorrent import get_libtorrent
-        libtorrent = get_libtorrent()
+try:
+    import libtorrent
+except ImportError:
+    from python_libtorrent import get_libtorrent
+    libtorrent = get_libtorrent()
 
 
 def load_torrent(url):
