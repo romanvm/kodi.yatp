@@ -25,3 +25,11 @@
 .icon-torrent-add {
     background:url('/static/img/folder_torrents.png') no-repeat center center;
     }
+.button-sep {
+    display:inline-block;
+    width:0;
+    height:22px;
+    border-left:1px solid #ccc;
+    border-right:1px solid #fff;
+    vertical-align:middle;
+    }

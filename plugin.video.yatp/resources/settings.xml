@@ -16,7 +16,7 @@
     </category>
     <category label="Web UI">
         <setting id="pass_protect" type="bool"
-                 label="Restrict assess to web UI" default="false" />
+                 label="Restrict access to web UI" default="false" />
         <setting id="web_login" type="text"
                  label="Web UI login" default="yatp" enable="eq(-1,true)" />
         <setting id="web_pass" type="text"

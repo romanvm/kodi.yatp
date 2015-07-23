@@ -122,7 +122,7 @@ class Torrenter(object):
             files.append(file_.path.decode('utf-8'))
         result['files'] = files
         if zero_priorities:
-            [torr_handle.piece_priority(i, 0) for i in xrange(torr_info.num_pieces())]
+            [torr_handle.piece_priority(piece, 0) for piece in xrange(torr_info.num_pieces())]
         self._data_buffer.append(result)
         self._torrent_added.set()
         return result
@@ -227,10 +227,6 @@ class Torrenter(object):
         end_offset = 2097152 / torr_info.piece_length() + 2  # Experimentally tested
         pieces_pool = range(start_piece, buffer_length) + range(end_piece - end_offset, end_piece)
         [torr_handle.piece_priority(piece, 1) for piece in pieces_pool]
-        print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
-        print buffer_length
-        print end_offset
-        print len(pieces_pool)
         while len(pieces_pool) > 0:
             if self._abort_buffering.is_set():
                 break
@@ -242,9 +238,10 @@ class Torrenter(object):
             time.sleep(0.1)
         else:
             torr_handle.flush_cache()
-            [torr_handle.piece_priority(piece, 1) for piece in xrange(torr_info.num_pieces() + 1)]
+            [torr_handle.piece_priority(piece, 1) for piece in xrange(torr_info.num_pieces())]
             torr_handle.set_sequential_download(True)
             self._buffering_complete.set()
+        # Sliding window
         # if self._buffering_complete.is_set():
         #     # Start sliding window
         #     window_start = buffer_length + 1

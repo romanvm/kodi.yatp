@@ -72,7 +72,7 @@ def get_methods():
 
 
 @route('/json-rpc', method='POST')
-def json():
+def json_rpc():
     """
     JSON-RPC requests processing
 
@@ -156,10 +156,10 @@ def add_torrent_file():
 
     :return:
     """
-    buffer = StringIO()
+    buffer_ = StringIO()
     upload = request.files.get('torrent_file')
-    upload.save(buffer)
-    torrent = libtorrent.bdecode(buffer.getvalue())
+    upload.save(buffer_)
+    torrent = libtorrent.bdecode(buffer_.getvalue())
     torrenter.add_torrent(torrent, download_dir)
 
 

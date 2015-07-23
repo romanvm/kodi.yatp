@@ -18,20 +18,25 @@
         <table id="torrents" title=""></table>
     </div>
     <div id="toolbar">
-        <a href="javascript:void(0)" class="easyui-linkbutton"
-           iconCls="icon-torrent-add" plain="true" onclick="$('#add_torrent_dlg').dialog('open')">Add .torrent file</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton"
-           iconCls="icon-link-add" plain="true" onclick="$('#add_link_dlg').dialog('open')">Add torrent link</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton"
-           iconCls="icon-pause" plain="true" onclick="pause_torrent()">Pause</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton"
-           iconCls="icon-resume" plain="true" onclick="resume_torrent()">Resume</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton"
-           iconCls="icon-pause-red" plain="true" onclick="pause_all()">Pause all</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton"
-           iconCls="icon-resume-red" plain="true" onclick="resume_all()">Resume all</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton"
-           iconCls="icon-delete" plain="true" onclick="confirm_remove_torrent()">Delete torrent</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Add .torrent file"
+           data-options="position:'right'" iconCls="icon-torrent-add" plain="true"
+           onclick="$('#add_torrent_dlg').dialog('open')"></a>
+        <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Add torrent link"
+           data-options="position:'right'" iconCls="icon-link-add" plain="true"
+           onclick="$('#add_link_dlg').dialog('open')"></a>
+        <span class="button-sep"></span>
+        <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Pause selected torrent"
+           data-options="position:'right'" iconCls="icon-pause" plain="true" onclick="pause_torrent()"></a>
+        <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Resume selected torrent"
+           data-options="position:'right'"iconCls="icon-resume" plain="true" onclick="resume_torrent()"></a>
+        <span class="button-sep"></span>
+        <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Pause all torrents"
+           data-options="position:'right'" iconCls="icon-pause-red" plain="true" onclick="pause_all()"></a>
+        <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Resume all torrents"
+           data-options="position:'right'" iconCls="icon-resume-red" plain="true" onclick="resume_all()"></a>
+        <span class="button-sep"></span>
+        <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Delete selected torrent"
+           data-options="position:'right'" iconCls="icon-delete" plain="true" onclick="confirm_remove_torrent()"></a>
     </div>
     <div id="add_torrent_dlg" style="padding:10px">
         <form id="add_torr_file_form" action="add-torrent-file" method="post" enctype="multipart/form-data">
