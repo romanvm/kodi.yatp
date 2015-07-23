@@ -39,14 +39,24 @@
            data-options="position:'right'" iconCls="icon-delete" plain="true" onclick="confirm_remove_torrent()"></a>
     </div>
     <div id="add_torrent_dlg" style="padding:10px">
-        <form id="add_torr_file_form" action="add-torrent-file" method="post" enctype="multipart/form-data">
-            <input id="torr_path" name="torrent_file" class="easyui-filebox" style="width:100%;height:26px",
-                    data-options="prompt:'Select a .torrent file'">
+        <form id="add_torr_file_form" action="add-torrent/file" method="post" enctype="multipart/form-data">
+            <div style="margin-bottom:20px">
+                <input id="torr_path" name="torrent_file" class="easyui-filebox" style="width:100%;height:26px",
+                        data-options="prompt:'Select a .torrent file'">
+                </div>
+            <input id="file_sub_path" name="sub_path" class="easyui-textbox" style="width:100%;height:26px"
+                   data-options="prompt:'Sub-folder for downloading'">
         </form>
     </div>
     <div id="add_link_dlg" style="padding:10px">
-        <input id="torrent_link" class="easyui-textbox" style="width:100%;height:26px"
-               data-options="prompt:'Insert a .torrent file URL or a magnet link here'">
+        <form id="add_torr_link_form" action="add-torrent/link" method="post">
+            <div style="margin-bottom:20px">
+                <input id="torrent_link" name="torrent_link" class="easyui-textbox" style="width:100%;height:26px"
+                       data-options="prompt:'Insert a .torrent file URL or a magnet link here'">
+            </div>
+            <input id="link_sub_path" name="sub_path" class="easyui-textbox" style="width:100%;height:26px"
+                   data-options="prompt:'Sub-folder for downloading'">
+        </form>
     </div>
     <div id="remove_torrent_dlg" style="padding:10px">
         <p><strong>Are you sure you want to delete the torrent?</strong></p>
