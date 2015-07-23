@@ -119,6 +119,7 @@ class Torrenter(object):
         result['files'] = files
         if zero_priorities:
             [torr_handle.piece_priority(piece, 0) for piece in xrange(torr_info.num_pieces())]
+        torr_handle.resume()  # Needed for plugin.module.libtorrent which adds torrents paused for some reason.
         self._data_buffer.append(result)
         self._torrent_added.set()
         return result
