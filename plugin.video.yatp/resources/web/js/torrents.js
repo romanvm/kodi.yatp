@@ -63,9 +63,8 @@ function remove_torrents()
             contentType:'application/json',
             dataType:'json'
     }); // end ajax
-    $('#delete_files').prop('checked',false);
     $('#remove_torrent_dlg').dialog('close');
-    $('#torrents').datagrid('clearSelections')
+    $('#torrents').datagrid('clearSelections');
 } // end remove_torrent
 
 function add_torrent_file()
@@ -74,8 +73,6 @@ function add_torrent_file()
     if (ext == 'torrent')
     {
         $('#add_torr_file_form').form('submit');
-        $('#torr_path').filebox('clear');
-        $('#file_sub_path').textbox('clear');
         $('#add_torrent_dlg').dialog('close');
     }
     else
@@ -90,8 +87,6 @@ function add_torrent_link()
     if (torrent_link && (torrent_link.slice(0, 7) == 'magnet:' || torrent_link.slice(0, 4) == 'http'))
     {
         $('#add_torr_link_form').form('submit');
-        $('#torrent_link').textbox('clear');
-        $('#link_sub_path').textbox('clear');
         $('#add_link_dlg').dialog('close');
     }
     else
@@ -173,6 +168,11 @@ $(function()
         height: 170,
         closed: true,
         modal: true,
+        onClose:function()
+        {
+            $('#torr_path').filebox('clear');
+            $('#file_sub_path').textbox('clear');
+        },
         buttons: [{
             text: 'Add',
             iconCls: 'icon-ok',
@@ -185,8 +185,6 @@ $(function()
             text: 'Cancel',
             handler: function()
                 {
-                    $('#torr_path').filebox('clear');
-                    $('#file_sub_path').textbox('clear');
                     $('#add_torrent_dlg').dialog('close');
                 } // end function
             } // end button
@@ -199,6 +197,11 @@ $(function()
         height: 170,
         closed: true,
         modal: true,
+        onClose:function()
+        {
+            $('#torrent_link').textbox('clear');
+            $('#link_sub_path').textbox('clear');
+        },
         buttons: [{
             text: 'Add',
             iconCls: 'icon-ok',
@@ -211,8 +214,6 @@ $(function()
             text: 'Cancel',
             handler: function()
                 {
-                    $('#torrent_link').textbox('clear');
-                    $('#link_sub_path').textbox('clear');
                     $('#add_link_dlg').dialog('close');
                 } // end function
             } // end button
@@ -225,6 +226,10 @@ $(function()
         height: 180,
         closed: true,
         modal: true,
+        onClose:function()
+        {
+            $('#delete_files').prop('checked',false);
+        },
         buttons: [{
             text: 'Delete',
             iconCls: 'icon-ok',
@@ -238,7 +243,6 @@ $(function()
             handler: function()
                 {
                     $('#remove_torrent_dlg').dialog('close');
-                    $('#delete_files').prop('checked',false);
                 } // end function
             } // end button
         ] // end buttons
