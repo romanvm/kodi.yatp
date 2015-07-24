@@ -95,3 +95,5 @@ venv/
 *.bat
 
 temp/
+resume/
+settings.json
