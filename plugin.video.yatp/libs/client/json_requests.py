@@ -7,7 +7,7 @@ JSON-RPC requests to the Torrent Server
 """
 
 from requests import post
-from addon import Addon
+from libs.addon import Addon
 
 json_rpc_url = Addon().torrenter_host + '/json-rpc'
 

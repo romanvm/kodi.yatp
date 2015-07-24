@@ -18,8 +18,8 @@ __addon__.log('***** Starting Torrent Server... *****')
 
 import xbmc
 import xbmcgui
-from libs import wsgi
-from libs.wsgi_server import create_server
+from libs.server import wsgi
+from libs.server.wsgi_server import create_server
 
 wsgi.limits_timer.start()
 wsgi.save_resume_timer.start()
