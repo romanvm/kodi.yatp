@@ -8,8 +8,8 @@ import os
 import codecs
 import json
 
-DEFAULT_CONFIG = {'config_dir': './resume',
-                  'download_dir': 'D:\\Torrents',  # Change to your dir here
+DEFAULT_CONFIG = {'config_dir': '.',  # Root dir to store resume data
+                  'download_dir': './Download',  # Download dir. Change to your dir if necessary.
                   'buffer_size': 35,  # MB
                   'ratio_limit': 0.0,
                   'time_limit': 0,

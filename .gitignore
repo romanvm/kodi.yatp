@@ -96,4 +96,6 @@ venv/
 
 temp/
 resume/
+torrents/
+Download/
 settings.json

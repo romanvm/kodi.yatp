@@ -6,6 +6,10 @@
 # License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
 """
 Torrent streamer WSGI server
+
+To start the server in standalone mode (without Kodi)
+use -s or --standalone command line parameter, e.g.:
+python server.py --standalone
 """
 
 import sys
@@ -25,12 +29,12 @@ try:
     import xbmcgui
 except ImportError:
     pass
-from libs.server import wsgi
+from libs.server import wsgi_app
 from libs.server.wsgi_server import create_server
 
-wsgi.limits_timer.start()
-wsgi.save_resume_timer.start()
-httpd = create_server(wsgi.application, port=__addon__.server_port)
+wsgi_app.limits_timer.start()
+wsgi_app.save_resume_timer.start()
+httpd = create_server(wsgi_app.app, port=__addon__.server_port)
 httpd.timeout = 0.1
 start_trigger = True
 try:
@@ -45,8 +49,8 @@ try:
                 start_trigger = False
 except KeyboardInterrupt:
     pass
-wsgi.limits_timer.abort()
-wsgi.save_resume_timer.abort()
-wsgi.torrenter.abort_buffering()
-del wsgi.torrenter
+wsgi_app.limits_timer.abort()
+wsgi_app.save_resume_timer.abort()
+wsgi_app.torrenter.abort_buffering()
+del wsgi_app.torrenter
 __addon__.log('***** Torrent Server stopped *****')

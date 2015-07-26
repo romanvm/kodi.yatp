@@ -2,7 +2,7 @@
 # Module: methods
 # Created on: 02.07.2015
 # Author: Roman Miroshnychenko aka Roman V.M. (romanvm@yandex.ua)
-"""JSON-RPC methdos implementation"""
+"""JSON-RPC methods implementation"""
 
 
 def ping(torrenter, params=None):

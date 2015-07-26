@@ -1,5 +1,5 @@
 # coding: utf-8
-# Module: wsgi
+# Module: wsgi_app
 # Created on: 23.07.2015
 # Author: Roman Miroshnychenko aka Roman V.M. (romanvm@yandex.ua)
 """
@@ -171,4 +171,4 @@ def add_torrent(source):
     torrenter.add_torrent_async(torrent, path)
 
 
-application = default_app()
+app = default_app()
