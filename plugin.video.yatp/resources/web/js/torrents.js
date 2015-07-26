@@ -127,7 +127,6 @@ function grid_refresh()
 // Start JQuery document_ready
 $(function()
 {
-    $('#torrents').attr('title','Torrents on ' + window.location.host);
     $('#torrents').datagrid({
         singleSelect:false,
         ctrlSelect:true,
@@ -138,6 +137,14 @@ $(function()
         loadMsg: 'Loading torrents data...',
         remoteSort:false,
         toolbar:'#toolbar',
+        onLoadSuccess:function()
+        {
+            $('#torrents').attr('title','Torrents on ' + window.location.host);
+        },
+        onLoadError:function()
+        {
+            $('#torrents').attr('title','Connection lost!');
+        },
         columns:[[
             {field:'name',title:'Torrent Name',sortable:true,width:400},
             {field:'size',title:'Size (MB)',width:70,align:'right'},
