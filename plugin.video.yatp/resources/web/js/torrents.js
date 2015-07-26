@@ -121,7 +121,9 @@ function grid_refresh()
 {
     $('#torrents').datagrid('reload'); // reload grid
     $('#torrents').datagrid('loaded'); // hide 'loading' message
+    setTimeout(grid_refresh, 2000);
 } // end grid_refresh
+
 // Start JQuery document_ready
 $(function()
 {
@@ -136,14 +138,6 @@ $(function()
         loadMsg: 'Loading torrents data...',
         remoteSort:false,
         toolbar:'#toolbar',
-        onLoadSuccess: function()
-        {
-            setTimeout(grid_refresh, 2000);
-        },
-        onLoadError: function()
-        {
-            $.messager.alert('Error!','Unable to load torrents data!','error');
-        },
         columns:[[
             {field:'name',title:'Torrent Name',sortable:true,width:400},
             {field:'size',title:'Size (MB)',width:70,align:'right'},
@@ -253,4 +247,5 @@ $(function()
         $('#toolbar').panel('resize');
     }
     ); // end window resize
+    grid_refresh();
 }); // end document_ready
