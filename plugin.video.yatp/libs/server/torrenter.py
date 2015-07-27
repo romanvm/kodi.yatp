@@ -55,7 +55,7 @@ class Torrenter(object):
         # Use persistent storage for session and torrents info
         self._persistent = persistent
         # The directory where session and torrent data are stored
-        self._resume_dir = resume_dir
+        self._resume_dir = os.path.abspath(resume_dir)
         self._add_torrent_thread = None
         self._stream_torrent_thread = None
         self._torrent_added = threading.Event()
@@ -149,7 +149,7 @@ class Torrenter(object):
         :param resume_data: str - bencoded torrent resume data
         :return: object - torr_handle
         """
-        add_torrent_params = {'save_path': save_path,
+        add_torrent_params = {'save_path': os.path.abspath(save_path),
                               'storage_mode': libtorrent.storage_mode_t.storage_mode_allocate,}
         if resume_data is not None:
             add_torrent_params['resume_data'] = resume_data
@@ -162,7 +162,7 @@ class Torrenter(object):
             add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(load_torrent(torrent)))
         else:
             try:
-                add_torrent_params['ti'] = libtorrent.torrent_info(os.path.normpath(torrent))
+                add_torrent_params['ti'] = libtorrent.torrent_info(os.path.abspath(torrent))
             except RuntimeError:
                 raise TorrenterError('Invalid path to the .torrent file!')
         torr_handle = self._session.add_torrent(add_torrent_params)
