@@ -32,7 +32,7 @@ max_ratio = __addon__.ratio_limit
 max_time = __addon__.time_limit
 limits_timer = Timer(10, check_seeding_limits, torrenter, max_ratio, max_time,
                      __addon__.expired_action, __addon__.delete_expired_files)
-save_resume_timer = Timer(20, save_resume_data, torrenter)
+save_resume_timer = Timer(30, save_resume_data, torrenter)
 # Bottle WSGI application
 static_path = os.path.join(__addon__.path, 'resources', 'web')
 TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))
@@ -109,7 +109,10 @@ def get_torrents():
     :return:
     """
     response.content_type = 'application/json'
-    return dumps(torrenter.get_all_torrents_info())
+    reply = dumps(torrenter.get_all_torrents_info())
+    if DEBUG:
+        __addon__.log(reply)
+    return reply
 
 
 @route('/media/<path:path>')

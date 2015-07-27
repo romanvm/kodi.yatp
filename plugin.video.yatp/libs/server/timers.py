@@ -49,6 +49,7 @@ class Timer(object):
 
         :return:
         """
+        self._abort_flag.clear()
         self._thread.start()
 
     def abort(self):
@@ -58,6 +59,10 @@ class Timer(object):
         :return:
         """
         self._abort_flag.set()
+        try:
+            self._thread.join()
+        except RuntimeError:
+            pass
 
 
 def check_seeding_limits(torrenter, max_ratio, max_time, expired_action, delete_expired):

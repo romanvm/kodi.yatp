@@ -7,6 +7,7 @@
 import os
 import codecs
 import json
+from datetime import datetime
 
 DEFAULT_CONFIG = {'config_dir': '.',  # Root dir to store resume data
                   'download_dir': './Download',  # Download dir. Change to your dir if necessary.
@@ -40,7 +41,7 @@ class ConfigParser(object):
             os.mkdir(self._config['config_dir'])
 
     def log(self, message):
-        print message
+        print '{0}: {1}'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message)
 
     @property
     def credentials(self):
