@@ -168,7 +168,7 @@ def add_torrent(source):
     else:
         torrent = request.forms.get('torrent_link')
     if request.forms.get('sub_path'):
-        path = os.path.join(download_dir, os.path.normpath(request.forms.get('sub_path')))
+        path = os.path.join(download_dir, request.forms.get('sub_path'))
     else:
         path = download_dir
     torrenter.add_torrent_async(torrent, path)
