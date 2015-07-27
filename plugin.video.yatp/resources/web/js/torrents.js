@@ -121,7 +121,6 @@ function grid_refresh()
 {
     $('#torrents').datagrid('reload'); // reload grid
     $('#torrents').datagrid('loaded'); // hide 'loading' message
-    setTimeout(grid_refresh, 2000);
 } // end grid_refresh
 
 // Start JQuery document_ready
@@ -136,12 +135,21 @@ $(function()
         idField:'info_hash',
         rownumbers:true,
         loadMsg: 'Loading torrents data...',
+        sortName:'added_time',
         remoteSort:false,
         toolbar:'#toolbar',
+        onLoadSuccess:function()
+        {
+            setTimeout(grid_refresh, 2000);
+        },
+        onLoadError:function()
+        {
+            $.messager.alert('Error','Unable to load torrent data!','error');
+        },
         columns:[[
             {field:'name',title:'Torrent Name',sortable:true,width:400},
-            {field:'size',title:'Size (MB)',width:70,align:'right'},
-            {field:'state',title:'State',width:100},
+            {field:'size',title:'Size (MB)',sortable:true,width:70,align:'right'},
+            {field:'state',title:'State',sortable:true,width:100},
             {field:'progress',title:'%',width:35,align:'right'},
             {field:'dl_speed',title:'DL (KB/s)',width:70,align:'right'},
             {field:'ul_speed',title:'UL (KB/s)',width:70,align:'right'},
@@ -150,11 +158,10 @@ $(function()
             {field:'num_seeds',title:'Seeds',width:50,align:'right'},
             {field:'num_peers',title:'Peers',width:50,align:'right'},
             {field:'added_time',title:'Added on',sortable:true,width:150},
-            {field:'completed_time',title:'Completed on',width:150},
+            {field:'completed_time',title:'Completed on',sortable:true,width:150},
             {field:'info_hash',title:'Hash',width:300}
         ]] // end columns
     }); // end datagrid
-    $('#torrents').datagrid('sort', 'added_time');
     $('#add_torrent_dlg').dialog({
         title: 'Add .torrent file',
         iconCls: 'icon-torrent-add',
@@ -247,5 +254,5 @@ $(function()
         $('#toolbar').panel('resize');
     }
     ); // end window resize
-    grid_refresh();
+//    grid_refresh();
 }); // end document_ready
