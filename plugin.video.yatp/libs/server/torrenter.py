@@ -119,7 +119,7 @@ class Torrenter(object):
         result['files'] = files
         if zero_priorities:
             [torr_handle.piece_priority(piece, 0) for piece in xrange(torr_info.num_pieces())]
-        torr_handle.resume()  # Needed for plugin.module.libtorrent which adds torrents paused for some reason.
+        # torr_handle.resume()  # Needed for plugin.module.libtorrent which adds torrents paused for some reason.
         self._data_buffer.append(result)
         self._torrent_added.set()
         return result
@@ -168,7 +168,7 @@ class Torrenter(object):
         torr_handle = self._session.add_torrent(add_torrent_params)
         while not torr_handle.has_metadata():  # Wait until torrent metadata are populated
             time.sleep(0.1)
-        torr_handle.auto_managed(False)
+        # torr_handle.auto_managed(False)
         info_hash = str(torr_handle.info_hash())
         self._torrents_pool[info_hash] = torr_handle
         return torr_handle

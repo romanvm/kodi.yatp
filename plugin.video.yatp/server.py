@@ -11,6 +11,7 @@ To start the server in standalone mode (without Kodi)
 use -s or --standalone command line parameter, e.g.:
 python server.py --standalone
 """
+# todo: investigate unwanted auto-pausing newly added torrents
 
 import sys
 standalone = '-s' in sys.argv or '--standalone' in sys.argv
