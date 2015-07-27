@@ -11,7 +11,7 @@ import os
 from time import sleep
 from urllib import quote
 import xbmcgui
-import json_requests as jsonrc
+import json_requests as jsonrq
 from simpleplugin import Addon
 
 
@@ -26,14 +26,14 @@ def buffer_torrent(torrent):
     :param torrent: str - magnet link or .torrent file URL
     :return:
     """
-    jsonrc.add_torrent(torrent)
+    jsonrq.add_torrent(torrent)
     progress_dialog = xbmcgui.DialogProgress()
     progress_dialog.create('Buffering torrent')
     progress_dialog.update(0, 'Adding torrent...', 'This may take some time.')
-    while not (progress_dialog.iscanceled() or jsonrc.check_torrent_added()):
+    while not (progress_dialog.iscanceled() or jsonrq.check_torrent_added()):
         sleep(1.0)
     if not progress_dialog.iscanceled():
-        torrent_data = jsonrc.get_data_buffer()
+        torrent_data = jsonrq.get_data_buffer()
         addon.log(str(torrent_data))
         # Create a list of videofiles in a torrent.
         # Each element is a tuple (<file name>, <file index in a torrent>).
@@ -50,12 +50,12 @@ def buffer_torrent(torrent):
             if index >= 0:
                 # Select a vileofile to play
                 selected_file_index = videofiles[index][0]
-                jsonrc.stream_torrent(torrent_data['info_hash'],
+                jsonrq.stream_torrent(torrent_data['info_hash'],
                                       selected_file_index,
                                       addon.buffer_size)
-                while not (progress_dialog.iscanceled() or jsonrc.check_buffering_complete()):
-                    buffer_progress = jsonrc.get_data_buffer()
-                    torrent_info = jsonrc.get_torrent_info(torrent_data['info_hash'])
+                while not (progress_dialog.iscanceled() or jsonrq.check_buffering_complete()):
+                    buffer_progress = jsonrq.get_data_buffer()
+                    torrent_info = jsonrq.get_torrent_info(torrent_data['info_hash'])
                     progress_dialog.update(buffer_progress,
                                     'Downloaded: {0}MB'.format(torrent_info['total_download']),
                                     'Download speed: {0}KB/s'.format(torrent_info['dl_speed']),
@@ -65,14 +65,14 @@ def buffer_torrent(torrent):
                     progress_dialog.close()
                     return media_url + quote(torrent_data['files'][selected_file_index].replace('\\', '/').encode('utf-8'))
                 else:
-                    jsonrc.abort_buffering()
-                    if jsonrc.get_torrent_info(torrent_data['info_hash'])['state'] == 'downloading':
-                        jsonrc.remove_torrent(torrent_data['info_hash'], True)
+                    jsonrq.abort_buffering()
+                    if jsonrq.get_torrent_info(torrent_data['info_hash'])['state'] == 'downloading':
+                        jsonrq.remove_torrent(torrent_data['info_hash'], True)
             else:
                 xbmcgui.Dialog().notification(addon.id, 'A video is not selected', addon.icon, 3000)
         else:
             xbmcgui.Dialog().notification(addon.id, 'No videofiles to play.', 'error', 3000)
-    if not (jsonrc.check_torrent_added() and jsonrc.check_buffering_complete()):
+    if not (jsonrq.check_torrent_added() and jsonrq.check_buffering_complete()):
         xbmcgui.Dialog().notification(addon.id, 'Playback cancelled.', addon.icon, 3000)
     if not progress_dialog.iscanceled():
         progress_dialog.close()

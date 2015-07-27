@@ -56,3 +56,11 @@ def abort_buffering():
 
 def remove_torrent(info_hash, delete_files):
     _request({'method': 'remove_torrent', 'params': [info_hash, delete_files]})
+
+
+def download_torrent(torrent, download_dir):
+    _request({'method': 'add_torrent', 'params': [torrent, download_dir, False]})
+
+
+def get_all_torrent_info():
+    return _request({'method': 'get_all_torrent_info'})
