@@ -22,8 +22,8 @@ if not standalone:
 
 from libs.addon import Addon
 
-__addon__ = Addon()
-__addon__.log('***** Starting Torrent Server... *****')
+addon = Addon()
+addon.log('***** Starting Torrent Server... *****')
 
 try:
     import xbmc
@@ -35,16 +35,16 @@ from libs.server.wsgi_server import create_server
 
 wsgi_app.limits_timer.start()
 wsgi_app.save_resume_timer.start()
-httpd = create_server(wsgi_app.app, port=__addon__.server_port)
+httpd = create_server(wsgi_app.app, port=addon.server_port)
 httpd.timeout = 0.1
 start_trigger = True
 try:
     while standalone or not xbmc.abortRequested:
             httpd.handle_request()
             if start_trigger:
-                __addon__.log('***** Torrent Server started *****')
+                addon.log('***** Torrent Server started *****')
                 if not standalone:
-                    xbmcgui.Dialog().notification('YATP', 'Torrent server started', __addon__.icon, 3000, False)
+                    xbmcgui.Dialog().notification('YATP', 'Torrent server started', addon.icon, 3000, False)
                 else:
                     print 'Press CTRL+C to exit'
                 start_trigger = False
@@ -54,4 +54,4 @@ wsgi_app.limits_timer.abort()
 wsgi_app.save_resume_timer.abort()
 wsgi_app.torrenter.abort_buffering()
 del wsgi_app.torrenter
-__addon__.log('***** Torrent Server stopped *****')
+addon.log('***** Torrent Server stopped *****')

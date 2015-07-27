@@ -15,26 +15,26 @@ from json import dumps
 from inspect import getmembers, isfunction
 from bottle import route, default_app, request, template, response, debug, static_file, TEMPLATE_PATH, HTTPError
 import methods
-from libs.addon import Addon
+from simpleplugin import Addon
 from torrenter import Torrenter, libtorrent
 from timers import Timer, check_seeding_limits, save_resume_data
 
-__addon__ = Addon()
+addon = Addon()
 # Torrent client parameters
-download_dir = __addon__.download_dir
-resume_dir = os.path.join(__addon__.config_dir, 'torrents')
+download_dir = addon.download_dir
+resume_dir = os.path.join(addon.config_dir, 'torrents')
 if not os.path.exists(resume_dir):
     os.mkdir(resume_dir)
-torrent_port = __addon__.torrent_port
+torrent_port = addon.torrent_port
 torrenter = Torrenter(torrent_port, torrent_port + 10, True, resume_dir)
 # Timers
-max_ratio = __addon__.ratio_limit
-max_time = __addon__.time_limit
+max_ratio = addon.ratio_limit
+max_time = addon.time_limit
 limits_timer = Timer(10, check_seeding_limits, torrenter, max_ratio, max_time,
-                     __addon__.expired_action, __addon__.delete_expired_files)
+                     addon.expired_action, addon.delete_expired_files)
 save_resume_timer = Timer(30, save_resume_data, torrenter)
 # Bottle WSGI application
-static_path = os.path.join(__addon__.path, 'resources', 'web')
+static_path = os.path.join(addon.path, 'resources', 'web')
 TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))
 debug(DEBUG)
 
@@ -47,7 +47,7 @@ def root():
     :return:
     """
     login, password = request.auth or (None, None)
-    if __addon__.pass_protect and (login is None or (login, password) != __addon__.credentials):
+    if addon.pass_protect and (login is None or (login, password) != addon.credentials):
         error = HTTPError(401, 'Access denied')
         error.add_header('WWW-Authenticate', 'Basic realm="private"')
         return error
@@ -79,8 +79,8 @@ def json_rpc():
     :return:
     """
     if DEBUG:
-        __addon__.log('***** JSON request *****')
-        __addon__.log(request.body.read())
+        addon.log('***** JSON request *****')
+        addon.log(request.body.read())
     data = request.json
     # Use the default download dir if param[2] == ''
     if data['method'] == 'add_torrent' and len(data['params']) >= 2 and not data['params'][1]:
@@ -96,8 +96,8 @@ def json_rpc():
     except Exception, ex:
         reply['error'] = '{0}: {1}'.format(str(ex.__class__)[7:-2], ex.message)
     if DEBUG:
-        __addon__.log('***** JSON response *****')
-        __addon__.log(str(reply))
+        addon.log('***** JSON response *****')
+        addon.log(str(reply))
     return reply
 
 
@@ -111,7 +111,7 @@ def get_torrents():
     response.content_type = 'application/json'
     reply = dumps(torrenter.get_all_torrents_info())
     if DEBUG:
-        __addon__.log(reply)
+        addon.log(reply)
     return reply
 
 
@@ -123,7 +123,7 @@ def get_media(path):
     :param path: relative path to a media file
     :return:
     """
-    __addon__.log('Playing media: ' + path.decode('utf-8'))
+    addon.log('Playing media: ' + path.decode('utf-8'))
     if sys.platform == 'win32':
         path = path.decode('utf-8')
     if os.path.splitext(path)[1] == '.mkv':

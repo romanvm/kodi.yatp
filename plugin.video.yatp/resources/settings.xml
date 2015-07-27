@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <settings>
     <category label="General">
-        <setting id="download_folder" type="folder"
+        <setting id="download_dir" type="folder"
                  label="Folder for downloading files" default="" />
         <setting id="buffer_size" type="number"
                  label="Buffer size (MB)" default="35"/>

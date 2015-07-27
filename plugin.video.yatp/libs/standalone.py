@@ -11,7 +11,6 @@ from datetime import datetime
 
 DEFAULT_CONFIG = {'config_dir': '.',  # Root dir to store resume data
                   'download_dir': './Download',  # Download dir. Change to your dir if necessary.
-                  'buffer_size': 35,  # MB
                   'ratio_limit': 0.0,
                   'time_limit': 0,
                   'expired_action': 'pause',  # Possible values 'pause' and 'delete'

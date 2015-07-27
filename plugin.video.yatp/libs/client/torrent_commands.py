@@ -12,11 +12,11 @@ from time import sleep
 from urllib import quote
 import xbmcgui
 import json_requests as jsonrc
-from libs.addon import Addon
+from simpleplugin import Addon
 
 
-__addon__ = Addon()
-media_url = __addon__.torrenter_host + '/media/'
+addon = Addon()
+media_url = addon.torrenter_host + '/media/'
 
 
 def buffer_torrent(torrent):
@@ -34,7 +34,7 @@ def buffer_torrent(torrent):
         sleep(1.0)
     if not progress_dialog.iscanceled():
         torrent_data = jsonrc.get_data_buffer()
-        __addon__.log(str(torrent_data))
+        addon.log(str(torrent_data))
         # Create a list of videofiles in a torrent.
         # Each element is a tuple (<file name>, <file index in a torrent>).
         videofiles = []
@@ -50,7 +50,9 @@ def buffer_torrent(torrent):
             if index >= 0:
                 # Select a vileofile to play
                 selected_file_index = videofiles[index][0]
-                jsonrc.stream_torrent(torrent_data['info_hash'], selected_file_index,  __addon__.buffer_size)
+                jsonrc.stream_torrent(torrent_data['info_hash'],
+                                      selected_file_index,
+                                      addon.buffer_size)
                 while not (progress_dialog.iscanceled() or jsonrc.check_buffering_complete()):
                     buffer_progress = jsonrc.get_data_buffer()
                     torrent_info = jsonrc.get_torrent_info(torrent_data['info_hash'])
@@ -67,11 +69,11 @@ def buffer_torrent(torrent):
                     if jsonrc.get_torrent_info(torrent_data['info_hash'])['state'] == 'downloading':
                         jsonrc.remove_torrent(torrent_data['info_hash'], True)
             else:
-                xbmcgui.Dialog().notification(__addon__.id, 'A video is not selected', __addon__.icon, 3000)
+                xbmcgui.Dialog().notification(addon.id, 'A video is not selected', addon.icon, 3000)
         else:
-            xbmcgui.Dialog().notification(__addon__.id, 'No videofiles to play.', 'error', 3000)
+            xbmcgui.Dialog().notification(addon.id, 'No videofiles to play.', 'error', 3000)
     if not (jsonrc.check_torrent_added() and jsonrc.check_buffering_complete()):
-        xbmcgui.Dialog().notification(__addon__.id, 'Playback cancelled.', __addon__.icon, 3000)
+        xbmcgui.Dialog().notification(addon.id, 'Playback cancelled.', addon.icon, 3000)
     if not progress_dialog.iscanceled():
         progress_dialog.close()
     return ''
