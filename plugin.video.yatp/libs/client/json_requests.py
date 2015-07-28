@@ -9,7 +9,8 @@ JSON-RPC requests to the Torrent Server
 from requests import post
 from simpleplugin import Addon
 
-json_rpc_url = Addon().get_setting('torrenter_host') + '/json-rpc'
+addon = Addon('plugin.video.yatp')
+json_rpc_url = 'http://{0}:{1}/json-rpc'.format(addon.torrenter_host, addon.server_port)
 
 
 def _request(data):
@@ -64,3 +65,19 @@ def download_torrent(torrent, download_dir):
 
 def get_all_torrent_info():
     return _request({'method': 'get_all_torrent_info'})
+
+
+def pause_torrent(info_hash):
+    _request({'method': 'pause_torrent', 'params': [info_hash]})
+
+
+def resume_torrent(info_hash):
+    _request({'method': 'resume_torrent', 'params': [info_hash]})
+
+
+def pause_all():
+    _request({'method': 'pause_all'})
+
+
+def resume_all():
+    _request({'method': 'resume_all'})
