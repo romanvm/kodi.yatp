@@ -48,7 +48,7 @@ class ConfigParser(object):
 
     @property
     def path(self):
-        return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
     def __getattr__(self, item):
         return self._config[item]

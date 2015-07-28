@@ -19,7 +19,7 @@ if not standalone:
     from time import sleep
     sleep(3.0)
 
-from libs.addon import Addon
+from libs.server.addon import Addon
 
 addon = Addon()
 addon.log('***** Starting Torrent Server... *****')

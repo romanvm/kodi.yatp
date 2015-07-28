@@ -15,7 +15,7 @@ from json import dumps
 from inspect import getmembers, isfunction
 from bottle import route, default_app, request, template, response, debug, static_file, TEMPLATE_PATH, HTTPError
 import methods
-from libs.addon import Addon
+from addon import Addon
 from torrenter import Torrenter, libtorrent
 from timers import Timer, check_seeding_limits, save_resume_data
 
