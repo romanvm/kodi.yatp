@@ -11,6 +11,7 @@ import json_requests as jsonrq
 from buffering import buffer_torrent
 
 plugin = Plugin()
+string = plugin.get_localized_string
 icons = os.path.join(plugin.path, 'resources', 'icons')
 commands = os.path.join(os.path.dirname(__file__), 'commands.py')
 
@@ -22,15 +23,15 @@ def root(params):
     :param params:
     :return:
     """
-    return [{'label': 'Play .torrent file...',
+    return [{'label': string(32000),
              'thumb': os.path.join(icons, 'play.png'),
              'url': plugin.get_url(action='select_torrent', target='play'),
              'is_playable': True},
-            {'label': 'Download torrent from .torrent file...',
+            {'label': string(32001),
              'thumb': os.path.join(icons, 'down.png'),
              'url': plugin.get_url(action='select_torrent', target='download'),
              'is_folder': False},
-            {'label': 'Torrents',
+            {'label': string(32002),
              'thumb': plugin.icon,
              'url': plugin.get_url(action='torrents')}]
 
@@ -42,7 +43,7 @@ def select_torrent(params):
     :param params:
     :return:
     """
-    torrent = xbmcgui.Dialog().browse(1, 'Select .torrent file', 'video', mask='.torrent')
+    torrent = xbmcgui.Dialog().browse(1, string(32003), 'video', mask='.torrent')
     if torrent:
         plugin.log('Torrent selected: {0}'.format(torrent))
         if params['target'] == 'play':
@@ -74,7 +75,7 @@ def download_torrent(params):
     jsonrq.download_torrent(params['torrent'], download_dir)
     time.sleep(1.0)
     if jsonrq.check_torrent_added():
-        xbmcgui.Dialog().notification('YATP', 'Torrent added for downloading', plugin.icon, 3000)
+        xbmcgui.Dialog().notification('YATP', string(32004), plugin.icon, 3000)
 
 
 def torrents(params):
@@ -107,22 +108,22 @@ def torrents(params):
         else:
             item['thumb'] = os.path.join(icons, 'question.png')
         listing.append(item)
-        context_menu = [('Pause all torrents',
+        context_menu = [(string(32005),
                          'RunScript({commands},pause_all)'.format(commands=commands)),
-                        ('Resume all torrents',
+                        (string(32006),
                         'RunScript({commands},resume_all)'.format(commands=commands)),
-                        ('Delete torrent',
+                        (string(32007),
                          'RunScript({commands},delete,{info_hash})'.format(commands=commands,
                                                                            info_hash=torrent['info_hash'])),
-                        ('Delete torrent and files',
+                        (string(32008),
                          'RunScript({commands},delete_with_files,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash']))]
         if torrent['state'] == 'paused':
-            context_menu.insert(0, ('Resume torrent',
+            context_menu.insert(0, (string(32009),
                                     'RunScript({commands},resume,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash'])))
         else:
-            context_menu.insert(0, ('Pause torrent',
+            context_menu.insert(0, (string(32010),
                                     'RunScript({commands},pause,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash'])))
         item['context_menu'] = (context_menu, True)
@@ -141,12 +142,12 @@ def torrent_info(params):
     info_dialog.create(torr_info['name'])
     while not info_dialog.iscanceled():
         info_dialog.update(torr_info['progress'],
-                           'size: {0}; state: {1}; seeds: {2}; peers: {3}'.format(torr_info['size'],
-                                                                                  torr_info['state'],
-                                                                                  torr_info['num_seeds'],
-                                                                                  torr_info['num_peers']),
-                           'DL speed: {0}KB/s; UL speed: {1}KB/s'.format(torr_info['dl_speed'], torr_info['ul_speed']),
-                           'total DL: {0}MB; total UL: {1}MB'.format(torr_info['total_download'],
+                           string(32011).format(torr_info['size'],
+                                           torr_info['state'],
+                                           torr_info['num_seeds'],
+                                           torr_info['num_peers']),
+                           string(32012).format(torr_info['dl_speed'], torr_info['ul_speed']),
+                           string(32013).format(torr_info['total_download'],
                                                                      torr_info['total_upload']))
         time.sleep(1.0)
         torr_info = jsonrq.get_torrent_info(params['info_hash'])

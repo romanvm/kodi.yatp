@@ -1,0 +1,120 @@
+# XBMC Media Center language file
+msgid ""
+msgstr ""
+
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+
+
+msgctxt "#32000"
+msgid "Play .torrent file..."
+msgstr ""
+
+msgctxt "#32001"
+msgid "Download torrent from .torrent file..."
+msgstr ""
+
+msgctxt "#32002"
+msgid "Torrents"
+msgstr ""
+
+msgctxt "#32003"
+msgid "Select .torrent file"
+msgstr ""
+
+msgctxt "#32004"
+msgid "Torrent added for downloading"
+msgstr ""
+
+msgctxt "#32005"
+msgid "Pause all torrents"
+msgstr ""
+
+msgctxt "#32006"
+msgid "Resume all torrents"
+msgstr ""
+
+msgctxt "#32007"
+msgid "Delete torrent"
+msgstr ""
+
+msgctxt "#32008"
+msgid "Delete torrent and files"
+msgstr ""
+
+msgctxt "#32009"
+msgid "Resume torrent"
+msgstr ""
+
+msgctxt "#32010"
+msgid "Pause torrent"
+msgstr ""
+
+msgctxt "#32011"
+msgid "size: {0}; state: {1}; seeds: {2}; peers: {3}"
+msgstr ""
+
+msgctxt "#32012"
+msgid "DL speed: {0}KB/s; UL speed: {1}KB/s"
+msgstr ""
+
+msgctxt "#32013"
+msgid "total DL: {0}MB; total UL: {1}MB"
+msgstr ""
+
+msgctxt "#32014"
+msgid "Buffering torrent"
+msgstr ""
+
+msgctxt "#32015"
+msgid "Adding torrent..."
+msgstr ""
+
+msgctxt "#32016"
+msgid "This may take some time."
+msgstr ""
+
+msgctxt "#32017"
+msgid "Select a videofile to play"
+msgstr ""
+
+msgctxt "#32018"
+msgid "Downloaded: {0}MB"
+msgstr ""
+
+msgctxt "#32019"
+msgid "Download speed: {0}KB/s"
+msgstr ""
+
+msgctxt "#32020"
+msgid "Seeds: {0}"
+msgstr ""
+
+msgctxt "#32021"
+msgid "A video is not selected"
+msgstr ""
+
+msgctxt "#32022"
+msgid "No videofiles to play."
+msgstr ""
+
+msgctxt "#32023"
+msgid "Playback cancelled."
+msgstr ""
+
+msgctxt "#32024"
+msgid "Confirm delete"
+msgstr ""
+
+msgctxt "#32025"
+msgid "Do you really want to delete the torrent?"
+msgstr ""
+
+msgctxt "#32026"
+msgid "Do you really want to delete the torrent with files?"
+msgstr ""
+
+msgctxt "#32027"
+msgid "Warning: The files will be deleted permanently!"
+msgstr ""

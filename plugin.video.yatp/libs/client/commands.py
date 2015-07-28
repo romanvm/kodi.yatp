@@ -10,6 +10,10 @@ import sys
 import xbmc
 import xbmcgui
 import json_requests as jsonrq
+from simpleplugin import Addon
+
+addon = Addon('plugin.video.yatp')
+string = addon.get_localized_string
 
 if __name__ == '__main__':
     if sys.argv[1] == 'pause':
@@ -17,12 +21,10 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'resume':
         jsonrq.resume_torrent(sys.argv[2])
     elif sys.argv[1] == 'delete':
-        if xbmcgui.Dialog().yesno('Confirm delete', 'Do you really want to delete the torrent?'):
+        if xbmcgui.Dialog().yesno(string(32024), string(32025)):
             jsonrq.remove_torrent(sys.argv[2], False)
     elif sys.argv[1] == 'delete_with_files':
-        if xbmcgui.Dialog().yesno('Confirm delete',
-                                  'Do you really want to delete the torrent with files?',
-                                  'Warning: The files will be deleted permanently!'):
+        if xbmcgui.Dialog().yesno(string(32024), string(32026), string(32027)):
             jsonrq.remove_torrent(sys.argv[2], True)
     elif sys.argv[1] == 'pause_all':
         jsonrq.pause_all()
