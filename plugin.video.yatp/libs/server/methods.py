@@ -2,7 +2,18 @@
 # Module: methods
 # Created on: 02.07.2015
 # Author: Roman Miroshnychenko aka Roman V.M. (romanvm@yandex.ua)
-"""JSON-RPC methods implementation"""
+"""
+JSON-RPC methods implementation
+
+The methods are called via POST request at this address.
+Don't forget to add ('Content-Type': 'application/json') header to your http-request.
+The API is compliant with JSON-RPC 2.0, though 'jsonrpc' and 'id' keys are optional in requests.
+Example:
+{"method": "pause_torrent", "params": ["21df87c3cc3209e3b6011a88053aec35a58582a9"]}
+
+"params" are an array (list) of method call parameters. Some methods do not take any parameters.
+For those methods "params" key can be equal null or omitted at all.
+"""
 
 
 def ping(torrenter, params=None):

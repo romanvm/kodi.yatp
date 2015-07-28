@@ -8,6 +8,9 @@
 <div style="padding:20px">
     <h1>Available JSON-RPC methods</h1>
     <p>
+        {{!info}}
+    </p>
+    <p>
         <table border="1"  cellpadding="10" style="width:100%">
             <tr>
                 <th>Method</th>

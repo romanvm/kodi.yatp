@@ -68,7 +68,8 @@ def get_methods():
         if isfunction(member[1]) and not member[0].startswith('_'):
             methods_list.append(member[0])
             docs_list.append(member[1].__doc__.replace('\n', '<br>'))
-    return template('methods', methods=methods_list, docs=docs_list)
+    info = methods.__doc__.replace('\n', '<br>')
+    return template('methods', methods=methods_list, docs=docs_list, info=info)
 
 
 @route('/json-rpc', method='POST')
