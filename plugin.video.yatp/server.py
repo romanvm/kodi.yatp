@@ -13,22 +13,20 @@ python server.py --standalone
 """
 
 import sys
-standalone = '-s' in sys.argv or '--standalone' in sys.argv
-
-if not standalone:
-    from time import sleep
-    sleep(3.0)
-
 from libs.server.addon import Addon
 
+standalone = '-s' in sys.argv or '--standalone' in sys.argv
 addon = Addon()
-addon.log('***** Starting Torrent Server... *****')
 
-try:
+if not standalone:
+    if addon.remote_mode:
+        sys.exit()
+    from time import sleep
     import xbmc
     import xbmcgui
-except ImportError:
-    pass
+    sleep(3.0)
+addon.log('***** Starting Torrent Server... *****')
+
 from libs.server import wsgi_app
 from libs.server.wsgi_server import create_server
 
