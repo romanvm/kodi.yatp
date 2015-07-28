@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Torrents</title>
+    <link rel="icon" href="/static/img/folder_torrents.png" type="image/png" sizes="16x16">
+    <link rel="icon" href="/static/img/folder_torrents_big.png" type="image/png" sizes="32x32">
     <link rel="stylesheet" type="text/css" href="/static/easyui/themes/default/easyui.css">
     <link rel="stylesheet" type="text/css" href="/static/easyui/themes/icon.css">
     <link rel="stylesheet" type="text/css" href="/static/easyui/demo.css">
@@ -28,7 +30,7 @@
         <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Pause selected torrents"
            data-options="position:'right'" iconCls="icon-pause" plain="true" onclick="pause_torrents()"></a>
         <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Resume selected torrents"
-           data-options="position:'right'"iconCls="icon-resume" plain="true" onclick="resume_torrents()"></a>
+           data-options="position:'right'" iconCls="icon-resume" plain="true" onclick="resume_torrents()"></a>
         <span class="button-sep"></span>
         <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Pause all torrents"
            data-options="position:'right'" iconCls="icon-pause-red" plain="true" onclick="pause_all()"></a>
@@ -41,9 +43,9 @@
     <div id="add_torrent_dlg" style="padding:10px">
         <form id="add_torr_file_form" action="add-torrent/file" method="post" enctype="multipart/form-data">
             <div style="margin-bottom:20px">
-                <input id="torr_path" name="torrent_file" class="easyui-filebox" style="width:100%;height:26px",
+                <input id="torr_path" name="torrent_file" class="easyui-filebox" style="width:100%;height:26px"
                         data-options="prompt:'Select a .torrent file'">
-                </div>
+            </div>
             <input id="file_sub_path" name="sub_path" class="easyui-textbox" style="width:100%;height:26px"
                    data-options="prompt:'Sub-folder for downloading'">
         </form>
