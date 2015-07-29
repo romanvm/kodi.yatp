@@ -20,6 +20,7 @@ addon = Addon()
 
 if not standalone:
     if addon.remote_mode:
+        addon.log('***** Remote mode activated. *****')
         sys.exit()
     from time import sleep
     import xbmc
