@@ -41,7 +41,7 @@ try:
             if start_trigger:
                 addon.log('***** Torrent Server started *****')
                 if not standalone:
-                    xbmcgui.Dialog().notification('YATP', 'Torrent server started', addon.icon, 3000, False)
+                    xbmcgui.Dialog().notification('YATP', addon.get_localized_string(32028), addon.icon, 3000, False)
                 else:
                     print 'Press CTRL+C to exit'
                 start_trigger = False

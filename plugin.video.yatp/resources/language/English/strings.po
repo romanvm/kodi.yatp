@@ -118,3 +118,7 @@ msgstr ""
 msgctxt "#32027"
 msgid "Warning: The files will be deleted permanently!"
 msgstr ""
+
+msgctxt "#32028"
+msgid "Torrent server started."
+msgstr ""
