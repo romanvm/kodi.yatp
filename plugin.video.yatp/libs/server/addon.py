@@ -11,10 +11,24 @@ try:
     import simpleplugin
 except ImportError:
     from standalone import ConfigParser
+
     Addon = ConfigParser
 else:
+    import os
+    import xbmc
+
     class Addon(simpleplugin.Addon):
         """Helper class to access addon parameters"""
+        def __init__(self):
+            self._download_dir = (self.get_setting('download_dir') or
+                                  xbmc.translatePath('special://temp').decode('utf-8'))
+            if not os.path.exists(self._download_dir):
+                os.mkdir(self._download_dir)
+
         @property
         def credentials(self):
             return self.get_setting('web_login'), self.get_setting('web_pass')
+
+        @property
+        def download_dir(self):
+            return self._download_dir
