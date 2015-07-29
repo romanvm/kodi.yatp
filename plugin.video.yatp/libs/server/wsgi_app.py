@@ -124,6 +124,10 @@ def get_media(path):
     :param path: relative path to a media file
     :return:
     """
+    if DEBUG:
+        addon.log('Media file requested')
+        addon.log('Method: ' + request.method)
+        addon.log('Headers: ' + str(request.headers.items()))
     addon.log('Playing media: ' + path.decode('utf-8'))
     if sys.platform == 'win32':
         path = path.decode('utf-8')
