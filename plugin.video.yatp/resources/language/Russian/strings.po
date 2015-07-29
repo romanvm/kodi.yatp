@@ -1,0 +1,196 @@
+# XBMC Media Center language file
+msgid ""
+msgstr ""
+
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ru\n"
+
+
+msgctxt "#32000"
+msgid "Play .torrent file..."
+msgstr "Проиграть файл .torrent…"
+
+msgctxt "#32001"
+msgid "Download torrent from .torrent file..."
+msgstr "Загрузить торрент из файла .torrent…"
+
+msgctxt "#32002"
+msgid "Torrents"
+msgstr "Торренты"
+
+msgctxt "#32003"
+msgid "Select .torrent file"
+msgstr "Выберите файл .torrent"
+
+msgctxt "#32004"
+msgid "Torrent added for downloading"
+msgstr "Торрент добавлен для загрузки"
+
+msgctxt "#32005"
+msgid "Pause all torrents"
+msgstr "Приостановить все"
+
+msgctxt "#32006"
+msgid "Resume all torrents"
+msgstr "Возобновить все"
+
+msgctxt "#32007"
+msgid "Delete torrent"
+msgstr "Удалить торрент"
+
+msgctxt "#32008"
+msgid "Delete torrent and files"
+msgstr "Удалить торрент и файлы"
+
+msgctxt "#32009"
+msgid "Resume torrent"
+msgstr "Возобновить"
+
+msgctxt "#32010"
+msgid "Pause torrent"
+msgstr "Приостановить"
+
+msgctxt "#32011"
+msgid "size: {0}; state: {1}; seeds: {2}; peers: {3}"
+msgstr "размер: {0}; статус: {1}; сидов: {2}; пиров: {3}"
+
+msgctxt "#32012"
+msgid "DL speed: {0}KB/s; UL speed: {1}KB/s"
+msgstr "загрузка: {0}КБ/с; отдача: {1}КБ/с"
+
+msgctxt "#32013"
+msgid "total DL: {0}MB; total UL: {1}MB"
+msgstr "загружено: {0}МБ; отдано: {1}МБ"
+
+msgctxt "#32014"
+msgid "Buffering torrent"
+msgstr "Буферизация торрента"
+
+msgctxt "#32015"
+msgid "Adding torrent..."
+msgstr "Добавление торрента…"
+
+msgctxt "#32016"
+msgid "This may take some time."
+msgstr "Это может занять некоторое время."
+
+msgctxt "#32017"
+msgid "Select a videofile to play"
+msgstr "Выберите видеофайл для проигрывания"
+
+msgctxt "#32018"
+msgid "Downloaded: {0}MB"
+msgstr "Загружено: {0}МБ."
+
+msgctxt "#32019"
+msgid "Download speed: {0}KB/s"
+msgstr "Скорость загрузки: {0}КБ/с."
+
+msgctxt "#32020"
+msgid "Seeds: {0}"
+msgstr "Сидов: {0}."
+
+msgctxt "#32021"
+msgid "A video is not selected"
+msgstr "Видео не выбрано."
+
+msgctxt "#32022"
+msgid "No videofiles to play."
+msgstr "Видеофайлы отсутствуют."
+
+msgctxt "#32023"
+msgid "Playback cancelled."
+msgstr "Воспроизведение отменено."
+
+msgctxt "#32024"
+msgid "Confirm delete"
+msgstr "Подтвердите удаление"
+
+msgctxt "#32025"
+msgid "Do you really want to delete the torrent?"
+msgstr "Действительно удалить торрент?"
+
+msgctxt "#32026"
+msgid "Do you really want to delete the torrent with files?"
+msgstr "Действительно удалить торрент и файлы?"
+
+msgctxt "#32027"
+msgid "Warning: The files will be deleted permanently!"
+msgstr "Внимание: файлы будут удалены безвозвратно!"
+
+msgctxt "#32028"
+msgid "Torrent server started."
+msgstr "Торрент-сервер запущен."
+
+msgctxt "#32029"
+msgid "General"
+msgstr "Общие"
+
+msgctxt "#32030"
+msgid "Folder for downloading files"
+msgstr "Папка для загрузки файлов"
+
+msgctxt "#32031"
+msgid "Buffer size (MB)"
+msgstr "Размер буфера (МБ)"
+
+msgctxt "#32032"
+msgid "Seeding ratio limit (0 - no limit)"
+msgstr "Лимит коэффициента отдачи (0 - без лимита)"
+
+msgctxt "#32033"
+msgid "Keep torrents for (hours, 0 - no limit)"
+msgstr "Срок хранения торрентов (ч., 0 — бессрочно)"
+
+msgctxt "#32034"
+msgid "Action for expired torrents"
+msgstr "Действие для просроченных торрентов"
+
+msgctxt "#32035"
+msgid "Delete files for expired torrents"
+msgstr "Удалять файлы просроченных торрентов"
+
+msgctxt "#32036"
+msgid "Web UI"
+msgstr "Веб-интерфейс"
+
+msgctxt "#32037"
+msgid "Restrict access to web UI"
+msgstr "Защитить веб-интерфейс паролем"
+
+msgctxt "#32038"
+msgid "Web UI login"
+msgstr "Логин веб-интерфейса"
+
+msgctxt "#32039"
+msgid "Web UI password"
+msgstr "Пароль веб-интерфейса"
+
+msgctxt "#32040"
+msgid "Advanced"
+msgstr "Дополнительно"
+
+msgctxt "#32041"
+msgid "Torrent server host"
+msgstr "Хост торрент-сервера"
+
+msgctxt "#32042"
+msgid "Torrent server port"
+msgstr "Порт торрент-сервера"
+
+msgctxt "#32043"
+msgid "Remote mode (local torrent server isn't launched)"
+msgstr "Удаленный режим (локальный сервер не запускается)"
+
+msgctxt "#32044"
+msgid "Torrent client port"
+msgstr "Порт торрент-клиента"
+
+msgctxt "#32045"
+msgid "pause"
+msgstr "приостановить"
+
+msgctxt "#32046"
+msgid "delete"
+msgstr "удалить"

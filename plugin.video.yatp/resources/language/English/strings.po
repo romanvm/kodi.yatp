@@ -122,3 +122,75 @@ msgstr ""
 msgctxt "#32028"
 msgid "Torrent server started."
 msgstr ""
+
+msgctxt "#32029"
+msgid "General"
+msgstr ""
+
+msgctxt "#32030"
+msgid "Folder for downloading files"
+msgstr ""
+
+msgctxt "#32031"
+msgid "Buffer size (MB)"
+msgstr ""
+
+msgctxt "#32032"
+msgid "Seeding ratio limit (0 - no limit)"
+msgstr ""
+
+msgctxt "#32033"
+msgid "Keep torrents for (hours, 0 - no limit)"
+msgstr ""
+
+msgctxt "#32034"
+msgid "Action for expired torrents"
+msgstr ""
+
+msgctxt "#32035"
+msgid "Delete files for expired torrents"
+msgstr ""
+
+msgctxt "#32036"
+msgid "Web UI"
+msgstr ""
+
+msgctxt "#32037"
+msgid "Restrict access to web UI"
+msgstr ""
+
+msgctxt "#32038"
+msgid "Web UI login"
+msgstr ""
+
+msgctxt "#32039"
+msgid "Web UI password"
+msgstr ""
+
+msgctxt "#32040"
+msgid "Advanced"
+msgstr ""
+
+msgctxt "#32041"
+msgid "Torrent server host"
+msgstr ""
+
+msgctxt "#32042"
+msgid "Torrent server port"
+msgstr ""
+
+msgctxt "#32043"
+msgid "Remote mode (local torrent server isn't launched)"
+msgstr ""
+
+msgctxt "#32044"
+msgid "Torrent client port"
+msgstr ""
+
+msgctxt "#32045"
+msgid "pause"
+msgstr ""
+
+msgctxt "#32046"
+msgid "delete"
+msgstr ""

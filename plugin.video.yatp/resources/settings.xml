@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <settings>
-    <category label="General">
+    <category label="32029">
         <setting id="download_dir" type="folder"
-                 label="Folder for downloading files" default="" />
+                 label="32030" default="" />
         <setting id="buffer_size" type="number"
-                 label="Buffer size (MB)" default="35"/>
+                 label="32031" default="35"/>
         <setting id="ratio_limit" type="labelenum"
-                 label="Seeding ratio limit (0 - no limit)" values="0|1|1.5|2|3|4|5" default="1.5" />
+                 label="32032" values="0|1|1.5|2|3|4|5" default="1.5" />
         <setting id="time_limit" type="number"
-                 label="Keep torrents for (hours, 0 - no limit)" default="0" />
+                 label="32033" default="0" />
         <setting id="expired_action" type="labelenum"
-                 label="Action for expired torrents" values="pause|delete" default="pause" />
+                 label="32034" values="pause|delete" default="32045" />
         <setting id="delete_expired_files" type="bool"
-                 label="Delete files for expired torrents" enable="eq(-1,1)" default="false"/>
+                 label="32035" enable="eq(-1,1)" default="false"/>
     </category>
-    <category label="Web UI">
+    <category label="32036">
         <setting id="pass_protect" type="bool"
-                 label="Restrict access to web UI" default="false" />
+                 label="32037" default="false" />
         <setting id="web_login" type="text"
-                 label="Web UI login" default="yatp" enable="eq(-1,true)" />
+                 label="32038" default="yatp" enable="eq(-1,true)" />
         <setting id="web_pass" type="text"
-                 label="Web UI password" default="yatp" option="hidden" enable="eq(-2,true)" />
+                 label="32039" default="yatp" option="hidden" enable="eq(-2,true)" />
     </category>
-    <category label="Advanced">
+    <category label="32040">
         <setting id="torrenter_host" type="text"
-                 label="Torrent server host" default="localhost" />
+                 label="32041" default="localhost" />
                <setting id="server_port" type="number"
-                 label="Torrent server port" default="8668"/>
+                 label="32042" default="8668"/>
         <setting id="remote_mode" type="bool"
-                 label="Remote mode (local torrent server isn't launched)" default="false" />
+                 label="32043" default="false" />
         <setting id="torrent_port" type="number"
-                 label="Torrent port" default="25335" enable="eq(-1,false)" />
+                 label="32044" default="25335" enable="eq(-1,false)" />
     </category>
 </settings>
