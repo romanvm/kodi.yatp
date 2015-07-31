@@ -71,10 +71,10 @@ class Torrenter(object):
                 self._load_session_state()
             except TorrenterError:
                 self._save_session_state()
-        self._session.start_dht()
         self._session.add_dht_router('router.bittorrent.com', 6881)
         self._session.add_dht_router('router.utorrent.com', 6881)
         self._session.add_dht_router('router.bitcomet.com', 6881)
+        self._session.start_dht()
         if self._persistent:
             self._load_torrents()
 
@@ -150,7 +150,7 @@ class Torrenter(object):
         :return: object - torr_handle
         """
         add_torrent_params = {'save_path': os.path.abspath(save_path),
-                              'storage_mode': libtorrent.storage_mode_t.storage_mode_allocate,}
+                              'storage_mode': libtorrent.storage_mode_t.storage_mode_sparse}
         if resume_data is not None:
             add_torrent_params['resume_data'] = resume_data
         if isinstance(torrent, dict):
