@@ -128,7 +128,7 @@ def get_media(path):
         addon.log('Media file requested')
         addon.log('Method: ' + request.method)
         addon.log('Headers: ' + str(request.headers.items()))
-    addon.log('Playing media: ' + path.decode('utf-8'))
+    addon.log('Playing media: ' + path)
     if sys.platform == 'win32':
         path = path.decode('utf-8')
     if os.path.splitext(path)[1] == '.mkv':

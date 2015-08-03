@@ -47,7 +47,7 @@ def select_torrent(params):
     if torrent:
         plugin.log('Torrent selected: {0}'.format(torrent))
         if params['target'] == 'play':
-            play_torrent({'torrent': torrent})
+            return play_torrent({'torrent': torrent})
         else:
             download_torrent({'torrent': torrent})
 
@@ -60,6 +60,7 @@ def play_torrent(params):
     :return:
     """
     path = buffer_torrent(params['torrent'])
+    plugin.log('Path to play: {0}'.format(path))
     success = True if path else False
     return plugin.resolve_url(path, success)
 
