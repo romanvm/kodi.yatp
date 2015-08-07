@@ -25,6 +25,8 @@ except ImportError:
     from python_libtorrent import get_libtorrent
     libtorrent = get_libtorrent()
 
+thread_lock = threading.Lock()
+
 
 def load_torrent(url):
         return get(url).content
@@ -37,7 +39,7 @@ class TorrenterError(Exception):
 
 class Torrenter(object):
     """The main Torrenter class"""
-    def __init__(self, start_port=6881, end_port=6891, persistent=False, resume_dir=''):
+    def __init__(self, start_port=6881, end_port=6891, dl_limit=0, ul_limit=0, persistent=False, resume_dir=''):
         """
         Class constructor
 
@@ -45,8 +47,10 @@ class Torrenter(object):
         for torrents.
         :param start_port: int
         :param end_port: int
-        :param persistent: bool
-        :param resume_dir: str
+        :param dl_limit: int - download limit in KB/s
+        :param ul_limit: int - uplpad lomit in KB/s
+        :param persistent: bool - store persistent data
+        :param resume_dir: str - the dir where session and torrents persistent data are stored.
         :return:
         """
         # torrents_pool is used to map torrent handles to their sha1 hexdigests
@@ -56,13 +60,19 @@ class Torrenter(object):
         self._persistent = persistent
         # The directory where session and torrent data are stored
         self._resume_dir = os.path.abspath(resume_dir)
+        # Worker threads
         self._add_torrent_thread = None
-        self._stream_torrent_thread = None
+        self._buffer_torrent_thread = None
+        self._sliding_window_thread = None
+        # Signal events
         self._torrent_added = threading.Event()
         self._buffering_complete = threading.Event()
         self._abort_buffering = threading.Event()
-        # self._thread_lock = threading.Lock()
-        self._data_buffer = deque([None], maxlen=1)
+        self._abort_sliding = threading.Event()
+        # Inter-thread data buffers. Any read/write must be guarded by thread_lock.
+        self._last_added_torrent = None
+        self._buffer_percent = 0
+        self._streamed_file_data = None
         # Initialize session
         self._session = libtorrent.session()
         self._session.listen_on(start_port, end_port)
@@ -71,6 +81,14 @@ class Torrenter(object):
                 self._load_session_state()
             except TorrenterError:
                 self._save_session_state()
+        if dl_limit or ul_limit:
+            settings = self._session.get_settings()
+            settings.ignore_limits_on_local_network = False
+            if dl_limit > 0:
+                settings.download_rate_limit = dl_limit * 1024
+            if ul_limit > 0:
+                settings.upload_rate_limit = ul_limit * 1024
+            self._session.set_settings(settings)
         self._session.add_dht_router('router.bittorrent.com', 6881)
         self._session.add_dht_router('router.utorrent.com', 6881)
         self._session.add_dht_router('router.bitcomet.com', 6881)
@@ -93,7 +111,11 @@ class Torrenter(object):
         except (RuntimeError, AttributeError):
             pass
         try:
-            self._stream_torrent_thread.join()
+            self._buffer_torrent_thread.join()
+        except (RuntimeError, AttributeError):
+            pass
+        try:
+            self._sliding_window_thread.join()
         except (RuntimeError, AttributeError):
             pass
         del self._session
@@ -185,10 +207,10 @@ class Torrenter(object):
         :param buffer_size: int - buffer size in MB
         :return:
         """
-        self._stream_torrent_thread = threading.Thread(target=self.stream_torrent,
+        self._buffer_torrent_thread = threading.Thread(target=self.stream_torrent,
                                                        args=(info_hash, file_index, buffer_size))
-        self._stream_torrent_thread.daemon = True
-        self._stream_torrent_thread.start()
+        self._buffer_torrent_thread.daemon = True
+        self._buffer_torrent_thread.start()
 
     def stream_torrent(self, info_hash, file_index, buffer_size=35):
         """
@@ -447,7 +469,7 @@ class Torrenter(object):
         """
         self._abort_buffering.set()
         try:
-            self._stream_torrent_thread.join()
+            self._buffer_torrent_thread.join()
         except (RuntimeError, AttributeError):
             pass
 
