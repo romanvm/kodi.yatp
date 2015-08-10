@@ -93,7 +93,7 @@ class TorrenterTestCase(unittest.TestCase):
         add_thread.daemon = True
         add_thread.start()
         conut = 0
-        while not self.torrenter.torrent_added:
+        while not self.torrenter.is_torrent_added:
             time.sleep(1.0)
             conut += 1
             if conut > 10:
@@ -124,10 +124,10 @@ class TorrenterTestCase(unittest.TestCase):
         """
         self.torrenter = torrenter.Torrenter()
         self.torrenter.add_torrent(bbt_torrent_file, self.tempdir)
-        stream_theread = threading.Thread(target=self.torrenter.stream_torrent_async, args=(0, 1.0))
+        stream_theread = threading.Thread(target=self.torrenter.buffer_torrent_async, args=(0, 1.0))
         stream_theread.daemon = True
         stream_theread.start()
-        while not self.torrenter.buffering_complete:
+        while not self.torrenter.is_buffering_complete:
             time.sleep(1.0)
             print 'Peers: {0}; DL speed: {1}KB/s; Downloaded: {2}MB'.format(
             self.torrenter.torrent.status().num_peers,

@@ -49,7 +49,7 @@ def check_torrent_added(torrenter, params=None):
     params - None
     :return: bool - torrent added or not
     """
-    return torrenter.torrent_added
+    return torrenter.is_torrent_added
 
 
 def get_added_torrent_info(torrenter, params=None):
@@ -162,7 +162,7 @@ def stream_torrent(torrenter, params):
     params[2] - buffer size in MB
     :return: 'OK'
     """
-    torrenter.stream_torrent_async(params[0], params[1], params[2])
+    torrenter.buffer_torrent_async(params[0], params[1], params[2])
     return 'OK'
 
 
@@ -172,7 +172,7 @@ def check_buffering_complete(torrenter, params=None):
 
     :return: bool - buffering status
     """
-    return torrenter.buffering_complete
+    return torrenter.is_buffering_complete
 
 
 def abort_buffering(torrenter, params=None):

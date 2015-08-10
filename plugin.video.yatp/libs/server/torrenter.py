@@ -25,8 +25,6 @@ except ImportError:
     from python_libtorrent import get_libtorrent
     libtorrent = get_libtorrent()
 
-thread_lock = threading.Lock()
-
 
 def load_torrent(url):
         return get(url).content
@@ -69,10 +67,12 @@ class Torrenter(object):
         self._buffering_complete = threading.Event()
         self._abort_buffering = threading.Event()
         self._abort_sliding = threading.Event()
-        # Inter-thread data buffers. Any read/write must be guarded by thread_lock.
-        self._last_added_torrent = None
-        self._buffer_percent = 0
-        self._streamed_file_data = None
+        # Inter-thread data buffers.
+        # deque containers for 1 items are used because deque.append operation is atomic.
+        self._last_added_torrent = deque([None], 1)
+        self._buffer_percent = deque([0], 1)
+        self._streamed_file_data = deque([None], 1)
+        self._sliding_window_position = deque([-1], 1)
         # Initialize session
         self._session = libtorrent.session()
         self._session.listen_on(start_port, end_port)
@@ -141,10 +141,8 @@ class Torrenter(object):
         result['files'] = files
         if zero_priorities:
             [torr_handle.piece_priority(piece, 0) for piece in xrange(torr_info.num_pieces())]
-        # torr_handle.resume()  # Needed for plugin.module.libtorrent which adds torrents paused for some reason.
-        self._data_buffer.append(result)
+        self._last_added_torrent.append(result)
         self._torrent_added.set()
-        return result
 
     def add_torrent_async(self, torrent, save_path, zero_priorities=False):
         """
@@ -195,7 +193,7 @@ class Torrenter(object):
         self._torrents_pool[info_hash] = torr_handle
         return torr_handle
 
-    def stream_torrent_async(self, info_hash, file_index, buffer_size=35):
+    def buffer_torrent_async(self, info_hash, file_index, buffer_size=35):
         """
         Force sequential download of file for video playback.
 
@@ -207,12 +205,12 @@ class Torrenter(object):
         :param buffer_size: int - buffer size in MB
         :return:
         """
-        self._buffer_torrent_thread = threading.Thread(target=self.stream_torrent,
+        self._buffer_torrent_thread = threading.Thread(target=self.buffer_torrent,
                                                        args=(info_hash, file_index, buffer_size))
         self._buffer_torrent_thread.daemon = True
         self._buffer_torrent_thread.start()
 
-    def stream_torrent(self, info_hash, file_index, buffer_size=35):
+    def buffer_torrent(self, info_hash, file_index, buffer_size=35):
         """
         Force sequential download of file for video playback.
 
@@ -224,7 +222,7 @@ class Torrenter(object):
         # Clear flags
         self._buffering_complete.clear()
         self._abort_buffering.clear()
-        self._data_buffer.append(0)
+        self._buffer_percent.append(0)
         torr_handle = self._torrents_pool[info_hash]
         # torr_handle.set_sequential_download(True)
         torr_info = torr_handle.get_torrent_info()
@@ -244,13 +242,65 @@ class Torrenter(object):
         # Setup buffer download
         # Download the last 2+MB
         end_offset = 2097152 / torr_info.piece_length() + 2  # Experimentally tested
+        self._streamed_file_data.append((torr_handle, start_piece, num_pieces))
+        window_start = start_piece
+        [torr_handle.piece_priority(piece, 7) for piece in xrange(end_piece - end_offset, end_piece)]
+        self.start_sliding_window_async(torr_handle, window_start, start_piece + buffer_length,
+                                        end_piece - end_offset - 1)
+        while window_start <= start_piece + buffer_length and not self._abort_buffering.is_set():
+            pass # todo: complete this
+
+
+    def start_sliding_window_async(self, torr_handle, window_start, window_end, last_piece):
+        """
+        Start sliding window in a separate thread
+        """
+        self._abort_sliding.set()
+        try:
+            self._sliding_window_thread.join()
+        except (RuntimeError, AttributeError):
+            pass
+        self._sliding_window_thread = threading.Thread(target=self._sliding_window,
+                                                       args=(torr_handle, window_start, window_end, last_piece))
+        self._sliding_window_thread.daemon = True
+        self._sliding_window_thread.start()
+
+    def _sliding_window(self, torr_handle, window_start, window_end, last_piece):
+        """Sliding window"""
+        self._abort_sliding.clear()
+        [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start, window_end)]
+        while window_start <= last_piece and not self._abort_sliding.is_set():
+            self._sliding_window_position.append(window_start)
+            torr_handle.piece_priority(window_start, 7)
+            if torr_handle.have_piece(window_start):
+                window_start += 1
+                if window_end < last_piece:
+                    window_end += 1
+                    torr_handle.piece_priority(window_end, 1)
+            time.sleep(0.1)
+        if not self._abort_sliding.is_set():
+            [torr_handle.piece_priority(piece, 1) for piece in xrange(torr_handle.get_torrent_info().num_pieces())]
+        self._sliding_window_position.append(-1)
+        self._abort_sliding.clear()
+
+
+
+
+
+
+
+
+
+
+
+        """
         pieces_pool = range(start_piece, buffer_length) + range(end_piece - end_offset, end_piece)
         [torr_handle.piece_priority(piece, 1) for piece in pieces_pool]
         while len(pieces_pool) > 0:
             if self._abort_buffering.is_set():
                 break
-            self._data_buffer.append(int(100 * float(buffer_length + end_offset - len(pieces_pool)) /
-                                         (buffer_length + end_offset)))
+            self._buffer_percent.append(int(100 * float(buffer_length + end_offset - len(pieces_pool)) /
+                                           (buffer_length + end_offset)))
             for index, piece in enumerate(pieces_pool):
                 if torr_handle.have_piece(piece):
                     del pieces_pool[index]
@@ -279,6 +329,7 @@ class Torrenter(object):
             else:
                 [torr_handle.piece_priority(piece, 1) for piece in xrange(torr_info.num_pieces())]
         self._abort_buffering.clear()
+        """
 
     def _get_torrent_status(self, info_hash):
         """
@@ -544,16 +595,21 @@ class Torrenter(object):
             self.resume_torrent(info_hash)
 
     @property
-    def torrent_added(self):
+    def is_torrent_added(self):
         """Torrent added flag"""
         return self._torrent_added.is_set()
 
     @property
-    def buffering_complete(self):
+    def last_added_torrent(self):
+        """The last added torrent info"""
+        return self._last_added_torrent[0]
+
+    @property
+    def is_buffering_complete(self):
         """Buffering complete flag"""
         return self._buffering_complete.is_set()
 
     @property
-    def data_buffer(self):
-        """Data buffer contents"""
-        return self._data_buffer[0]
+    def sliding_window_position(self):
+        """Sliding window position"""
+        return self._sliding_window_position[0]
