@@ -35,8 +35,8 @@ def check_torrent_added():
     return _request({'method': 'check_torrent_added'})
 
 
-def get_data_buffer():
-    return _request({'method': 'get_data_buffer'})
+def get_last_added_torrent():
+    return _request({'method': 'get_last_added_torrent'})
 
 
 def stream_torrent(info_hash, file_index, buffer_size):

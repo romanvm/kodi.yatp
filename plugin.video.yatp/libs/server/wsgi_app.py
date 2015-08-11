@@ -16,7 +16,7 @@ from inspect import getmembers, isfunction
 from bottle import route, default_app, request, template, response, debug, static_file, TEMPLATE_PATH, HTTPError
 import methods
 from addon import Addon
-from torrenter import Torrenter, libtorrent
+from torrenter import Streamer, libtorrent
 from timers import Timer, check_seeding_limits, save_resume_data
 
 addon = Addon()
@@ -26,13 +26,13 @@ resume_dir = os.path.join(addon.config_dir, 'torrents')
 if not os.path.exists(resume_dir):
     os.mkdir(resume_dir)
 torrent_port = addon.torrent_port
-torrenter = Torrenter(torrent_port, torrent_port + 10, True, resume_dir)
+torrent_client = Streamer(torrent_port, torrent_port + 10, True, resume_dir)
 # Timers
 max_ratio = addon.ratio_limit
 max_time = addon.time_limit
-limits_timer = Timer(10, check_seeding_limits, torrenter, max_ratio, max_time,
+limits_timer = Timer(10, check_seeding_limits, torrent_client, max_ratio, max_time,
                      addon.expired_action, addon.delete_expired_files)
-save_resume_timer = Timer(30, save_resume_data, torrenter)
+save_resume_timer = Timer(30, save_resume_data, torrent_client)
 # Bottle WSGI application
 static_path = os.path.join(addon.path, 'resources', 'web')
 TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))
@@ -93,7 +93,7 @@ def json_rpc():
         data['params'].append(True)
     reply = {'jsonrpc': '2.0', 'id': data.get('id', '1')}
     try:
-        reply['result'] = getattr(methods, data['method'])(torrenter, data.get('params'))
+        reply['result'] = getattr(methods, data['method'])(torrent_client, data.get('params'))
     except Exception, ex:
         reply['error'] = '{0}: {1}'.format(str(ex.__class__)[7:-2], ex.message)
     if DEBUG:
@@ -110,7 +110,7 @@ def get_torrents():
     :return:
     """
     response.content_type = 'application/json'
-    reply = dumps(torrenter.get_all_torrents_info())
+    reply = dumps(torrent_client.get_all_torrents_info())
     if DEBUG:
         addon.log(reply)
     return reply
@@ -176,7 +176,7 @@ def add_torrent(source):
         path = os.path.join(download_dir, request.forms.get('sub_path'))
     else:
         path = download_dir
-    torrenter.add_torrent_async(torrent, path)
+    torrent_client.add_torrent_async(torrent, path)
 
 
 app = default_app()

@@ -50,6 +50,6 @@ except KeyboardInterrupt:
     pass
 wsgi_app.limits_timer.abort()
 wsgi_app.save_resume_timer.abort()
-wsgi_app.torrenter.abort_buffering()
-del wsgi_app.torrenter
+wsgi_app.torrent_client.abort_buffering()
+del wsgi_app.torrent_client
 addon.log('***** Torrent Server stopped *****')

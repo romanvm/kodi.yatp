@@ -16,7 +16,7 @@ For those methods "params" key can be equal null or omitted at all.
 """
 
 
-def ping(torrenter, params=None):
+def ping(torrent_client, params=None):
     """
     Connection test method
 
@@ -25,7 +25,7 @@ def ping(torrenter, params=None):
     return 'pong'
 
 
-def add_torrent(torrenter, params):
+def add_torrent(torrent_client, params):
     """
     Add torrent method
 
@@ -38,41 +38,41 @@ def add_torrent(torrenter, params):
     params[2] - bool - zero priorities (do not start download immediately, optional, default - True)
     :return: 'OK'
     """
-    torrenter.add_torrent_async(params[0], params[1], params[2])
+    torrent_client.add_torrent_async(params[0], params[1], params[2])
     return 'OK'
 
 
-def check_torrent_added(torrenter, params=None):
+def check_torrent_added(torrent_client, params=None):
     """
     Check torrent_added flag
 
     params - None
     :return: bool - torrent added or not
     """
-    return torrenter.is_torrent_added
+    return torrent_client.is_torrent_added
 
 
-def get_added_torrent_info(torrenter, params=None):
+def get_last_added_torrent(torrent_client, params=None):
     """
     Get added torrent info
 
     params - None
     :return: dict - added torrent info
     """
-    return torrenter.data_buffer
+    return torrent_client.last_added_torrent
 
 
-def get_torrent_info(torrenter, params):
+def get_torrent_info(torrent_client, params):
     """
     Get torrent info
 
     params[0] - str - info_hash in lowercase
     :return: dict - extended torrent info
     """
-    return torrenter.get_torrent_info(params[0])
+    return torrent_client.get_torrent_info(params[0])
 
 
-def get_all_torrent_info(torrenter, params=None):
+def get_all_torrent_info(torrent_client, params=None):
     """
     Get info for all torrents in the session
 
@@ -80,21 +80,21 @@ def get_all_torrent_info(torrenter, params=None):
     it us up to a client to sort the list accordingly.
     :return: list - the list of torrent info dicts
     """
-    return torrenter.get_all_torrents_info()
+    return torrent_client.get_all_torrents_info()
 
 
-def pause_torrent(torrenter, params):
+def pause_torrent(torrent_client, params):
     """
     Pause torrent
 
     params[0] - torrent info-hash in lowercase
     :return: 'OK'
     """
-    torrenter.pause_torrent(params[0])
+    torrent_client.pause_torrent(params[0])
     return 'OK'
 
 
-def pause_group(torrenter, params):
+def pause_group(torrent_client, params):
     """
     Pause several torrents
 
@@ -102,22 +102,22 @@ def pause_group(torrenter, params):
     :return: 'OK'
     """
     for info_hash in params[0]:
-        torrenter.pause_torrent(info_hash)
+        torrent_client.pause_torrent(info_hash)
     return 'OK'
 
 
-def resume_torrent(torrenter, params):
+def resume_torrent(torrent_client, params):
     """
     Resume torrent
 
     params[0] - torrent info-hash in lowercase
     :return: 'OK'
     """
-    torrenter.resume_torrent(params[0])
+    torrent_client.resume_torrent(params[0])
     return 'OK'
 
 
-def resume_group(torrenter, params):
+def resume_group(torrent_client, params):
     """
     Resume several torrents
 
@@ -125,11 +125,11 @@ def resume_group(torrenter, params):
     :return:
     """
     for info_hash in params[0]:
-        torrenter.resume_torrent(info_hash)
+        torrent_client.resume_torrent(info_hash)
     return 'OK'
 
 
-def remove_torrent(torrenter, params):
+def remove_torrent(torrent_client, params):
     """
     Remove torrent
 
@@ -137,11 +137,11 @@ def remove_torrent(torrenter, params):
     params[1] - bool - also remove files
     :return: 'OK'
     """
-    torrenter.remove_torrent(params[0], params[1])
+    torrent_client.remove_torrent(params[0], params[1])
     return 'OK'
 
 
-def remove_group(torrenter, params):
+def remove_group(torrent_client, params):
     """
 
     params[0] - the list of info-hashes
@@ -149,66 +149,57 @@ def remove_group(torrenter, params):
     :return:
     """
     for info_hash in params[0]:
-        torrenter.remove_torrent(info_hash, params[1])
+        torrent_client.remove_torrent(info_hash, params[1])
     return 'OK'
 
 
-def stream_torrent(torrenter, params):
+def buffer_torrent(torrent_client, params):
     """
     Stream torrent
 
     params[0] - torrent info-hash in lowercase
-    params[1] - the index of the file to be streamed
+    params[1] - the index of the file to be buffered
     params[2] - buffer size in MB
     :return: 'OK'
     """
-    torrenter.buffer_torrent_async(params[0], params[1], params[2])
+    torrent_client.buffer_torrent_async(params[0], params[1], params[2])
     return 'OK'
 
 
-def check_buffering_complete(torrenter, params=None):
+def check_buffering_complete(torrent_client, params=None):
     """
     Check if buffering is complete
 
     :return: bool - buffering status
     """
-    return torrenter.is_buffering_complete
+    return torrent_client.is_buffering_complete
 
 
-def abort_buffering(torrenter, params=None):
+def abort_buffering(torrent_client, params=None):
     """
     Abort buffering
 
     :return: 'OK'
     """
-    torrenter.abort_buffering()
+    torrent_client.abort_buffering()
     return 'OK'
 
 
-def get_data_buffer(torrenter, params=None):
-    """
-    Get torrenter data buffer contents
-
-    :return: data buffer contents
-    """
-    return torrenter.data_buffer
-
-
-def pause_all(torrenter, params=None):
+def pause_all(torrent_client, params=None):
     """
     Pause all torrents
 
     :return: 'OK'
     """
-    torrenter.pause_all()
+    torrent_client.pause_all()
     return 'OK'
 
 
-def resume_all(torrenter, params=None):
+def resume_all(torrent_client, params=None):
     """
     Resume all torrents
 
     :return: 'OK'
     """
-    torrenter.resume_all()
+    torrent_client.resume_all()
     return 'OK'

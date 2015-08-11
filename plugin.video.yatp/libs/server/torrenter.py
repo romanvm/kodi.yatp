@@ -36,7 +36,11 @@ class TorrenterError(Exception):
 
 
 class Torrenter(object):
-    """The main Torrenter class"""
+    """
+    Torrenter class
+
+    Implements a simple torrent client.
+    """
     def __init__(self, start_port=6881, end_port=6891, dl_limit=0, ul_limit=0, persistent=False, resume_dir=''):
         """
         Class constructor
@@ -60,19 +64,11 @@ class Torrenter(object):
         self._resume_dir = os.path.abspath(resume_dir)
         # Worker threads
         self._add_torrent_thread = None
-        self._buffer_torrent_thread = None
-        self._sliding_window_thread = None
         # Signal events
         self._torrent_added = threading.Event()
-        self._buffering_complete = threading.Event()
-        self._abort_buffering = threading.Event()
-        self._abort_sliding = threading.Event()
         # Inter-thread data buffers.
         # deque containers for 1 items are used because deque.append operation is atomic.
         self._last_added_torrent = deque([None], 1)
-        self._buffer_percent = deque([0], 1)
-        self._streamed_file_data = deque([None], 1)
-        self._sliding_window_position = deque([-1], 1)
         # Initialize session
         self._session = libtorrent.session()
         self._session.listen_on(start_port, end_port)
@@ -103,21 +99,12 @@ class Torrenter(object):
         Always delete the Torrenter instance when
         exiting the main program.
         """
-        self._abort_buffering.set()
-        if self._persistent:
-            self.save_all_resume_data()
         try:
             self._add_torrent_thread.join()
         except (RuntimeError, AttributeError):
             pass
-        try:
-            self._buffer_torrent_thread.join()
-        except (RuntimeError, AttributeError):
-            pass
-        try:
-            self._sliding_window_thread.join()
-        except (RuntimeError, AttributeError):
-            pass
+        if self._persistent:
+            self.save_all_resume_data()
         del self._session
 
     def add_torrent(self, torrent, save_path, zero_priorities=False):
@@ -192,106 +179,6 @@ class Torrenter(object):
         info_hash = str(torr_handle.info_hash())
         self._torrents_pool[info_hash] = torr_handle
         return torr_handle
-
-    def buffer_torrent_async(self, info_hash, file_index, buffer_size=35):
-        """
-        Force sequential download of file for video playback.
-
-        This method will stream a torrent in a separate thread. The caller should periodically
-        check buffering_complete flag. If buffering needs to be terminated,
-        the caller should call abort_buffering method.
-        :param info_hash: str
-        :param file_index: int - the numerical index of the file to be streamed.
-        :param buffer_size: int - buffer size in MB
-        :return:
-        """
-        self._buffer_torrent_thread = threading.Thread(target=self.buffer_torrent,
-                                                       args=(info_hash, file_index, buffer_size))
-        self._buffer_torrent_thread.daemon = True
-        self._buffer_torrent_thread.start()
-
-    def buffer_torrent(self, info_hash, file_index, buffer_size=35):
-        """
-        Force sequential download of file for video playback.
-
-        :param info_hash: str
-        :param file_index: int - the numerical index of the file to be streamed.
-        :param buffer_size: int - buffer size in MB
-        :return:
-        """
-        # todo: review and remove bugs if any
-        # Clear flags
-        self._buffering_complete.clear()
-        self._abort_buffering.clear()
-        self._buffer_percent.append(0)
-        torr_handle = self._torrents_pool[info_hash]
-        # torr_handle.set_sequential_download(True)
-        torr_info = torr_handle.get_torrent_info()
-        # Pick the file to be streamed from the torrent files
-        file_entry = torr_info.files()[file_index]
-        peer_req = torr_info.map_file(file_index, 0, 1048576)  # 1048576 (1MB) is a dummy value to avoid C int overflow
-        # Start piece of the file
-        start_piece = peer_req.piece
-        # The number of pieces in the file
-        num_pieces = file_entry.size / torr_info.piece_length()
-        # The number of pieces at the start of the file
-        # to be downloaded before the file can be played
-        buffer_length = (buffer_size * 1048576) / torr_info.piece_length()
-        # The index of the end piece in the file
-        end_piece = start_piece + num_pieces
-        # Check if the torrent has been buffered earlier
-        # Setup buffer download
-        # Download the last 2+MB
-        end_offset = 2097152 / torr_info.piece_length() + 2  # Experimentally tested
-        self._streamed_file_data.append((torr_handle, start_piece, num_pieces))
-        [torr_handle.piece_priority(piece, 7) for piece in xrange(end_piece - end_offset, end_piece)]
-        window_start = start_piece
-        self.start_sliding_window_async(torr_handle, window_start, start_piece + buffer_length,
-                                        end_piece - end_offset - 1)
-        while (window_start <= start_piece + buffer_length
-               and not self.check_piece_range(torr_handle, end_piece - end_offset, end_piece)
-               and not self._abort_buffering.is_set()):
-            window_start = self._sliding_window_position[0]
-            self._buffer_percent.append(int(100.0 * float(window_start - start_piece)/buffer_length))
-            time.sleep(0.1)
-        if not self._abort_buffering.is_set():
-            torr_handle.fulsh_cahce()
-            self._buffer_percent.append(0)
-            self._buffering_complete.set()
-        self._abort_buffering.clear()
-
-    def start_sliding_window_async(self, torr_handle, window_start, window_end, last_piece):
-        """
-        Start sliding window in a separate thread
-        """
-        self._abort_sliding.set()
-        try:
-            self._sliding_window_thread.join()
-        except (RuntimeError, AttributeError):
-            pass
-        self._sliding_window_thread = threading.Thread(target=self._sliding_window,
-                                                       args=(torr_handle, window_start, window_end, last_piece))
-        self._sliding_window_thread.daemon = True
-        self._sliding_window_thread.start()
-
-    def _sliding_window(self, torr_handle, window_start, window_end, last_piece):
-        """Sliding window"""
-        self._abort_sliding.clear()
-        [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start, window_end)]
-        while window_start < last_piece and not self._abort_sliding.is_set():
-            self._sliding_window_position.append(window_start)
-            torr_handle.piece_priority(window_start, 7)
-            if torr_handle.have_piece(window_start):
-                window_start += 1
-                if window_end < last_piece:
-                    window_end += 1
-                    torr_handle.piece_priority(window_end, 1)
-            time.sleep(0.1)
-        if not self._abort_sliding.is_set():
-            [torr_handle.piece_priority(piece, 1) for piece in xrange(torr_handle.get_torrent_info().num_pieces())]
-            self._streamed_file_data.append(None)
-        self._sliding_window_position.append(-1)
-        self._abort_sliding.clear()
 
     @staticmethod
     def check_piece_range(torr_handle, start_piece, end_piece):
@@ -489,18 +376,6 @@ class Torrenter(object):
             if item[-7:] == '.resume':
                 self._load_torrent_info(os.path.join(self._resume_dir, item))
 
-    def abort_buffering(self):
-        """
-        Abort buffering
-
-        :return:
-        """
-        self._abort_buffering.set()
-        try:
-            self._buffer_torrent_thread.join()
-        except (RuntimeError, AttributeError):
-            pass
-
     def get_torrent_info(self, info_hash):
         """
         Get torrent info in a human-readable format
@@ -580,6 +455,151 @@ class Torrenter(object):
     def last_added_torrent(self):
         """The last added torrent info"""
         return self._last_added_torrent[0]
+
+
+class Streamer(Torrenter):
+    """
+    Torrent Streamer class
+
+    Implements a torrent client with media streaming capability
+    """
+    def __init__(self, *args, **kwargs):
+        """Class constructor"""
+        # Worker threads
+        self._buffer_torrent_thread = None
+        self._sliding_window_thread = None
+        # Signal events
+        self._buffering_complete = threading.Event()
+        self._abort_buffering = threading.Event()
+        self._abort_sliding = threading.Event()
+        # Inter-thread data buffers
+        self._buffer_percent = deque([0], 1)
+        self._streamed_file_data = deque([None], 1)
+        self._sliding_window_position = deque([-1], 1)
+        super(Streamer, self).__init__(*args, **kwargs)
+
+    def __del__(self):
+        """Class destructor"""
+        self.abort_buffering()
+        super(Streamer, self).__del__()
+
+    def buffer_torrent_async(self, info_hash, file_index, buffer_size=35):
+        """
+        Force sequential download of file for video playback.
+
+        This method will stream a torrent in a separate thread. The caller should periodically
+        check buffering_complete flag. If buffering needs to be terminated,
+        the caller should call abort_buffering method.
+        :param info_hash: str
+        :param file_index: int - the numerical index of the file to be streamed.
+        :param buffer_size: int - buffer size in MB
+        :return:
+        """
+        self._buffer_torrent_thread = threading.Thread(target=self.buffer_torrent,
+                                                       args=(info_hash, file_index, buffer_size))
+        self._buffer_torrent_thread.daemon = True
+        self._buffer_torrent_thread.start()
+
+    def buffer_torrent(self, info_hash, file_index, buffer_size=35):
+        """
+        Force sequential download of file for video playback.
+
+        :param info_hash: str
+        :param file_index: int - the numerical index of the file to be streamed.
+        :param buffer_size: int - buffer size in MB
+        :return:
+        """
+        # todo: review and remove bugs if any
+        # Clear flags
+        self._buffering_complete.clear()
+        self._abort_buffering.clear()
+        self._buffer_percent.append(0)
+        torr_handle = self._torrents_pool[info_hash]
+        # torr_handle.set_sequential_download(True)
+        torr_info = torr_handle.get_torrent_info()
+        # Pick the file to be streamed from the torrent files
+        file_entry = torr_info.files()[file_index]
+        peer_req = torr_info.map_file(file_index, 0, 1048576)  # 1048576 (1MB) is a dummy value to avoid C int overflow
+        # Start piece of the file
+        start_piece = peer_req.piece
+        # The number of pieces in the file
+        num_pieces = file_entry.size / torr_info.piece_length()
+        # The number of pieces at the start of the file
+        # to be downloaded before the file can be played
+        buffer_length = (buffer_size * 1048576) / torr_info.piece_length()
+        # The index of the end piece in the file
+        end_piece = start_piece + num_pieces
+        if not self.check_piece_range(torr_handle, start_piece, end_piece):
+            # Check if the torrent has been buffered earlier
+            # Setup buffer download
+            # Download the last 2+MB
+            end_offset = 2097152 / torr_info.piece_length() + 2  # Experimentally tested
+            self._streamed_file_data.append((torr_handle, start_piece, num_pieces, torr_info.piece_length()))
+            [torr_handle.piece_priority(piece, 7) for piece in xrange(end_piece - end_offset, end_piece)]
+            window_start = start_piece
+            self.start_sliding_window_async(torr_handle, window_start, start_piece + buffer_length,
+                                            end_piece - end_offset - 1)
+            while (window_start <= start_piece + buffer_length
+                   and not self.check_piece_range(torr_handle, end_piece - end_offset, end_piece)
+                   and not self._abort_buffering.is_set()):
+                window_start = self._sliding_window_position[0]
+                self._buffer_percent.append(int(100.0 * float(window_start - start_piece)/buffer_length))
+                time.sleep(0.1)
+            if not self._abort_buffering.is_set():
+                torr_handle.fulsh_cahce()
+                self._buffer_percent.append(0)
+                self._buffering_complete.set()
+        else:
+            self._buffering_complete.set()
+
+    def start_sliding_window_async(self, torr_handle, window_start, window_end, last_piece):
+        """
+        Start sliding window in a separate thread
+        """
+        self._abort_sliding.set()
+        try:
+            self._sliding_window_thread.join()
+        except (RuntimeError, AttributeError):
+            pass
+        self._sliding_window_thread = threading.Thread(target=self._sliding_window,
+                                                       args=(torr_handle, window_start, window_end, last_piece))
+        self._sliding_window_thread.daemon = True
+        self._sliding_window_thread.start()
+
+    def _sliding_window(self, torr_handle, window_start, window_end, last_piece):
+        """Sliding window"""
+        self._abort_sliding.clear()
+        [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start, window_end)]
+        while window_start <= last_piece and not self._abort_sliding.is_set():
+            self._sliding_window_position.append(window_start)
+            torr_handle.piece_priority(window_start, 7)
+            if torr_handle.have_piece(window_start):
+                window_start += 1
+                if window_end < last_piece:
+                    window_end += 1
+                    torr_handle.piece_priority(window_end, 1)
+            time.sleep(0.1)
+        if not self._abort_sliding.is_set():
+            [torr_handle.piece_priority(piece, 1) for piece in xrange(torr_handle.get_torrent_info().num_pieces())]
+        self._streamed_file_data.append(None)
+        self._sliding_window_position.append(-1)
+
+    def abort_buffering(self):
+        """
+        Abort buffering
+
+        :return:
+        """
+        self._abort_buffering.set()
+        try:
+            self._buffer_torrent_thread.join()
+        except (RuntimeError, AttributeError):
+            pass
+        self._abort_sliding.set()
+        try:
+            self._sliding_window_thread.join()
+        except (RuntimeError, AttributeError):
+            pass
 
     @property
     def is_buffering_complete(self):
