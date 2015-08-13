@@ -203,3 +203,12 @@ def resume_all(torrent_client, params=None):
     """
     torrent_client.resume_all()
     return 'OK'
+
+
+def get_buffer_percent(torrent_client, params=None):
+    """
+    Get buffer %
+
+    :return: int - buffer % (can be more than 100%).
+    """
+    return torrent_client.buffer_percent

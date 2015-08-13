@@ -81,3 +81,7 @@ def pause_all():
 
 def resume_all():
     _request({'method': 'resume_all'})
+
+
+def get_buffer_percent():
+    return _request({'method': 'get_buffer_percent'})
