@@ -34,7 +34,7 @@ def buffer_torrent(torrent):
     while not (progress_dialog.iscanceled() or jsonrq.check_torrent_added()):
         sleep(1.0)
     if not progress_dialog.iscanceled():
-        torrent_data = jsonrq.get_data_buffer()
+        torrent_data = jsonrq.get_last_added_torrent()
         addon.log(str(torrent_data))
         # Create a list of videofiles in a torrent.
         # Each element is a tuple (<file name>, <file index in a torrent>).
@@ -55,7 +55,8 @@ def buffer_torrent(torrent):
                                       selected_file_index,
                                       addon.buffer_size)
                 while not (progress_dialog.iscanceled() or jsonrq.check_buffering_complete()):
-                    buffer_progress = jsonrq.get_data_buffer()
+                    buffer_percent = jsonrq.get_buffer_percent()
+                    buffer_progress = buffer_percent if buffer_percent < 100 else 100
                     torrent_info = jsonrq.get_torrent_info(torrent_data['info_hash'])
                     progress_dialog.update(buffer_progress,
                                            string(32018).format(torrent_info['total_download']),

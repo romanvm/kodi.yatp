@@ -5,6 +5,10 @@
                  label="32030" default="" />
         <setting id="buffer_size" type="number"
                  label="32031" default="35"/>
+        <setting id="dl_speed_limit" type="number"
+                 label="32048" default="0" />
+        <setting id="ul_speed_limit" type="number"
+                 label="32049" default="0" />
         <setting id="ratio_limit" type="labelenum"
                  label="32032" values="0|1|1.5|2|3|4|5" default="1.5" />
         <setting id="time_limit" type="number"

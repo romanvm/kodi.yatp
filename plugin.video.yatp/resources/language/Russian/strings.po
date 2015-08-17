@@ -194,3 +194,12 @@ msgstr "приостановить"
 msgctxt "#32046"
 msgid "delete"
 msgstr "удалить"
+
+
+msgctxt "#32047"
+msgid "Download speed limit (KB/s, 0 - no limit)"
+msgstr "Лимит скорости загрузки (КБ/с, 0 — без лимита)"
+
+msgctxt "#32048"
+msgid "Upload speed limit (KB/s, 0 - no limit)"
+msgstr "Лимит скорости отдачи (КБ/с, 0 — без лимита)"

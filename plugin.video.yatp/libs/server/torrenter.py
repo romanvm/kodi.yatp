@@ -41,7 +41,8 @@ class Torrenter(object):
 
     Implements a simple torrent client.
     """
-    def __init__(self, start_port=6881, end_port=6891, dl_limit=0, ul_limit=0, persistent=False, resume_dir=''):
+    def __init__(self, start_port=6881, end_port=6891,
+                 dl_speed_limit=0, ul_speed_limit=0, persistent=False, resume_dir=''):
         """
         Class constructor
 
@@ -49,8 +50,8 @@ class Torrenter(object):
         for torrents.
         :param start_port: int
         :param end_port: int
-        :param dl_limit: int - download limit in KB/s
-        :param ul_limit: int - uplpad lomit in KB/s
+        :param dl_speed_limit: int - download speed limit in KB/s
+        :param ul_speed_limit: int - uplpad speed lomit in KB/s
         :param persistent: bool - store persistent data
         :param resume_dir: str - the dir where session and torrents persistent data are stored.
         :return:
@@ -77,13 +78,13 @@ class Torrenter(object):
                 self._load_session_state()
             except TorrenterError:
                 self._save_session_state()
-        if dl_limit or ul_limit:
+        if dl_speed_limit or ul_speed_limit:
             settings = self._session.get_settings()
             settings.ignore_limits_on_local_network = False
-            if dl_limit > 0:
-                settings.download_rate_limit = dl_limit * 1024
-            if ul_limit > 0:
-                settings.upload_rate_limit = ul_limit * 1024
+            if dl_speed_limit > 0:
+                settings.download_rate_limit = dl_speed_limit * 1024
+            if ul_speed_limit > 0:
+                settings.upload_rate_limit = ul_speed_limit * 1024
             self._session.set_settings(settings)
         self._session.add_dht_router('router.bittorrent.com', 6881)
         self._session.add_dht_router('router.utorrent.com', 6881)

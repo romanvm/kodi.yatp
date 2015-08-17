@@ -19,6 +19,14 @@ from addon import Addon
 from torrenter import Streamer, libtorrent
 from timers import Timer, check_seeding_limits, save_resume_data
 
+
+MIME = {'.mkv': 'video/x-matroska',
+        '.mp4': 'video/mp4',
+        '.avi': 'video/avi',
+        '.ts': 'video/mp2t',
+        '.m2ts': 'video/mp2t',
+        '.mov': 'video/quicktime'}
+
 addon = Addon()
 # Torrent client parameters
 download_dir = addon.download_dir
@@ -26,7 +34,8 @@ resume_dir = os.path.join(addon.config_dir, 'torrents')
 if not os.path.exists(resume_dir):
     os.mkdir(resume_dir)
 torrent_port = addon.torrent_port
-torrent_client = Streamer(torrent_port, torrent_port + 10, True, resume_dir)
+torrent_client = Streamer(torrent_port, torrent_port + 10,
+                          addon.dl_speed_limit, addon.ul_speed_limit, True, resume_dir)
 # Timers
 max_ratio = addon.ratio_limit
 max_time = addon.time_limit
@@ -131,19 +140,7 @@ def get_media(path):
     addon.log('Playing media: ' + path)
     if sys.platform == 'win32':
         path = path.decode('utf-8')
-    if os.path.splitext(path)[1] == '.mkv':
-        mime = 'video/x-matroska'
-    elif os.path.splitext(path)[1] == '.mp4':
-        mime = 'video/mp4'
-    elif os.path.splitext(path)[1] == '.avi':
-        mime = 'video/avi'
-    elif os.path.splitext(path)[1] == '.ts':
-        mime = 'video/mp2t'
-    elif os.path.splitext(path)[1] == '.mov':
-        mime = 'video/quicktime'
-    else:
-        mime = 'auto'
-    return static_file(path, root=download_dir, mimetype=mime)
+    return static_file(path, root=download_dir, mimetype=MIME.get(os.path.splitext(path)[1], 'auto'))
 
 
 @route('/static/<path:path>')

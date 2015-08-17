@@ -194,3 +194,11 @@ msgstr ""
 msgctxt "#32046"
 msgid "delete"
 msgstr ""
+
+msgctxt "#32047"
+msgid "Download speed limit (KB/s, 0 - no limit)"
+msgstr ""
+
+msgctxt "#32048"
+msgid "Upload speed limit (KB/s, 0 - no limit)"
+msgstr ""
