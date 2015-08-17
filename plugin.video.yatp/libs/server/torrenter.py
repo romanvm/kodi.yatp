@@ -191,10 +191,12 @@ class Torrenter(object):
         :param end_piece:
         :return:
         """
+        result = True
         for piece in xrange(start_piece, end_piece + 1):
             if not torr_handle.have_piece(piece):
-                return False
-        return True
+                result = False
+                break
+        return result
 
     def _get_torrent_status(self, info_hash):
         """
@@ -529,14 +531,14 @@ class Streamer(Torrenter):
         # to be downloaded before the file can be played
         buffer_length = (buffer_size * 1048576) / torr_info.piece_length()
         # The index of the end piece in the file
-        end_piece = start_piece + num_pieces
+        end_piece = start_piece + num_pieces - 1
         if not self.check_piece_range(torr_handle, start_piece, end_piece):
             # Check if the torrent has been buffered earlier
             # Setup buffer download
             # Download the last 2+MB
             end_offset = 2097152 / torr_info.piece_length() + 2  # Experimentally tested
             self._streamed_file_data.append((torr_handle, start_piece, num_pieces, torr_info.piece_length()))
-            [torr_handle.piece_priority(piece, 7) for piece in xrange(end_piece - end_offset, end_piece)]
+            [torr_handle.piece_priority(piece, 7) for piece in xrange(end_piece - end_offset, end_piece + 1)]
             window_start = start_piece
             self.start_sliding_window_async(torr_handle, window_start, start_piece + buffer_length,
                                             end_piece - end_offset - 1)
@@ -547,8 +549,7 @@ class Streamer(Torrenter):
                 self._buffer_percent.append(int(100.0 * float(window_start - start_piece)/buffer_length))
                 time.sleep(0.1)
             if not self._abort_buffering.is_set():
-                torr_handle.fulsh_cahce()
-                self._buffer_percent.append(0)
+                torr_handle.flush_cache()
                 self._buffering_complete.set()
         else:
             self._buffering_complete.set()

@@ -51,7 +51,7 @@ def buffer_torrent(torrent):
             if index >= 0:
                 # Select a vileofile to play
                 selected_file_index = videofiles[index][0]
-                jsonrq.stream_torrent(torrent_data['info_hash'],
+                jsonrq.buffer_torrent(torrent_data['info_hash'],
                                       selected_file_index,
                                       addon.buffer_size)
                 while not (progress_dialog.iscanceled() or jsonrq.check_buffering_complete()):
