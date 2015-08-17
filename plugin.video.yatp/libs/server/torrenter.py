@@ -80,11 +80,11 @@ class Torrenter(object):
                 self._save_session_state()
         if dl_speed_limit or ul_speed_limit:
             settings = self._session.get_settings()
-            settings.ignore_limits_on_local_network = False
+            settings['ignore_limits_on_local_network'] = False
             if dl_speed_limit > 0:
-                settings.download_rate_limit = dl_speed_limit * 1024
+                settings['download_rate_limit'] = dl_speed_limit * 1024
             if ul_speed_limit > 0:
-                settings.upload_rate_limit = ul_speed_limit * 1024
+                settings['upload_rate_limit'] = ul_speed_limit * 1024
             self._session.set_settings(settings)
         self._session.add_dht_router('router.bittorrent.com', 6881)
         self._session.add_dht_router('router.utorrent.com', 6881)
@@ -537,7 +537,8 @@ class Streamer(Torrenter):
             # Setup buffer download
             # Download the last 2+MB
             end_offset = 2097152 / torr_info.piece_length() + 2  # Experimentally tested
-            self._streamed_file_data.append((torr_handle, start_piece, num_pieces, torr_info.piece_length()))
+            self._streamed_file_data.append((torr_handle, start_piece, buffer_length, end_piece - end_offset - 1,
+                                             torr_info.piece_length(), end_piece))
             [torr_handle.piece_priority(piece, 7) for piece in xrange(end_piece - end_offset, end_piece + 1)]
             window_start = start_piece
             self.start_sliding_window_async(torr_handle, window_start, start_piece + buffer_length,
@@ -546,6 +547,7 @@ class Streamer(Torrenter):
                    and not self.check_piece_range(torr_handle, end_piece - end_offset, end_piece)
                    and not self._abort_buffering.is_set()):
                 window_start = self._sliding_window_position[0]
+                print '$$$$$$ window_start={0}; start_piece={1}; buffer_length={2}'.format(window_start, start_piece, buffer_length)
                 self._buffer_percent.append(int(100.0 * float(window_start - start_piece)/buffer_length))
                 time.sleep(0.1)
             if not self._abort_buffering.is_set():
@@ -573,6 +575,7 @@ class Streamer(Torrenter):
         self._abort_sliding.clear()
         [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start, window_end)]
         while window_start <= last_piece and not self._abort_sliding.is_set():
+            print 'plugin.video.yatp. Sliding window position: {0}'.format(window_start)
             self._sliding_window_position.append(window_start)
             torr_handle.piece_priority(window_start, 7)
             if torr_handle.have_piece(window_start):
@@ -582,8 +585,8 @@ class Streamer(Torrenter):
                     torr_handle.piece_priority(window_end, 1)
             time.sleep(0.1)
         if not self._abort_sliding.is_set():
+            self._streamed_file_data.append(None)
             [torr_handle.piece_priority(piece, 1) for piece in xrange(torr_handle.get_torrent_info().num_pieces())]
-        self._streamed_file_data.append(None)
         self._sliding_window_position.append(-1)
 
     def abort_buffering(self):

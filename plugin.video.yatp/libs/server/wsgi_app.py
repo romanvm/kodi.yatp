@@ -10,6 +10,8 @@ DEBUG = True
 
 import os
 import sys
+import time
+import re
 from cStringIO import StringIO
 from json import dumps
 from inspect import getmembers, isfunction
@@ -46,6 +48,31 @@ save_resume_timer = Timer(30, save_resume_data, torrent_client)
 static_path = os.path.join(addon.path, 'resources', 'web')
 TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))
 debug(DEBUG)
+
+
+def serve_file(file_, byte_position, torrent_handle, start_piece, piece_length):
+    """
+    Serve file by chunks
+
+    Chunk == torrent piece.
+    """
+    while True:
+        current_piece = start_piece + byte_position / piece_length
+        # Wait for the piece if it is not downloaded
+        while not torrent_handle.have_piece(current_piece):
+            addon.log('...Waiting for piece #{0}...'.format(current_piece))
+            if torrent_handle.piece_priority(current_piece) < 7:
+                torrent_handle.piece_priority(current_piece, 7)
+            time.sleep(0.1)
+        torrent_handle.flush_cache()
+        addon.log('Serving piece #{0}'.format(current_piece))
+        file_.seek(byte_position)
+        chunk = file_.read(piece_length)
+        if not chunk:
+            file_.close()
+            break
+        yield chunk
+        byte_position += piece_length
 
 
 @route('/')
@@ -120,8 +147,8 @@ def get_torrents():
     """
     response.content_type = 'application/json'
     reply = dumps(torrent_client.get_all_torrents_info())
-    if DEBUG:
-        addon.log(reply)
+    # if DEBUG:
+    #     addon.log(reply)
     return reply
 
 
@@ -174,6 +201,57 @@ def add_torrent(source):
     else:
         path = download_dir
     torrent_client.add_torrent_async(torrent, path)
+
+
+@route('/stream/<path:path>')
+def test_range_serving(path):
+    """Test serving byte range"""
+    addon.log('********* Test ***********')
+    addon.log('Method: ' + request.method)
+    addon.log('Headers: ' + str(request.headers.items()))
+    file_path = os.path.normpath(os.path.join(download_dir, path))
+    addon.log('File path: {0}'.format(file_path))
+    size = os.path.getsize(file_path)
+    addon.log('File size: {0}'.format(size))
+    mime = MIME.get(os.path.splitext(path)[1], 'application/octet-stream')
+    response.set_header('Content-Type', mime)
+    response.set_header('Content-Length', str(size))
+    response.set_header('Accept-Ranges', 'bytes')
+    if request.method == 'GET':
+        addon.log('Opening file...')
+        body = open(file_path, 'rb')
+        range_header = request.get_header('Range')
+        streamed_file = torrent_client.streamed_file_data
+        if range_header and streamed_file is not None:
+            addon.log('Getting requested range')
+            range_match = re.search(r'^bytes=(\d*)-(\d*)$', range_header)
+            start_pos = int(range_match.group(1) or 0)
+            end_pos = int(range_match.group(2) or size - 1)
+            if end_pos - start_pos != 65536:
+                if start_pos >= size or end_pos >= size:
+                    addon.log('Error 416, Requested Range Not Satisfiable')
+                    return HTTPError(416, 'Requested Range Not Satisfiable')
+                response.status = 206
+                response.set_header('Content-Length', str(end_pos - start_pos + 1))
+                response.set_header('Content-Range', 'bytes {0}-{1}/{2}'.format(start_pos, end_pos, size))
+                if start_pos > 0:
+                    torrent_client.abort_buffering()
+                    start_piece = streamed_file[1] + start_pos / streamed_file[4]
+                    torrent_client.start_sliding_window_async(streamed_file[0],
+                                                              start_piece,
+                                                              start_piece + streamed_file[2],
+                                                              streamed_file[3])
+                    time.sleep(5.0)
+                addon.log('Starting file chunks serving...')
+                body = serve_file(body, start_pos, streamed_file[0], streamed_file[1], streamed_file[4])
+            else:
+                response.status = 200
+        else:
+            response.status = 200
+    else:
+        body = ''
+    addon.log('Response status: {0}'.format(response.status))
+    return body
 
 
 app = default_app()
