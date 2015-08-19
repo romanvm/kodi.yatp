@@ -80,6 +80,7 @@ class Torrenter(object):
                 self._save_session_state()
         if dl_speed_limit or ul_speed_limit:
             settings = self._session.get_settings()
+            print 'plugin.video.yatp. Cache size: {0}'.format(settings['cache_size'])
             settings['ignore_limits_on_local_network'] = False
             if dl_speed_limit > 0:
                 settings['download_rate_limit'] = dl_speed_limit * 1024
@@ -158,7 +159,7 @@ class Torrenter(object):
         :return: object - torr_handle
         """
         add_torrent_params = {'save_path': os.path.abspath(save_path),
-                              'storage_mode': libtorrent.storage_mode_t.storage_mode_sparse}
+                              'storage_mode': libtorrent.storage_mode_t.storage_mode_allocate}
         if resume_data is not None:
             add_torrent_params['resume_data'] = resume_data
         if isinstance(torrent, dict):
@@ -527,11 +528,12 @@ class Streamer(Torrenter):
         start_piece = peer_req.piece
         # The number of pieces in the file
         num_pieces = file_entry.size / torr_info.piece_length()
+        print 'plugin.video.yatp. Pieces in the torrent: {0}'.format(num_pieces)
         # The number of pieces at the start of the file
         # to be downloaded before the file can be played
         buffer_length = (buffer_size * 1048576) / torr_info.piece_length()
         # The index of the end piece in the file
-        end_piece = start_piece + num_pieces - 1
+        end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
         if not self.check_piece_range(torr_handle, start_piece, end_piece):
             # Check if the torrent has been buffered earlier
             # Setup buffer download
@@ -543,13 +545,19 @@ class Streamer(Torrenter):
             window_start = start_piece
             self.start_sliding_window_async(torr_handle, window_start, start_piece + buffer_length,
                                             end_piece - end_offset - 1)
-            while (window_start <= start_piece + buffer_length
-                   and not self.check_piece_range(torr_handle, end_piece - end_offset, end_piece)
+            while (not (window_start > start_piece + buffer_length
+                   and self.check_piece_range(torr_handle, end_piece - end_offset, end_piece))
                    and not self._abort_buffering.is_set()):
                 window_start = self._sliding_window_position[0]
-                print '$$$$$$ window_start={0}; start_piece={1}; buffer_length={2}'.format(window_start, start_piece, buffer_length)
+                print 'plugin.video.yatp. window_start={0}; start_piece={1}; buffer_length={2}'.format(window_start,
+                                                                                                       start_piece,
+                                                                                                       buffer_length)
                 self._buffer_percent.append(int(100.0 * float(window_start - start_piece)/buffer_length))
                 time.sleep(0.1)
+                print 'plugin.video.yatp.$$$$$$$$$$$$$$$$$$$$'
+                print 'Break criterion 1: {0}'.format(window_start <= start_piece + buffer_length)
+                print 'Break criterion 2: {0}'.format(not self.check_piece_range(torr_handle, end_piece - end_offset, end_piece))
+                print 'Break criterion 3: {0}'.format(not self._abort_buffering.is_set())
             if not self._abort_buffering.is_set():
                 torr_handle.flush_cache()
                 self._buffering_complete.set()
@@ -575,7 +583,7 @@ class Streamer(Torrenter):
         self._abort_sliding.clear()
         [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start, window_end)]
         while window_start <= last_piece and not self._abort_sliding.is_set():
-            print 'plugin.video.yatp. Sliding window position: {0}'.format(window_start)
+            # print 'plugin.video.yatp. Sliding window position: {0}'.format(window_start)
             self._sliding_window_position.append(window_start)
             torr_handle.piece_priority(window_start, 7)
             if torr_handle.have_piece(window_start):
@@ -596,11 +604,11 @@ class Streamer(Torrenter):
         :return:
         """
         self._abort_buffering.set()
+        self._abort_sliding.set()
         try:
             self._buffer_torrent_thread.join()
         except (RuntimeError, AttributeError):
             pass
-        self._abort_sliding.set()
         try:
             self._sliding_window_thread.join()
         except (RuntimeError, AttributeError):

@@ -15,21 +15,25 @@ import re
 from cStringIO import StringIO
 from json import dumps
 from inspect import getmembers, isfunction
-from bottle import route, default_app, request, template, response, debug, static_file, TEMPLATE_PATH, HTTPError
+from mimetypes import guess_type
+import xbmc
+from bottle import route, default_app, request, template, response, debug, static_file, TEMPLATE_PATH, HTTPError, HTTPResponse
 import methods
 from addon import Addon
 from torrenter import Streamer, libtorrent
 from timers import Timer, check_seeding_limits, save_resume_data
+from onscreen_label import OnScreenLabel
 
 
 MIME = {'.mkv': 'video/x-matroska',
         '.mp4': 'video/mp4',
         '.avi': 'video/avi',
-        '.ts': 'video/mp2t',
-        '.m2ts': 'video/mp2t',
+        '.ts': 'video/vnd.dlna.mpeg-tts',
+        '.m2ts': 'video/vnd.dlna.mpeg-tts',
         '.mov': 'video/quicktime'}
 
 addon = Addon()
+onscreen_label = OnScreenLabel('', False)
 # Torrent client parameters
 download_dir = addon.download_dir
 resume_dir = os.path.join(addon.config_dir, 'torrents')
@@ -50,9 +54,9 @@ TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))
 debug(DEBUG)
 
 
-def serve_file(file_, byte_position, torrent_handle, start_piece, piece_length):
+def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, piece_length, label):
     """
-    Serve file by chunks
+    Serve file from torrent by chunks
 
     Chunk == torrent piece.
     """
@@ -60,12 +64,20 @@ def serve_file(file_, byte_position, torrent_handle, start_piece, piece_length):
         current_piece = start_piece + byte_position / piece_length
         # Wait for the piece if it is not downloaded
         while not torrent_handle.have_piece(current_piece):
-            addon.log('...Waiting for piece #{0}...'.format(current_piece))
             if torrent_handle.piece_priority(current_piece) < 7:
                 torrent_handle.piece_priority(current_piece, 7)
+            if not xbmc.getCondVisibility('Player.Paused'):
+                xbmc.executebuiltin('Action(Pause)')
+            label.text = addon.get_localized_string(32050).format(current_piece,
+                                                                  torrent_handle.status().download_payload_rate / 1024)
+            label.show()
+            # addon.log('...Waiting for piece #{0}...'.format(current_piece))
             time.sleep(0.1)
-        torrent_handle.flush_cache()
-        addon.log('Serving piece #{0}'.format(current_piece))
+        if xbmc.getCondVisibility('Player.Paused'):
+            xbmc.executebuiltin('Action(Play)')
+        label.hide()
+        # torrent_handle.flush_cache()
+        # addon.log('Serving piece #{0}'.format(current_piece))
         file_.seek(byte_position)
         chunk = file_.read(piece_length)
         if not chunk:
@@ -73,6 +85,16 @@ def serve_file(file_, byte_position, torrent_handle, start_piece, piece_length):
             break
         yield chunk
         byte_position += piece_length
+
+
+def get_mime(filename):
+    """Get mime type for filename"""
+    mime = MIME.get(os.path.splitext(filename)[1])
+    if mime is None:
+        mime = guess_type(filename, False)[0]
+    if mime is None:
+        mime = 'application/octet-stream'
+    return mime
 
 
 @route('/')
@@ -164,7 +186,7 @@ def get_media(path):
         addon.log('Media file requested')
         addon.log('Method: ' + request.method)
         addon.log('Headers: ' + str(request.headers.items()))
-    addon.log('Playing media: ' + path)
+        addon.log('Playing media: ' + path)
     if sys.platform == 'win32':
         path = path.decode('utf-8')
     return static_file(path, root=download_dir, mimetype=MIME.get(os.path.splitext(path)[1], 'auto'))
@@ -204,54 +226,64 @@ def add_torrent(source):
 
 
 @route('/stream/<path:path>')
-def test_range_serving(path):
-    """Test serving byte range"""
+def stream_file(path):
+    """Stream torrent"""
     addon.log('********* Test ***********')
     addon.log('Method: ' + request.method)
     addon.log('Headers: ' + str(request.headers.items()))
+    addon.log('Video duration: ' + xbmc.getInfoLabel('VideoPlayer.Duration'))
     file_path = os.path.normpath(os.path.join(download_dir, path))
     addon.log('File path: {0}'.format(file_path))
     size = os.path.getsize(file_path)
     addon.log('File size: {0}'.format(size))
-    mime = MIME.get(os.path.splitext(path)[1], 'application/octet-stream')
-    response.set_header('Content-Type', mime)
-    response.set_header('Content-Length', str(size))
-    response.set_header('Accept-Ranges', 'bytes')
+    mime = get_mime(path)
+    headers = {'Content-Type': mime,
+               'Content-Length': str(size),
+               'Accept-Ranges': 'bytes'}
+    response_status = 200
     if request.method == 'GET':
         addon.log('Opening file...')
-        body = open(file_path, 'rb')
+        file_ = open(file_path, 'rb')
         range_header = request.get_header('Range')
-        streamed_file = torrent_client.streamed_file_data
-        if range_header and streamed_file is not None:
-            addon.log('Getting requested range')
+        if range_header:
             range_match = re.search(r'^bytes=(\d*)-(\d*)$', range_header)
             start_pos = int(range_match.group(1) or 0)
             end_pos = int(range_match.group(2) or size - 1)
-            if end_pos - start_pos != 65536:
-                if start_pos >= size or end_pos >= size:
-                    addon.log('Error 416, Requested Range Not Satisfiable')
-                    return HTTPError(416, 'Requested Range Not Satisfiable')
-                response.status = 206
-                response.set_header('Content-Length', str(end_pos - start_pos + 1))
-                response.set_header('Content-Range', 'bytes {0}-{1}/{2}'.format(start_pos, end_pos, size))
-                if start_pos > 0:
-                    torrent_client.abort_buffering()
-                    start_piece = streamed_file[1] + start_pos / streamed_file[4]
+            addon.log('Getting requested range {0}-{1}'.format(start_pos, end_pos))
+            if start_pos >= size or end_pos >= size:
+                addon.log('Error 416, Requested Range Not Satisfiable')
+                return HTTPError(416, 'Requested Range Not Satisfiable')
+            response_status = 206
+            headers['Content-Range'] = 'bytes {0}-{1}/{2}'.format(start_pos, end_pos, size)
+            headers['Content-Length'] = str(end_pos - start_pos + 1)
+            # Check if Kodi requests end pieces from files
+            if end_pos - start_pos != 65535 and end_pos - start_pos != 2004903:  # The last value for AVI files
+                streamed_file = torrent_client.streamed_file_data
+                start_piece = streamed_file[1] - 1 + start_pos / streamed_file[4]
+                addon.log('Start piece: {0}'.format(start_piece))
+                addon.log('Streamed file: {0}'.format(str(streamed_file)))
+                if start_pos > 0 and start_piece > torrent_client.sliding_window_position:
+                    addon.log('Resetting sliding window start to piece #{0}'.format(start_piece))
                     torrent_client.start_sliding_window_async(streamed_file[0],
                                                               start_piece,
-                                                              start_piece + streamed_file[2],
+                                                              start_piece + streamed_file[2] - 1,
                                                               streamed_file[3])
-                    time.sleep(5.0)
+                    onscreen_label.text = addon.get_localized_string(32049)
+                    onscreen_label.show()
+                    time.sleep(10.0)
                 addon.log('Starting file chunks serving...')
-                body = serve_file(body, start_pos, streamed_file[0], streamed_file[1], streamed_file[4])
-            else:
-                response.status = 200
+                body = serve_file_from_torrent(file_, start_pos, streamed_file[0], streamed_file[1],
+                                               streamed_file[4], onscreen_label)
+            else:  # Serve end piece
+                file_.seek(start_pos)
+                body = file_.read(end_pos - start_pos + 1)
+                file_.close()
         else:
-            response.status = 200
+            body = file_
     else:
         body = ''
-    addon.log('Response status: {0}'.format(response.status))
-    return body
+    addon.log('Response status: {0}'.format(response_status))
+    return HTTPResponse(body, status=response_status, **headers)
 
 
 app = default_app()

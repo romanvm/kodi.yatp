@@ -25,7 +25,7 @@ if not standalone:
     from time import sleep
     import xbmc
     import xbmcgui
-    sleep(3.0)
+    sleep(1.0)
 addon.log('***** Starting Torrent Server... *****')
 
 from libs.server import wsgi_app
