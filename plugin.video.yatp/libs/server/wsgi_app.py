@@ -272,10 +272,11 @@ def stream_file(path):
                                                           start_piece,
                                                           start_piece + streamed_file['buffer_length'],
                                                           streamed_file['end_piece'] - streamed_file['end_offset'] - 1)
-                    # Wait until 30 pieces after a jump point are downloaded.
+                    # Wait until a specified number of pieces after a jump point are downloaded.
                     while not torrent_client.check_piece_range(streamed_file['torr_handle'],
                                                                start_piece,
-                                                               min(start_piece + 30, streamed_file['end_piece'])):
+                                                               min(start_piece + addon.jump_buffer,
+                                                                   streamed_file['end_piece'])):
                         onscreen_label.text = addon.get_localized_string(32050).format(
                             torrent_client.sliding_window_position,
                             streamed_file['torr_handle'].status().download_payload_rate / 1024)

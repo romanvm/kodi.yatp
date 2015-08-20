@@ -27,11 +27,11 @@
                  label="32039" default="yatp" option="hidden" enable="eq(-2,true)" />
     </category>
     <category label="32040">
-        <setting id="torrenter_host" type="text"
-                 label="32041" default="localhost" />
-               <setting id="server_port" type="number"
+        <setting id="server_port" type="number"
                  label="32042" default="8668"/>
         <setting id="torrent_port" type="number"
-                 label="32044" default="25335" enable="eq(-1,false)" />
+                 label="32044" default="25335" />
+        <setting id="jump_buffer" type="number"
+                 label="32031" default="30"/>
     </category>
 </settings>

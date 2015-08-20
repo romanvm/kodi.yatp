@@ -195,7 +195,6 @@ msgctxt "#32046"
 msgid "delete"
 msgstr "удалить"
 
-
 msgctxt "#32047"
 msgid "Download speed limit (KB/s, 0 - no limit)"
 msgstr "Лимит скорости загрузки (КБ/с, 0 — без лимита)"
@@ -211,3 +210,7 @@ msgstr "Изменение приоритета загрузки. Подожди
 msgctxt "#32050"
 msgid "Waiting for piece #{0}. DL speed: {1}KB/s."
 msgstr "Ожидание фрагмента №{0}. Скорость загрузки: {1}КБ/с."
+
+msgctxt "#32051"
+msgid "Pieces after a jump"
+msgstr "Кол-во фрагментов после прыжка"
