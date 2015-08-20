@@ -545,10 +545,6 @@ class Streamer(Torrenter):
                                              'end_offset': end_offset,
                                              'end_piece': end_piece,
                                              'piece_length': torr_info.piece_length()})
-
-
-            a = (torr_handle, start_piece, buffer_length, end_piece - end_offset - 1,
-                                             torr_info.piece_length(), end_piece)
             [torr_handle.piece_priority(piece, 7) for piece in xrange(end_piece - end_offset, end_piece + 1)]
             window_start = start_piece
             self.start_sliding_window_async(torr_handle, window_start, start_piece + buffer_length,

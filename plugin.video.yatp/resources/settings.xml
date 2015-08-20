@@ -4,7 +4,7 @@
         <setting id="download_dir" type="folder"
                  label="32030" default="" />
         <setting id="buffer_size" type="number"
-                 label="32031" default="35"/>
+                 label="32031" default="5"/>
         <setting id="dl_speed_limit" type="number"
                  label="32047" default="0" />
         <setting id="ul_speed_limit" type="number"
@@ -31,8 +31,6 @@
                  label="32041" default="localhost" />
                <setting id="server_port" type="number"
                  label="32042" default="8668"/>
-        <setting id="remote_mode" type="bool"
-                 label="32043" default="false" />
         <setting id="torrent_port" type="number"
                  label="32044" default="25335" enable="eq(-1,false)" />
     </category>
