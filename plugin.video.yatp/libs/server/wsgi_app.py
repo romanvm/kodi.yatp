@@ -269,8 +269,8 @@ def stream_file(path):
                 if start_pos > 0 and start_piece > torrent_client.sliding_window_position:
                     addon.log('Resetting sliding window start to piece #{0}'.format(start_piece))
                     torrent_client.start_sliding_window_async(streamed_file['torr_handle'],
-                                                          start_piece,
-                                                          start_piece + streamed_file['buffer_length'],
+                                                          start_piece - 1,
+                                                          start_piece + streamed_file['buffer_length'] - 1,
                                                           streamed_file['end_piece'] - streamed_file['end_offset'] - 1)
                     # Wait until a specified number of pieces after a jump point are downloaded.
                     while not torrent_client.check_piece_range(streamed_file['torr_handle'],
