@@ -8,7 +8,7 @@ torrent-client.
 
 - Video torrents playback in Kodi.
 - Seeding after playback.
-- Speed, ration and time limits for torrents.
+- Speed, ratio and time limits for torrents.
 - Support for multi-file torrents - you can select individual video files for playback.
 - Support for magnet links, local and remote .torrent files.
 - Support for jump/seek to arbitrary parts of the video (it re-prioritizes pieces for download).
