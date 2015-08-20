@@ -268,9 +268,11 @@ def stream_file(path):
                 addon.log('Streamed file: {0}'.format(str(streamed_file)))
                 if start_pos > 0 and start_piece > torrent_client.sliding_window_position:
                     addon.log('Resetting sliding window start to piece #{0}'.format(start_piece))
+                    # Set sliding window start 2 pieces before the jump point to minimize (hopefully) image distortion.
+                    # Needs to be tested!
                     torrent_client.start_sliding_window_async(streamed_file['torr_handle'],
-                                                          start_piece - 1,
-                                                          start_piece + streamed_file['buffer_length'] - 1,
+                                                          start_piece - 2,
+                                                          start_piece + streamed_file['buffer_length'] - 2,
                                                           streamed_file['end_piece'] - streamed_file['end_offset'] - 1)
                     # Wait until a specified number of pieces after a jump point are downloaded.
                     while not torrent_client.check_piece_range(streamed_file['torr_handle'],
@@ -281,7 +283,7 @@ def stream_file(path):
                             torrent_client.sliding_window_position,
                             streamed_file['torr_handle'].status().download_payload_rate / 1024)
                         onscreen_label.show()
-                        time.sleep(1.0)
+                        time.sleep(0.5)
                 addon.log('Starting file chunks serving...')
                 body = serve_file_from_torrent(file_, start_pos,
                                                streamed_file['torr_handle'],
