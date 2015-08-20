@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # coding: utf-8
 # Module: server
 # Created on: 01.07.2015
@@ -6,10 +5,6 @@
 # License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
 """
 Torrent streamer WSGI server
-
-To start the server in standalone mode (without Kodi)
-use -s or --standalone command line parameter, e.g.:
-python server.py --standalone
 """
 
 from time import sleep

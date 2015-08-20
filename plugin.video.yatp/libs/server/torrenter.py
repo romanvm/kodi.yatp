@@ -520,7 +520,6 @@ class Streamer(Torrenter):
         self._abort_buffering.clear()
         self._buffer_percent.append(0)
         torr_handle = self._torrents_pool[info_hash]
-        # torr_handle.set_sequential_download(True)
         torr_info = torr_handle.get_torrent_info()
         # Pick the file to be streamed from the torrent files
         file_entry = torr_info.files()[file_index]
@@ -534,6 +533,8 @@ class Streamer(Torrenter):
         buffer_length = (buffer_size * 1048576) / torr_info.piece_length()
         # The index of the end piece in the file
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
+        print 'plugin.video.yatp. start_piece={0}, end_piece={1}, piece_length={2}'.format(start_piece, end_piece,
+                                                                                           torr_info.piece_length())
         if not self.check_piece_range(torr_handle, start_piece, end_piece):
             # Check if the torrent has been buffered earlier
             # Setup buffer download
@@ -553,9 +554,6 @@ class Streamer(Torrenter):
                    and self.check_piece_range(torr_handle, end_piece - end_offset, end_piece))
                    and not self._abort_buffering.is_set()):
                 window_start = self._sliding_window_position[0]
-                print 'plugin.video.yatp. window_start={0}; start_piece={1}; buffer_length={2}'.format(window_start,
-                                                                                                       start_piece,
-                                                                                                       buffer_length)
                 self._buffer_percent.append(int(100.0 * float(window_start - start_piece)/buffer_length))
                 time.sleep(0.1)
             if not self._abort_buffering.is_set():
@@ -586,7 +584,7 @@ class Streamer(Torrenter):
         of a media file for streaming purposes.
         """
         self._abort_sliding.clear()
-        [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start, window_end)]
+        [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start, window_end + 1)]
         while window_start <= last_piece and not self._abort_sliding.is_set():
             print 'plugin.video.yatp. Sliding window position: {0}'.format(window_start)
             self._sliding_window_position.append(window_start)
@@ -638,6 +636,7 @@ class Streamer(Torrenter):
     def streamed_file_data(self):
         """
         Streamed file data
+
         :return: tuple - (torr_handle, start_piece, num_pieces)
         """
         return self._streamed_file_data[0]
