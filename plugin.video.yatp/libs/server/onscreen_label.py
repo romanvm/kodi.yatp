@@ -2,6 +2,7 @@
 # Module: onscreen_label
 # Created on: 17.08.2015
 # Author: Roman Miroshnychenko aka Roman V.M. (romanvm@yandex.ua)
+# Licence: GPL v.3: http://www.gnu.org/copyleft/gpl.html
 
 
 import os

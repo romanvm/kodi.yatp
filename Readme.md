@@ -34,3 +34,6 @@ http://<Kodi hostname or IP>:8668
 The Web UI support basic operations with torrents: adding torrents for download and pausing/resuming/deleting them.
 
 **License:** [GPL v.3](http://www.gnu.org/licenses/gpl-3.0.en.html).
+
+The plugin includes [Bottle](http://bottlepy.org/docs/dev/index.html) module which is licensed separately
+by its author(-s).

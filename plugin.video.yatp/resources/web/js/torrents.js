@@ -1,3 +1,4 @@
+// Licence: GPL v.3: http://www.gnu.org/copyleft/gpl.html
 // Start function declaration
 function pause_torrents()
 {

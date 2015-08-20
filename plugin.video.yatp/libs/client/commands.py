@@ -2,6 +2,7 @@
 # Module: commands
 # Created on: 28.07.2015
 # Author: Roman Miroshnychenko aka Roman V.M. (romanvm@yandex.ua)
+# Licence: GPL v.3: http://www.gnu.org/copyleft/gpl.html
 """
 Context menu commands
 """

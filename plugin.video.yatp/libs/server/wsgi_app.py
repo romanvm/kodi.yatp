@@ -2,6 +2,7 @@
 # Module: wsgi_app
 # Created on: 23.07.2015
 # Author: Roman Miroshnychenko aka Roman V.M. (romanvm@yandex.ua)
+# Licence: GPL v.3: http://www.gnu.org/copyleft/gpl.html
 """
 Torrent streamer WSGI application for Web/JSON interface
 """
