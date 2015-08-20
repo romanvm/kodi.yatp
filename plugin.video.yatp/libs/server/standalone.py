@@ -19,7 +19,9 @@ DEFAULT_CONFIG = {'config_dir': '.',  # Root dir to store resume data
                   'server_port': 8668,
                   'pass_protect': False,
                   'login': 'yatp',
-                  'password': 'yatp'}
+                  'password': 'yatp',
+                  'dl_speed_limit': 0,
+                  'ul_speed_limit': 0}
 
 
 class ConfigParser(object):

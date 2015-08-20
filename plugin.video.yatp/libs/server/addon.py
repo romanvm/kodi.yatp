@@ -17,6 +17,7 @@ else:
     import os
     import xbmc
 
+
     class Addon(simpleplugin.Addon):
         """Helper class to access addon parameters"""
         def __init__(self):
