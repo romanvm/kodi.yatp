@@ -161,7 +161,7 @@ class Torrenter(object):
         :return: object - torr_handle
         """
         add_torrent_params = {'save_path': os.path.abspath(save_path),
-                              'storage_mode': libtorrent.storage_mode_t.storage_mode_allocate}
+                              'storage_mode': libtorrent.storage_mode_t.storage_mode_sparse}
         if resume_data is not None:
             add_torrent_params['resume_data'] = resume_data
         if isinstance(torrent, dict):
