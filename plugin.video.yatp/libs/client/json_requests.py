@@ -6,7 +6,6 @@
 """
 JSON-RPC requests to the Torrent Server
 """
-# todo: remove all json-rpc
 
 from requests import post
 from simpleplugin import Addon

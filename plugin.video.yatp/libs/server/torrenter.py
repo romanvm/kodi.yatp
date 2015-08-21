@@ -596,7 +596,6 @@ class Streamer(Torrenter):
                     torr_handle.piece_priority(window_end, 1)
             time.sleep(0.1)
         if not self._abort_sliding.is_set():
-            self._streamed_file_data.append(None)
             [torr_handle.piece_priority(piece, 1) for piece in xrange(torr_handle.get_torrent_info().num_pieces())]
         self._sliding_window_position.append(-1)
 

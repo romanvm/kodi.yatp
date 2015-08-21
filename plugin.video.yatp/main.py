@@ -6,7 +6,6 @@
 """
 Plugin main module
 """
-# todo: Add localization
 
 from libs.client.actions import plugin
 

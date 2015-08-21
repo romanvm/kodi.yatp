@@ -64,6 +64,7 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
     If some piece is not downloaded, the function prioritizes it
     and then waits until it is downloaded.
     """
+    paused = False  # Needed to prevent unpausing video paused by a user.
     while True:
         current_piece = start_piece + byte_position / piece_length
         # Wait for the piece if it is not downloaded
@@ -72,13 +73,15 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
                 torrent_handle.piece_priority(current_piece, 7)
             if not xbmc.getCondVisibility('Player.Paused'):
                 xbmc.executebuiltin('Action(Pause)')
+                paused = True
             label.text = addon.get_localized_string(32050).format(current_piece,
                                                                   torrent_handle.status().download_payload_rate / 1024)
             label.show()
-            addon.log('...Waiting for piece #{0}...'.format(current_piece))
+            addon.log('Waiting for piece #{0}...'.format(current_piece))
             time.sleep(0.1)
-        if xbmc.getCondVisibility('Player.Paused'):
+        if xbmc.getCondVisibility('Player.Paused') and paused:
             xbmc.executebuiltin('Action(Play)')
+            paused = False
         label.hide()
         # torrent_handle.flush_cache()
         addon.log('Serving piece #{0}'.format(current_piece))
@@ -193,7 +196,7 @@ def get_media(path):
         addon.log('Playing media: ' + path)
     if sys.platform == 'win32':
         path = path.decode('utf-8')
-    return static_file(path, root=download_dir, mimetype=MIME.get(os.path.splitext(path)[1], 'auto'))
+    return static_file(path, root=download_dir, mimetype=get_mime(path))
 
 
 @route('/static/<path:path>')
@@ -247,58 +250,60 @@ def stream_file(path):
                'Accept-Ranges': 'bytes'}
     response_status = 200
     if request.method == 'GET':
-        file_ = open(file_path, 'rb')
-        range_header = request.get_header('Range')
-        if range_header:
-            range_match = re.search(r'^bytes=(\d*)-(\d*)$', range_header)
-            start_pos = int(range_match.group(1) or 0)
-            end_pos = int(range_match.group(2) or size - 1)
-            addon.log('Getting requested range {0}-{1}'.format(start_pos, end_pos))
-            if start_pos >= size or end_pos >= size:
-                addon.log('Error 416, Requested Range Not Satisfiable')
-                return HTTPError(416, 'Requested Range Not Satisfiable')
-            response_status = 206
-            headers['Content-Range'] = 'bytes {0}-{1}/{2}'.format(start_pos, end_pos, size)
-            headers['Content-Length'] = str(end_pos - start_pos + 1)
-            # Check if Kodi requests end pieces from files
-            # When requesting a jump, Koid always checks the last 64 or 1957 (for AVI) KB.
-            if end_pos - start_pos != 65535 and end_pos - start_pos != 2004903:  # The last value for AVI files
-                streamed_file = torrent_client.streamed_file_data
-                start_piece = streamed_file['start_piece'] - 1 + start_pos / streamed_file['piece_length']
-                addon.log('Start piece: {0}'.format(start_piece))
-                addon.log('Streamed file: {0}'.format(str(streamed_file)))
-                if start_pos > 0 and start_piece > torrent_client.sliding_window_position:
-                    addon.log('Resetting sliding window start to piece #{0}'.format(start_piece))
-                    # Set sliding window start 2 pieces before the jump point to minimize (hopefully) image distortion.
-                    # Needs to be tested!
-                    torrent_client.start_sliding_window_async(streamed_file['torr_handle'],
-                                                          start_piece - 2,
-                                                          start_piece + streamed_file['buffer_length'] - 2,
-                                                          streamed_file['end_piece'] - streamed_file['end_offset'] - 1)
-                    # Wait until a specified number of pieces after a jump point are downloaded.
-                    while not torrent_client.check_piece_range(streamed_file['torr_handle'],
-                                                               start_piece,
-                                                               min(start_piece + addon.jump_buffer,
-                                                                   streamed_file['end_piece'])):
-                        onscreen_label.text = addon.get_localized_string(32050).format(
-                            torrent_client.sliding_window_position,
-                            streamed_file['torr_handle'].status().download_payload_rate / 1024)
-                        onscreen_label.show()
-                        time.sleep(0.5)
-                addon.log('Starting file chunks serving...')
-                body = serve_file_from_torrent(file_, start_pos,
-                                               streamed_file['torr_handle'],
-                                               streamed_file['start_piece'],
-                                               streamed_file['piece_length'],
-                                               onscreen_label)
-            else:  # Serve end piece
-                file_.seek(start_pos)
-                body = file_.read(end_pos - start_pos + 1)
-                file_.close()
+        range_match = re.search(r'^bytes=(\d*)-(\d*)$', request.get_header('Range'))
+        start_pos = int(range_match.group(1) or 0)
+        end_pos = int(range_match.group(2) or size - 1)
+        addon.log('Getting requested range {0}-{1}'.format(start_pos, end_pos))
+        if start_pos >= size or end_pos >= size:
+            addon.log('Error 416, Requested Range Not Satisfiable')
+            return HTTPError(416, 'Requested Range Not Satisfiable')
+        response_status = 206
+        headers['Content-Range'] = 'bytes {0}-{1}/{2}'.format(start_pos, end_pos, size)
+        content_length = end_pos - start_pos + 1
+        headers['Content-Length'] = str(content_length)
+        streamed_file = torrent_client.streamed_file_data
+        if (str(streamed_file['torr_handle'].status().state) == 'seeding'
+            or content_length < streamed_file['piece_length'] * streamed_file['end_offset']):
+            addon.log('Torrent is being seeded or the end piece requested.')
+            # If the file is beeing seeded or Kodi checks the end piece,
+            # then serve the file via Bottle.
+            return static_file(path, root=download_dir, mimetype=get_mime(path))
         else:
-            body = file_
+            start_piece = streamed_file['start_piece'] - 1 + start_pos / streamed_file['piece_length']
+            addon.log('Start piece: {0}'.format(start_piece))
+            addon.log('Streamed file: {0}'.format(str(streamed_file)))
+            if start_pos > 0 and start_piece > torrent_client.sliding_window_position:
+                addon.log('Resetting sliding window start to piece #{0}'.format(start_piece))
+                # Set sliding window start 3 pieces before the jump point to minimize (hopefully) image distortion.
+                # Needs to be tested!
+                torrent_client.start_sliding_window_async(streamed_file['torr_handle'],
+                                                      start_piece - 3,
+                                                      start_piece + streamed_file['buffer_length'] - 3,
+                                                      streamed_file['end_piece'] - streamed_file['end_offset'] - 1)
+                if not xbmc.getCondVisibility('Player.Paused'):
+                    xbmc.executebuiltin('Action(Pause)')
+                # Wait until a specified number of pieces after a jump point are downloaded.
+                while not torrent_client.check_piece_range(streamed_file['torr_handle'],
+                                                           start_piece,
+                                                           min(start_piece + addon.jump_buffer,
+                                                               streamed_file['end_piece'])):
+                    onscreen_label.text = addon.get_localized_string(32050).format(
+                        torrent_client.sliding_window_position,
+                        streamed_file['torr_handle'].status().download_payload_rate / 1024)
+                    onscreen_label.show()
+                    time.sleep(0.5)
+                if xbmc.getCondVisibility('Player.Paused'):
+                    xbmc.executebuiltin('Action(Play)')
+            addon.log('Starting file chunks serving...')
+            body = serve_file_from_torrent(open(file_path, 'rb'),
+                                           start_pos,
+                                           streamed_file['torr_handle'],
+                                           streamed_file['start_piece'],
+                                           streamed_file['piece_length'],
+                                           onscreen_label)
     else:
         body = ''
+    addon.log('Reply headers: {0}'.format(str(headers)))
     return HTTPResponse(body, status=response_status, **headers)
 
 
