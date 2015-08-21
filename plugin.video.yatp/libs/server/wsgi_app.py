@@ -16,7 +16,6 @@ import re
 from cStringIO import StringIO
 from json import dumps
 from inspect import getmembers, isfunction
-from mimetypes import guess_type
 import xbmc
 from bottle import (route, default_app, request, template, response, debug,
                     static_file, TEMPLATE_PATH, HTTPError, HTTPResponse)
@@ -25,14 +24,8 @@ from addon import Addon
 from torrenter import Streamer, libtorrent
 from timers import Timer, check_seeding_limits, save_resume_data
 from onscreen_label import OnScreenLabel
+from utilities import get_mime, serve_file_from_torrent
 
-
-MIME = {'.mkv': 'video/x-matroska',
-        '.mp4': 'video/mp4',
-        '.avi': 'video/avi',
-        '.ts': 'video/vnd.dlna.mpeg-tts',
-        '.m2ts': 'video/vnd.dlna.mpeg-tts',
-        '.mov': 'video/quicktime'}
 
 addon = Addon()
 onscreen_label = OnScreenLabel('', False)
@@ -54,54 +47,6 @@ save_resume_timer = Timer(30, save_resume_data, torrent_client)
 static_path = os.path.join(addon.path, 'resources', 'web')
 TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))
 debug(DEBUG)
-
-
-def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, piece_length, label):
-    """
-    Serve a file from torrent by pieces
-
-    This iterator function serves a video file being downloaded to Kodi piece by piece.
-    If some piece is not downloaded, the function prioritizes it
-    and then waits until it is downloaded.
-    """
-    paused = False  # Needed to prevent unpausing video paused by a user.
-    while True:
-        current_piece = start_piece + byte_position / piece_length
-        # Wait for the piece if it is not downloaded
-        while not torrent_handle.have_piece(current_piece):
-            if torrent_handle.piece_priority(current_piece) < 7:
-                torrent_handle.piece_priority(current_piece, 7)
-            if not xbmc.getCondVisibility('Player.Paused'):
-                xbmc.executebuiltin('Action(Pause)')
-                paused = True
-            label.text = addon.get_localized_string(32050).format(current_piece,
-                                                                  torrent_handle.status().download_payload_rate / 1024)
-            label.show()
-            addon.log('Waiting for piece #{0}...'.format(current_piece))
-            time.sleep(0.1)
-        if xbmc.getCondVisibility('Player.Paused') and paused:
-            xbmc.executebuiltin('Action(Play)')
-            paused = False
-        label.hide()
-        # torrent_handle.flush_cache()
-        addon.log('Serving piece #{0}'.format(current_piece))
-        file_.seek(byte_position)
-        chunk = file_.read(piece_length)
-        if not chunk:
-            file_.close()
-            break
-        yield chunk
-        byte_position += piece_length
-
-
-def get_mime(filename):
-    """Get mime type for filename"""
-    mime = MIME.get(os.path.splitext(filename)[1])
-    if mime is None:
-        mime = guess_type(filename, False)[0]
-    if mime is None:
-        mime = 'application/octet-stream'
-    return mime
 
 
 @route('/')
@@ -280,9 +225,13 @@ def stream_file(path):
                                                       start_piece - 3,
                                                       start_piece + streamed_file['buffer_length'] - 3,
                                                       streamed_file['end_piece'] - streamed_file['end_offset'] - 1)
+                # Wait until a specified number of pieces after a jump point are downloaded.
                 if not xbmc.getCondVisibility('Player.Paused'):
                     xbmc.executebuiltin('Action(Pause)')
-                # Wait until a specified number of pieces after a jump point are downloaded.
+                    paused = True
+                    addon.log('stream_file - paused')
+                else:
+                    paused = False
                 while not torrent_client.check_piece_range(streamed_file['torr_handle'],
                                                            start_piece,
                                                            min(start_piece + addon.jump_buffer,
@@ -292,8 +241,9 @@ def stream_file(path):
                         streamed_file['torr_handle'].status().download_payload_rate / 1024)
                     onscreen_label.show()
                     time.sleep(0.5)
-                if xbmc.getCondVisibility('Player.Paused'):
+                if paused:  # Don't unpause if paused by a user.
                     xbmc.executebuiltin('Action(Play)')
+                    addon.log('stream_file - unpaused')
             addon.log('Starting file chunks serving...')
             body = serve_file_from_torrent(open(file_path, 'rb'),
                                            start_pos,
