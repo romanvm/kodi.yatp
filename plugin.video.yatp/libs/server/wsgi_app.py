@@ -226,12 +226,6 @@ def stream_file(path):
                                                       start_piece + streamed_file['buffer_length'] - 3,
                                                       streamed_file['end_piece'] - streamed_file['end_offset'] - 1)
                 # Wait until a specified number of pieces after a jump point are downloaded.
-                if not xbmc.getCondVisibility('Player.Paused'):
-                    xbmc.executebuiltin('Action(Pause)')
-                    paused = True
-                    addon.log('stream_file - paused')
-                else:
-                    paused = False
                 while not torrent_client.check_piece_range(streamed_file['torr_handle'],
                                                            start_piece,
                                                            min(start_piece + addon.jump_buffer,
@@ -241,9 +235,6 @@ def stream_file(path):
                         streamed_file['torr_handle'].status().download_payload_rate / 1024)
                     onscreen_label.show()
                     time.sleep(0.5)
-                if paused:  # Don't unpause if paused by a user.
-                    xbmc.executebuiltin('Action(Play)')
-                    addon.log('stream_file - unpaused')
             addon.log('Starting file chunks serving...')
             body = serve_file_from_torrent(open(file_path, 'rb'),
                                            start_pos,
