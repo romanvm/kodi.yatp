@@ -17,7 +17,7 @@ from simpleplugin import Addon
 
 addon = Addon()
 string = addon.get_localized_string
-media_url = 'http://{0}:{1}/stream/'.format(addon.torrenter_host, addon.server_port)
+media_url = 'http://127.0.0.1:{0}/stream/'.format(addon.server_port)
 
 
 def buffer_torrent(torrent):
