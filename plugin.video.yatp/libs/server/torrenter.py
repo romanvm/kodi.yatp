@@ -530,32 +530,39 @@ class Streamer(Torrenter):
         num_pieces = file_entry.size / torr_info.piece_length()
         # The number of pieces at the start of the file
         # to be downloaded before the file can be played
-        buffer_length = (buffer_size * 1048576) / torr_info.piece_length()
+        end_offset = 2097152 / torr_info.piece_length() + 2  # Experimentally tested
+        buffer_length = (buffer_size * 1048576) / torr_info.piece_length() - end_offset
         # The index of the end piece in the file
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
         print 'plugin.video.yatp. start_piece={0}, end_piece={1}, piece_length={2}'.format(start_piece, end_piece,
                                                                                            torr_info.piece_length())
+        # Check if the torrent has been downloaded earlier
         if not self.check_piece_range(torr_handle, start_piece, end_piece):
-            # Check if the torrent has been buffered earlier
-            # Setup buffer download
-            # Download the last 2+MB
-            end_offset = 2097152 / torr_info.piece_length() + 2  # Experimentally tested
             self._streamed_file_data.append({'torr_handle': torr_handle,
                                              'buffer_length': buffer_length,
                                              'start_piece': start_piece,
                                              'end_offset': end_offset,
                                              'end_piece': end_piece,
                                              'piece_length': torr_info.piece_length()})
-            [torr_handle.piece_priority(piece, 7) for piece in xrange(end_piece - end_offset, end_piece + 1)]
-            window_start = start_piece
-            self.start_sliding_window_async(torr_handle, window_start, start_piece + buffer_length,
+            # Setup buffer download
+            buffer_pool = (range(start_piece, start_piece + buffer_length + 1)
+                           + range(end_piece - end_offset, end_piece - 1))
+            print 'plugin.video.yatp. buffer_pool: {}'.format(str(buffer_pool))
+            buffer_pool_length = len(buffer_pool)
+            [torr_handle.piece_priority(piece, 7) for piece in buffer_pool]
+            self.start_sliding_window_async(torr_handle, start_piece, start_piece + buffer_length,
                                             end_piece - end_offset - 1)
-            while (not (window_start > start_piece + buffer_length
-                   and self.check_piece_range(torr_handle, end_piece - end_offset, end_piece))
-                   and not self._abort_buffering.is_set()):
-                window_start = self._sliding_window_position[0]
-                self._buffer_percent.append(int(100.0 * float(window_start - start_piece)/buffer_length))
+            while len(buffer_pool) > 0 and not self._abort_buffering.is_set():
+                # todo: finis this!
                 time.sleep(0.1)
+                for index, piece_ in enumerate(buffer_pool):
+                    if torr_handle.have_piece(piece_):
+                        del buffer_pool[index]
+                print 'plugin.video.yatp. buffer_pool: {}'.format(str(buffer_pool))
+                buffer_ = int(100 * float(buffer_pool_length - len(buffer_pool)
+                                                            / buffer_pool_length))
+                print 'plugin.video.yatp. buffer={}'.format(str(buffer_))
+                self._buffer_percent.append(buffer_)
             if not self._abort_buffering.is_set():
                 torr_handle.flush_cache()
                 self._buffering_complete.set()
