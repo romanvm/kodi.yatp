@@ -217,7 +217,7 @@ def stream_file(path):
             start_piece = streamed_file['start_piece'] - 1 + start_pos / streamed_file['piece_length']
             addon.log('Start piece: {0}'.format(start_piece))
             addon.log('Streamed file: {0}'.format(str(streamed_file)))
-            if start_pos > 0 and start_piece > torrent_client.sliding_window_position:
+            if start_pos > 0:
                 addon.log('Resetting sliding window start to piece #{0}'.format(start_piece))
                 # Set sliding window start 3 pieces before the jump point to minimize (hopefully) image distortion.
                 # Needs to be tested!
