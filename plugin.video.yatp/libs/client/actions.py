@@ -91,13 +91,13 @@ def torrents(params):
     torrent_list = sorted(jsonrq.get_all_torrent_info(), key=lambda i: i['added_time'], reverse=True)
     for torrent in torrent_list:
         if torrent['state'] == 'downloading':
-            label = '[COLOR=red]{0}[/COLOR]'.format(torrent['name'])
+            label = u'[COLOR=red]{0}[/COLOR]'.format(torrent['name'])
         elif torrent['state'] == 'seeding':
-            label = '[COLOR=green]{0}[/COLOR]'.format(torrent['name'])
+            label = u'[COLOR=green]{0}[/COLOR]'.format(torrent['name'])
         elif torrent['state'] == 'paused':
-            label = '[COLOR=gray]{0}[/COLOR]'.format(torrent['name'])
+            label = u'[COLOR=gray]{0}[/COLOR]'.format(torrent['name'])
         else:
-            label = '[COLOR=blue]{0}[/COLOR]'.format(torrent['name'])
+            label = u'[COLOR=blue]{0}[/COLOR]'.format(torrent['name'])
         item = {'label': label,
                 'url': plugin.get_url(action='torrent_info', info_hash=torrent['info_hash']),
                 'is_folder': False}
