@@ -546,7 +546,7 @@ class Streamer(Torrenter):
                                              'piece_length': torr_info.piece_length()})
             # Setup buffer download
             buffer_pool = (range(start_piece, start_piece + buffer_length + 1)
-                           + range(end_piece - end_offset, end_piece - 1))
+                           + range(end_piece - end_offset, end_piece + 1))
             print 'plugin.video.yatp. buffer_pool: {0}'.format(str(buffer_pool))
             buffer_pool_length = len(buffer_pool)
             [torr_handle.piece_priority(piece, 7) for piece in buffer_pool]
