@@ -547,21 +547,17 @@ class Streamer(Torrenter):
             # Setup buffer download
             buffer_pool = (range(start_piece, start_piece + buffer_length + 1)
                            + range(end_piece - end_offset, end_piece - 1))
-            print 'plugin.video.yatp. buffer_pool: {}'.format(str(buffer_pool))
+            print 'plugin.video.yatp. buffer_pool: {0}'.format(str(buffer_pool))
             buffer_pool_length = len(buffer_pool)
             [torr_handle.piece_priority(piece, 7) for piece in buffer_pool]
             self.start_sliding_window_async(torr_handle, start_piece, start_piece + buffer_length,
                                             end_piece - end_offset - 1)
             while len(buffer_pool) > 0 and not self._abort_buffering.is_set():
-                # todo: finis this!
                 time.sleep(0.1)
                 for index, piece_ in enumerate(buffer_pool):
                     if torr_handle.have_piece(piece_):
                         del buffer_pool[index]
-                print 'plugin.video.yatp. buffer_pool: {}'.format(str(buffer_pool))
-                buffer_ = int(100 * float(buffer_pool_length - len(buffer_pool)
-                                                            / buffer_pool_length))
-                print 'plugin.video.yatp. buffer={}'.format(str(buffer_))
+                buffer_ = int(100 * float(buffer_pool_length - len(buffer_pool)) / buffer_pool_length)
                 self._buffer_percent.append(buffer_)
             if not self._abort_buffering.is_set():
                 torr_handle.flush_cache()

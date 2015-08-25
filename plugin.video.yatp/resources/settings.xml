@@ -4,7 +4,7 @@
         <setting id="download_dir" type="folder"
                  label="32030" default="" />
         <setting id="buffer_size" type="number"
-                 label="32031" default="5"/>
+                 label="32031" default="10"/>
         <setting id="dl_speed_limit" type="number"
                  label="32047" default="0" />
         <setting id="ul_speed_limit" type="number"
