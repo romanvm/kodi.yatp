@@ -231,7 +231,7 @@ def stream_file(path):
                                                            min(start_piece + addon.jump_buffer,
                                                                streamed_file['end_piece'])):
                     onscreen_label.text = addon.get_localized_string(32050).format(
-                        torrent_client.sliding_window_position,
+                        torrent_client.sliding_window_position + 1,
                         streamed_file['torr_handle'].status().download_payload_rate / 1024)
                     onscreen_label.show()
                     time.sleep(0.5)
