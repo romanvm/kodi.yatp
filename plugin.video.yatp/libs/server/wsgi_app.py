@@ -16,7 +16,6 @@ import re
 from cStringIO import StringIO
 from json import dumps
 from inspect import getmembers, isfunction
-import xbmc
 from bottle import (route, default_app, request, template, response, debug,
                     static_file, TEMPLATE_PATH, HTTPError, HTTPResponse)
 import methods
@@ -124,24 +123,6 @@ def get_torrents():
     # if DEBUG:
     #     addon.log(reply)
     return reply
-
-
-@route('/media/<path:path>')
-def get_media(path):
-    """
-    Serve media files
-
-    :param path: relative path to a media file
-    :return:
-    """
-    if DEBUG:
-        addon.log('Media file requested')
-        addon.log('Method: ' + request.method)
-        addon.log('Headers: ' + str(request.headers.items()))
-        addon.log('Playing media: ' + path)
-    if sys.platform == 'win32':
-        path = path.decode('utf-8')
-    return static_file(path, root=download_dir, mimetype=get_mime(path))
 
 
 @route('/static/<path:path>')
