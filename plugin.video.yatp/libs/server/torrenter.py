@@ -619,6 +619,18 @@ class Streamer(Torrenter):
         except (RuntimeError, AttributeError):
             pass
 
+    def remove_torrent(self, info_hash, delete_files=False):
+        """
+        Remove torrent
+
+        :param info_hash:
+        :param delete_files:
+        :return:
+        """
+        if info_hash == str(self.streamed_file_data['torr_handle'].info_hash()):
+            self.abort_buffering()
+        super(Streamer, self).remove_torrent(info_hash, delete_files)
+
     @property
     def is_buffering_complete(self):
         """Buffering complete flag"""

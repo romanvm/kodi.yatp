@@ -40,7 +40,7 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
                     paused = True
                     addon.log('serve_file - paused')
                 label.text = addon.get_localized_string(32050).format(current_piece,
-                                                                      torrent_handle.status().download_payload_rate / 1024)
+                                                                  torrent_handle.status().download_payload_rate / 1024)
                 label.show()
                 addon.log('Waiting for piece #{0}...'.format(current_piece))
                 time.sleep(0.1)
