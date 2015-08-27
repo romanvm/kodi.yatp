@@ -9,12 +9,24 @@ import time
 import xbmcgui
 from simpleplugin import Plugin
 import json_requests as jsonrq
-from buffering import buffer_torrent
+from buffering import buffer_torrent, stream_torrent
 
 plugin = Plugin()
 string = plugin.get_localized_string
 icons = os.path.join(plugin.path, 'resources', 'icons')
 commands = os.path.join(os.path.dirname(__file__), 'commands.py')
+
+
+def _play(path):
+    """
+    Play a videofile
+
+    :param path:
+    :return:
+    """
+    plugin.log('Path to play: {0}'.format(path))
+    success = True if path else False
+    return plugin.resolve_url(path, success)
 
 
 def root(params):
@@ -60,10 +72,18 @@ def play_torrent(params):
     :param params:
     :return:
     """
-    path = buffer_torrent(params['torrent'])
-    plugin.log('Path to play: {0}'.format(path))
-    success = True if path else False
-    return plugin.resolve_url(path, success)
+    return _play(buffer_torrent(params['torrent'], params.get('file_index')))
+
+
+def play_file(params):
+    """
+    Stream a file from torrent by its index
+
+    The torrent must be already added via JSON-RPC!
+    :param params:
+    :return:
+    """
+    return _play(stream_torrent(params['file_index']))
 
 
 def download_torrent(params):
@@ -158,6 +178,7 @@ def torrent_info(params):
 plugin.actions['root'] = root
 plugin.actions['select_torrent'] = select_torrent
 plugin.actions['play'] = play_torrent
+plugin.actions['play_file'] = play_file
 plugin.actions['download'] = download_torrent
 plugin.actions['torrents'] = torrents
 plugin.actions['torrent_info'] = torrent_info

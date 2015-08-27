@@ -68,7 +68,7 @@ msgid "Buffering torrent"
 msgstr ""
 
 msgctxt "#32015"
-msgid "Adding torrent..."
+msgid "Adding torrent"
 msgstr ""
 
 msgctxt "#32016"
@@ -92,7 +92,7 @@ msgid "Seeds: {0}"
 msgstr ""
 
 msgctxt "#32021"
-msgid "A video is not selected"
+msgid "No video is selected"
 msgstr ""
 
 msgctxt "#32022"

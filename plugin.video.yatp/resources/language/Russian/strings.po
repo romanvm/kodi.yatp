@@ -68,8 +68,8 @@ msgid "Buffering torrent"
 msgstr "Буферизация торрента"
 
 msgctxt "#32015"
-msgid "Adding torrent..."
-msgstr "Добавление торрента…"
+msgid "Adding torrent"
+msgstr "Добавление торрента"
 
 msgctxt "#32016"
 msgid "This may take some time."
@@ -92,7 +92,7 @@ msgid "Seeds: {0}"
 msgstr "Сидов: {0}."
 
 msgctxt "#32021"
-msgid "A video is not selected"
+msgid "No video is selected"
 msgstr "Видео не выбрано."
 
 msgctxt "#32022"
