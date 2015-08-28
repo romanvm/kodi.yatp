@@ -627,7 +627,7 @@ class Streamer(Torrenter):
         :param delete_files:
         :return:
         """
-        if info_hash == str(self.streamed_file_data['torr_handle'].info_hash()):
+        if self.streamed_file_data is not None and info_hash == str(self.streamed_file_data['torr_handle'].info_hash()):
             self.abort_buffering()
         super(Streamer, self).remove_torrent(info_hash, delete_files)
 
