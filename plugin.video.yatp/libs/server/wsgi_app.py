@@ -101,10 +101,11 @@ def json_rpc():
     if data['method'] == 'add_torrent' and len(data['params']) == 2:
         data['params'].append(True)
     reply = {'jsonrpc': '2.0', 'id': data.get('id', '1')}
-    try:
-        reply['result'] = getattr(methods, data['method'])(torrent_client, data.get('params'))
-    except Exception, ex:
-        reply['error'] = '{0}: {1}'.format(str(ex.__class__)[7:-2], ex.message)
+    reply['result'] = getattr(methods, data['method'])(torrent_client, data.get('params'))
+    # try:
+    #     reply['result'] = getattr(methods, data['method'])(torrent_client, data.get('params'))
+    # except Exception, ex:
+    #     reply['error'] = '{0}: {1}'.format(str(ex.__class__)[7:-2], ex.message)
     if DEBUG:
         addon.log('***** JSON response *****')
         addon.log(str(reply))
@@ -207,12 +208,12 @@ def stream_file(path):
                                                       start_piece + streamed_file['buffer_length'] - 3,
                                                       streamed_file['end_piece'] - streamed_file['end_offset'] - 1)
                 # Wait until a specified number of pieces after a jump point are downloaded.
-                while not torrent_client.check_piece_range(streamed_file['torr_handle'],
-                                                           start_piece,
-                                                           min(start_piece + addon.jump_buffer,
-                                                               streamed_file['end_piece'])):
-                    onscreen_label.text = addon.get_localized_string(32050).format(
-                        torrent_client.sliding_window_position + 1,
+                end_piece = min(start_piece + addon.jump_buffer, streamed_file['end_piece'])
+                while not torrent_client.check_piece_range(streamed_file['torr_handle'], start_piece, end_piece):
+                    percent = int(100 * float(torrent_client.sliding_window_position - start_piece + 3) /
+                                  (end_piece - start_piece))
+                    onscreen_label.text = addon.get_localized_string(32052).format(
+                        percent,
                         streamed_file['torr_handle'].status().download_payload_rate / 1024)
                     onscreen_label.show()
                     time.sleep(0.5)
