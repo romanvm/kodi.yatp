@@ -13,7 +13,7 @@ function pause_torrents()
         hashes += '"]'
         $.ajax({type:'POST',
                 url:'/json-rpc',
-                data:'{"method":"pause_group", "params":[' + hashes + ']}',
+                data:'{"method":"pause_group", "params":{"info_hashes":' + hashes + '}}',
                 contentType:'application/json',
                 dataType:'json'
         }); // end ajax
@@ -33,7 +33,7 @@ function resume_torrents()
         hashes += '"]'
         $.ajax({type:'POST',
                 url:'/json-rpc',
-                data:'{"method":"resume_group", "params":[' + hashes + ']}',
+                data:'{"method":"resume_group", "params":{"info_hashes":' + hashes + '}}',
                 contentType:'application/json',
                 dataType:'json'
         }); // end ajax
@@ -60,7 +60,7 @@ function remove_torrents()
     hashes += '"]'
     $.ajax({type:'POST',
             url:'/json-rpc',
-            data:'{"method":"remove_group", "params":[' + hashes + ',' + delete_files + ']}',
+            data:'{"method":"remove_group", "params":{"info_hashes":' + hashes + ',"delete_files":' + delete_files + '}}',
             contentType:'application/json',
             dataType:'json'
     }); // end ajax
