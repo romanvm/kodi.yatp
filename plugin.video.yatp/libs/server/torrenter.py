@@ -43,8 +43,7 @@ class Torrenter(object):
 
     Implements a simple torrent client.
     """
-    def __init__(self, start_port=6881, end_port=6891,
-                 dl_speed_limit=0, ul_speed_limit=0, persistent=False, resume_dir=''):
+    def __init__(self, start_port=6881, end_port=6891, persistent=False, resume_dir=''):
         """
         Class constructor
 
@@ -82,12 +81,7 @@ class Torrenter(object):
                 self._save_session_state()
         settings = self._session.get_settings()
         settings['cache_size'] = 256
-        if dl_speed_limit or ul_speed_limit:
-            settings['ignore_limits_on_local_network'] = False
-            if dl_speed_limit > 0:
-                settings['download_rate_limit'] = dl_speed_limit * 1024
-            if ul_speed_limit > 0:
-                settings['upload_rate_limit'] = ul_speed_limit * 1024
+        settings['ignore_limits_on_local_network'] = False
         self._session.set_settings(settings)
         self._session.add_dht_router('router.bittorrent.com', 6881)
         self._session.add_dht_router('router.utorrent.com', 6881)
@@ -110,6 +104,30 @@ class Torrenter(object):
         if self._persistent:
             self.save_all_resume_data()
         del self._session
+
+    def set_encryption_policy(self, enc_policy=1):
+        """
+        Set encryption policy for the session
+
+        :param enc_policy: int - 0 = forced, 1 = enabled, 2 = disabled
+        :return:
+        """
+        pe_settings = self._session.get_pe_settings()
+        pe_settings.pe_settings.in_enc_policy = pe_settings.out_enc_policy = libtorrent.enc_policy(enc_policy)
+        self._session.set_pe_settings(pe_settings)
+
+    def set_speed_limits(self, dl_speed_limit=0, ul_speed_limit=0):
+        """
+        Set download and upload speed limits
+
+        :param dl_speed_limit: int - KB/s
+        :param ul_speed_limit: int - KB/s
+        :return:
+        """
+        settings = self._session.get_settings()
+        settings['download_rate_limit'] = dl_speed_limit * 1024
+        settings['upload_rate_limit'] = ul_speed_limit * 1024
+        self._session.set_settings(settings)
 
     def add_torrent(self, torrent, save_path, zero_priorities=False):
         """
@@ -451,6 +469,19 @@ class Torrenter(object):
         """
         for info_hash in self._torrents_pool.iterkeys():
             self.resume_torrent(info_hash)
+
+    def prioritize_file(self, info_hash, file_index, priority):
+        """
+        Prioritize a file in a torrent
+
+        If all piece priorities in the torrent are set to 0, to enable downloading an individual file
+        priority value must be no less than 2.
+        :param info_hash: str - torrent info-hash
+        :param file_index: int - the index of a file in the torrent
+        :param priority: int - priority from 0 to 7.
+        :return:
+        """
+        self._torrents_pool[info_hash].file_priority(file_index, priority)
 
     @property
     def is_torrent_added(self):

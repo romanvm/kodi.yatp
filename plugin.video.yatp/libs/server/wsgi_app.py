@@ -34,8 +34,11 @@ resume_dir = os.path.join(addon.config_dir, 'torrents')
 if not os.path.exists(resume_dir):
     os.mkdir(resume_dir)
 torrent_port = addon.torrent_port
-torrent_client = Streamer(torrent_port, torrent_port + 10,
-                          addon.dl_speed_limit, addon.ul_speed_limit, True, resume_dir)
+# Initialize torrent client
+torrent_client = Streamer(torrent_port, torrent_port + 10, True, resume_dir)
+torrent_client.set_speed_limits(addon.dl_speed_limit, addon.ul_speed_limit)
+if not addon.enable_encryption:
+    torrent_client.set_encryption_policy(0)
 # Timers
 max_ratio = addon.ratio_limit
 max_time = addon.time_limit

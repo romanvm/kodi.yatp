@@ -33,10 +33,10 @@ def add_torrent(torrent_client, params):
     The method calls add_torrent_async() in a separate thread
     and returns immediately. Then you need to poll torrent added status
     using check_torrent_added method.
-    params['torrent'] - str - magnet link or torrent URL
-    params['save_path'] - str - save path (optional).
+    params['torrent']: str - magnet link or torrent URL
+    params['save_path']: str - save path (optional).
         If save path is missing or equals an empty string then the default save path is used.
-    params['zero_priorities'] - bool - zero priorities (do not start download immediately, optional, default - True)
+    params['zero_priorities']: bool - zero priorities (do not start download immediately, optional, default - True)
     :return: 'OK'
     """
     torrent_client.add_torrent_async(params['torrent'], params['save_path'], params['zero_priorities'])
@@ -67,7 +67,7 @@ def get_torrent_info(torrent_client, params):
     """
     Get torrent info
 
-    params['info_hash'] - str - info_hash in lowercase
+    params['info_hash']: str - info_hash in lowercase
     :return: dict - extended torrent info
     """
     return torrent_client.get_torrent_info(params['info_hash'])
@@ -88,7 +88,7 @@ def pause_torrent(torrent_client, params):
     """
     Pause torrent
 
-    params['info_hash'] - torrent info-hash in lowercase
+    params['info_hash']: str - torrent info-hash in lowercase
     :return: 'OK'
     """
     torrent_client.pause_torrent(params['info_hash'])
@@ -99,7 +99,7 @@ def pause_group(torrent_client, params):
     """
     Pause several torrents
 
-    params['info_hashes'] - the list of info-hashes in lowercase
+    params['info_hashes']: list of str - the list of info-hashes in lowercase
     :return: 'OK'
     """
     for info_hash in params['info_hashes']:
@@ -111,7 +111,7 @@ def resume_torrent(torrent_client, params):
     """
     Resume torrent
 
-    params['info_hash'] - torrent info-hash in lowercase
+    params['info_hash']: str - torrent info-hash in lowercase
     :return: 'OK'
     """
     torrent_client.resume_torrent(params['info_hash'])
@@ -122,7 +122,7 @@ def resume_group(torrent_client, params):
     """
     Resume several torrents
 
-    params['info_hashes'] - the list of info-hashes in lowercase
+    params['info_hashes']: list of str - the list of info-hashes in lowercase
     :return:
     """
     for info_hash in params['info_hashes']:
@@ -134,8 +134,8 @@ def remove_torrent(torrent_client, params):
     """
     Remove torrent
 
-    params['info_hash'] - info-hash
-    params['delete_files'] - bool - also remove files
+    params['info_hash']: str - info-hash
+    params['delete_files']: bool - also remove files
     :return: 'OK'
     """
     torrent_client.remove_torrent(params['info_hash'], params['delete_files'])
@@ -145,8 +145,8 @@ def remove_torrent(torrent_client, params):
 def remove_group(torrent_client, params):
     """
 
-    params['info_hashes'] - the list of info-hashes
-    params['delete_files'] - bool - also remvove files
+    params['info_hashes']: list of str - the list of info-hashes
+    params['delete_files']: bool - also remvove files
     :return:
     """
     for info_hash in params['info_hashes']:
@@ -158,9 +158,9 @@ def buffer_torrent(torrent_client, params):
     """
     Stream torrent
 
-    params['info_hash'] - torrent info-hash in lowercase
-    params['file_index'] - the index of the file to be buffered
-    params['buffer_size'] - buffer size in MB
+    params['info_hash']: str - torrent info-hash in lowercase
+    params['file_index']: int - the index of the file to be buffered
+    params['buffer_size']: int - buffer size in MB
     :return: 'OK'
     """
     torrent_client.buffer_torrent_async(params['info_hash'], params['file_index'], params['buffer_size'])
@@ -213,3 +213,41 @@ def get_buffer_percent(torrent_client, params=None):
     :return: int - buffer % (can be more than 100%).
     """
     return torrent_client.buffer_percent
+
+
+def set_encryption_policy(torrent_client, params):
+    """
+    Set encryption policy for incoming and outgoing connections
+
+    params['enc_policy']: int - 0 = forced, 1 = enabled, 2 = disabled
+    :return: 'OK'
+    """
+    torrent_client.set_encryption_policy(params['enc_policy'])
+    return 'OK'
+
+
+def set_speed_limits(torrent_client, params):
+    """
+    Set speed limits
+
+    params['dl_speed_limit']: int - download speed limit in KB/s, 0 - no limit
+    params['ul_speed_limit']: int - upload speed limit in KB/s, 0 - no limit
+    :return: 'OK'
+    """
+    torrent_client.set_speed_limits(params['dl_speed_limit'], params['ul_speed_limit'])
+    return 'OK'
+
+
+def prioritize_file(self, torrent_client, params):
+    """
+    Prioritize a file in a torrent
+
+    If all piece priorities in the torrent are set to 0, to enable downloading an individual file
+    priority value must be no less than 2.
+    params['info_hash']: str - torrent info-hash
+    params['file_index']: int - the index of a file in the torrent
+    params['priority']: int - priority from 0 to 7.
+    :return: 'OK'
+    """
+    torrent_client.prioritize_file(params['info_hash'], params['file_index'], params['priority'])
+    return 'OK'
