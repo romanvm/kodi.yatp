@@ -10,10 +10,10 @@ The methods are called via POST request at this address.
 Don't forget to add ('Content-Type': 'application/json') header to your http-request.
 The API is compliant with JSON-RPC 2.0, though 'jsonrpc' and 'id' keys are optional in requests.
 Example:
-{"method": "pause_torrent", "params": ["21df87c3cc3209e3b6011a88053aec35a58582a9"]}
+{"method": "pause_torrent", "params": {"info_hash":"21df87c3cc3209e3b6011a88053aec35a58582a9"}}
 
-"params" are an array (list) of method call parameters. Some methods do not take any parameters.
-For those methods "params" key can be equal null or omitted at all.
+"params" is an object (dict) containing of method call parameters. Some methods do not take any parameters.
+For those methods "params" key can be equal null or omitted.
 """
 
 
@@ -33,13 +33,13 @@ def add_torrent(torrent_client, params):
     The method calls add_torrent_async() in a separate thread
     and returns immediately. Then you need to poll torrent added status
     using check_torrent_added method.
-    params[0] - str - magnet link or torrent URL
-    params[1] - str - save path (optional).
+    params['torrent'] - str - magnet link or torrent URL
+    params['save_path'] - str - save path (optional).
         If save path is missing or equals an empty string then the default save path is used.
-    params[2] - bool - zero priorities (do not start download immediately, optional, default - True)
+    params['zero_priorities'] - bool - zero priorities (do not start download immediately, optional, default - True)
     :return: 'OK'
     """
-    torrent_client.add_torrent_async(params[0], params[1], params[2])
+    torrent_client.add_torrent_async(params['torrent'], params['save_path'], params['zero_priorities'])
     return 'OK'
 
 
@@ -67,10 +67,10 @@ def get_torrent_info(torrent_client, params):
     """
     Get torrent info
 
-    params[0] - str - info_hash in lowercase
+    params['info_hash'] - str - info_hash in lowercase
     :return: dict - extended torrent info
     """
-    return torrent_client.get_torrent_info(params[0])
+    return torrent_client.get_torrent_info(params['info_hash'])
 
 
 def get_all_torrent_info(torrent_client, params=None):
@@ -88,10 +88,10 @@ def pause_torrent(torrent_client, params):
     """
     Pause torrent
 
-    params[0] - torrent info-hash in lowercase
+    params['info_hash'] - torrent info-hash in lowercase
     :return: 'OK'
     """
-    torrent_client.pause_torrent(params[0])
+    torrent_client.pause_torrent(params['info_hash'])
     return 'OK'
 
 
@@ -99,10 +99,10 @@ def pause_group(torrent_client, params):
     """
     Pause several torrents
 
-    params[0] - the list of info-hashes in lowercase
+    params['info_hashes'] - the list of info-hashes in lowercase
     :return: 'OK'
     """
-    for info_hash in params[0]:
+    for info_hash in params['info_hashes']:
         torrent_client.pause_torrent(info_hash)
     return 'OK'
 
@@ -111,10 +111,10 @@ def resume_torrent(torrent_client, params):
     """
     Resume torrent
 
-    params[0] - torrent info-hash in lowercase
+    params['info_hash'] - torrent info-hash in lowercase
     :return: 'OK'
     """
-    torrent_client.resume_torrent(params[0])
+    torrent_client.resume_torrent(params['info_hash'])
     return 'OK'
 
 
@@ -122,10 +122,10 @@ def resume_group(torrent_client, params):
     """
     Resume several torrents
 
-    params[0] - the list of info-hashes in lowercase
+    params['info_hashes'] - the list of info-hashes in lowercase
     :return:
     """
-    for info_hash in params[0]:
+    for info_hash in params['info_hashes']:
         torrent_client.resume_torrent(info_hash)
     return 'OK'
 
@@ -134,23 +134,23 @@ def remove_torrent(torrent_client, params):
     """
     Remove torrent
 
-    params[0] - info-hash
-    params[1] - bool - also remove files
+    params['info_hash'] - info-hash
+    params['delete_files'] - bool - also remove files
     :return: 'OK'
     """
-    torrent_client.remove_torrent(params[0], params[1])
+    torrent_client.remove_torrent(params['info_hash'], params['delete_files'])
     return 'OK'
 
 
 def remove_group(torrent_client, params):
     """
 
-    params[0] - the list of info-hashes
-    params[1] - bool - also remvove files
+    params['info_hashes'] - the list of info-hashes
+    params['delete_files'] - bool - also remvove files
     :return:
     """
-    for info_hash in params[0]:
-        torrent_client.remove_torrent(info_hash, params[1])
+    for info_hash in params['info_hashes']:
+        torrent_client.remove_torrent(info_hash, params['delete_files'])
     return 'OK'
 
 
@@ -158,12 +158,12 @@ def buffer_torrent(torrent_client, params):
     """
     Stream torrent
 
-    params[0] - torrent info-hash in lowercase
-    params[1] - the index of the file to be buffered
-    params[2] - buffer size in MB
+    params['info_hash'] - torrent info-hash in lowercase
+    params['file_index'] - the index of the file to be buffered
+    params['buffer_size'] - buffer size in MB
     :return: 'OK'
     """
-    torrent_client.buffer_torrent_async(params[0], params[1], params[2])
+    torrent_client.buffer_torrent_async(params['info_hash'], params['file_index'], params['buffer_size'])
     return 'OK'
 
 
