@@ -247,7 +247,7 @@ def prioritize_file(self, torrent_client, params):
     params['info_hash']: str - torrent info-hash
     params['file_index']: int - the index of a file in the torrent
     params['priority']: int - priority from 0 to 7.
-    :return: 'OK'
+    :return:
     """
     torrent_client.prioritize_file(params['info_hash'], params['file_index'], params['priority'])
     return 'OK'
