@@ -29,7 +29,7 @@ def _request(data):
 
 
 def add_torrent(torrent):
-    _request({'method': 'add_torrent', 'params': [torrent]})
+    _request({'method': 'add_torrent', 'params': {'torrent': torrent}})
 
 
 def check_torrent_added():
@@ -41,7 +41,9 @@ def get_last_added_torrent():
 
 
 def buffer_torrent(info_hash, file_index, buffer_size):
-    _request({'method': 'buffer_torrent', 'params': [info_hash, file_index, buffer_size]})
+    _request({'method': 'buffer_torrent', 'params': {'info_hash': info_hash,
+                                                     'file_index': file_index,
+                                                     'buffer_size': buffer_size}})
 
 
 def check_buffering_complete():
@@ -49,7 +51,7 @@ def check_buffering_complete():
 
 
 def get_torrent_info(info_hash):
-    return _request({'method': 'get_torrent_info', 'params': [info_hash]})
+    return _request({'method': 'get_torrent_info', 'params': {'info_hash': info_hash}})
 
 
 def abort_buffering():
@@ -57,11 +59,13 @@ def abort_buffering():
 
 
 def remove_torrent(info_hash, delete_files):
-    _request({'method': 'remove_torrent', 'params': [info_hash, delete_files]})
+    _request({'method': 'remove_torrent', 'params': {'info_hash': info_hash, 'delete_files': delete_files}})
 
 
 def download_torrent(torrent, download_dir):
-    _request({'method': 'add_torrent', 'params': [torrent, download_dir, False]})
+    _request({'method': 'add_torrent', 'params': {'torrent': torrent,
+                                                  'save_path': download_dir,
+                                                  'zero_priorities': False}})
 
 
 def get_all_torrent_info():
@@ -69,11 +73,11 @@ def get_all_torrent_info():
 
 
 def pause_torrent(info_hash):
-    _request({'method': 'pause_torrent', 'params': [info_hash]})
+    _request({'method': 'pause_torrent', 'params': {'info_hash': info_hash}})
 
 
 def resume_torrent(info_hash):
-    _request({'method': 'resume_torrent', 'params': [info_hash]})
+    _request({'method': 'resume_torrent', 'params': {'info_hash': info_hash}})
 
 
 def pause_all():
