@@ -179,7 +179,7 @@ class Torrenter(object):
         torr_handle = self._session.add_torrent(add_torrent_params)
         while not torr_handle.has_metadata():  # Wait until torrent metadata are populated
             time.sleep(0.1)
-        # torr_handle.auto_managed(False)
+        torr_handle.auto_managed(False)
         info_hash = str(torr_handle.info_hash())
         self._torrents_pool[info_hash] = torr_handle
         return torr_handle
