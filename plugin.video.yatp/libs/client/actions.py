@@ -6,6 +6,7 @@
 
 import os
 import time
+import xbmc
 import xbmcgui
 from simpleplugin import Plugin
 import json_requests as jsonrq
@@ -39,7 +40,7 @@ def root(params):
     return [{'label': string(32000),
              'thumb': os.path.join(icons, 'play.png'),
              'url': plugin.get_url(action='select_torrent', target='play'),
-             'is_playable': True},
+             'is_folder': False},
             {'label': string(32001),
              'thumb': os.path.join(icons, 'down.png'),
              'url': plugin.get_url(action='select_torrent', target='download'),
@@ -60,7 +61,9 @@ def select_torrent(params):
     if torrent:
         plugin.log('Torrent selected: {0}'.format(torrent))
         if params['target'] == 'play':
-            return play_torrent({'torrent': torrent})
+            path = buffer_torrent(os.path.normpath(torrent))
+            if path:
+                xbmc.Player().play(path)
         else:
             download_torrent({'torrent': torrent})
 

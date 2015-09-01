@@ -547,6 +547,8 @@ class Streamer(Torrenter):
         self._abort_buffering.clear()
         self._buffer_percent.append(0)
         torr_handle = self._torrents_pool[info_hash]
+        if torr_handle.status().paused:
+            torr_handle.resume()
         torr_info = torr_handle.get_torrent_info()
         # Pick the file to be streamed from the torrent files
         file_entry = torr_info.files()[file_index]
