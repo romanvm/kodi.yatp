@@ -32,7 +32,7 @@
         <setting id="torrent_port" type="number"
                  label="32044" default="25335" />
         <setting id="jump_buffer" type="number"
-                 label="32031" default="30"/>
+                 label="32051" default="30"/>
         <setting id="enable_encryption" type="bool"
                  label="32053" default="true" />
     </category>
