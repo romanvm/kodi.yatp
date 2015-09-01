@@ -144,10 +144,7 @@ class Torrenter(object):
             self._save_torrent_info(torr_handle)
         result = {'name': torr_handle.name().decode('utf-8'), 'info_hash': str(torr_handle.info_hash())}
         torr_info = torr_handle.get_torrent_info()
-        files = []
-        for file_ in torr_info.files():
-            files.append(file_.path.decode('utf-8'))
-        result['files'] = files
+        result['files'] = [file_.path.decode('utf-8') for file_ in torr_info.files()]
         if zero_priorities:
             [torr_handle.piece_priority(piece, 0) for piece in xrange(torr_info.num_pieces())]
         self._last_added_torrent.append(result)
@@ -198,8 +195,7 @@ class Torrenter(object):
         while not torr_handle.has_metadata():  # Wait until torrent metadata are populated
             time.sleep(0.1)
         torr_handle.auto_managed(False)
-        info_hash = str(torr_handle.info_hash())
-        self._torrents_pool[info_hash] = torr_handle
+        self._torrents_pool[str(torr_handle.info_hash())] = torr_handle
         return torr_handle
 
     @staticmethod
