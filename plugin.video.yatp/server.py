@@ -7,6 +7,7 @@
 Torrent streamer WSGI server
 """
 
+import sys
 from time import sleep
 import xbmc
 import xbmcgui
@@ -16,6 +17,9 @@ from libs.server.wsgi_server import create_server
 
 
 addon = Addon()
+if not addon.start_server:
+    addon.log('Torrent Server is disabled in settings.', xbmc.LOGWARNING)
+    sys.exit()
 sleep(2.0)
 addon.log('***** Starting Torrent Server... *****')
 wsgi_app.limits_timer.start()

@@ -222,3 +222,7 @@ msgstr "Буферизация торрента: {0}%. Скорость загр
 msgctxt "#32053"
 msgid "Enable peer encryption"
 msgstr "Включить шифрование пиров"
+
+msgctxt "#32054"
+msgid "Enable torrent server"
+msgstr "Включить торрент-сервер"

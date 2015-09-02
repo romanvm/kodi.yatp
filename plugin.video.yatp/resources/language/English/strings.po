@@ -222,3 +222,7 @@ msgstr ""
 msgctxt "#32053"
 msgid "Enable peer encryption"
 msgstr ""
+
+msgctxt "#32054"
+msgid "Enable torrent server"
+msgstr ""
