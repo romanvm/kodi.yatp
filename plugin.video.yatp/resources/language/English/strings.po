@@ -52,7 +52,7 @@ msgid "Pause torrent"
 msgstr ""
 
 msgctxt "#32011"
-msgid "size: {0}; state: {1}; seeds: {2}; peers: {3}"
+msgid "size: {0}MB; state: {1}; seeds: {2}; peers: {3}"
 msgstr ""
 
 msgctxt "#32012"
