@@ -9,7 +9,7 @@ Auxiliary module to access Kodi addon parameters
 
 import os
 import xbmc
-import simpleplugin
+from libs import simpleplugin
 
 
 class Addon(simpleplugin.Addon):

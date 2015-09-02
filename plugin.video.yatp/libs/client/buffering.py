@@ -12,7 +12,7 @@ from time import sleep
 from urllib import quote
 import xbmcgui
 import json_requests as jsonrq
-from simpleplugin import Addon
+from libs.simpleplugin import Addon
 
 
 addon = Addon()

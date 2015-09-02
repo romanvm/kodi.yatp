@@ -11,7 +11,7 @@ import sys
 import xbmc
 import xbmcgui
 import json_requests as jsonrq
-from simpleplugin import Addon
+from libs.simpleplugin import Addon
 
 addon = Addon('plugin.video.yatp')
 string = addon.get_localized_string

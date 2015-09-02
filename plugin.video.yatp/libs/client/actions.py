@@ -8,7 +8,7 @@ import os
 import time
 import xbmc
 import xbmcgui
-from simpleplugin import Plugin
+from libs.simpleplugin import Plugin
 import json_requests as jsonrq
 from buffering import buffer_torrent, stream_torrent
 
