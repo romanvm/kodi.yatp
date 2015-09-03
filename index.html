@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Kodi.yatp : A torrent video streaming addon for Kodi mediacenter">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Kodi.yatp</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/romanvm/kodi.yatp">View on GitHub</a>
+
+          <h1 id="project_title">Kodi.yatp</h1>
+          <h2 id="project_tagline">A torrent video streaming addon for Kodi mediacenter</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/romanvm/kodi.yatp/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/romanvm/kodi.yatp/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="yet-anoter-torrent-player" class="anchor" href="#yet-anoter-torrent-player" aria-hidden="true"><span class="octicon octicon-link"></span></a>Yet Anoter Torrent Player</h1>
+
+<p>Yet Anoter Torrent Player (YATP) is a torrent streaming video plugin for <a href="http://kodi.tv">Kodi</a> mediacenter.
+It allows to watch video torrents in Kodi without fully downloading them. The plugin can also act as a simple
+torrent-client.</p>
+
+<p><strong>Main features:</strong></p>
+
+<ul>
+<li>Video torrents playback in Kodi.</li>
+<li>Seeding after playback.</li>
+<li>Speed, ratio and time limits for torrents.</li>
+<li>Support for multi-file torrents - you can select individual video files for playback.</li>
+<li>Support for magnet links, local and remote .torrent files.</li>
+<li>Support for jump/seek to arbitrary parts of the video (it re-prioritizes pieces for download).</li>
+</ul>
+
+<p><strong>Warning!</strong> To use YATP you need a binary compiled libtorrent module which is not included in the plugin.</p>
+
+<p><strong>Warning2!</strong> The plugin is in WIP state and is subject to constant changes. Proper working distributions
+will be provided after it is more or less finished.</p>
+
+<h2>
+<a id="basic-usage" class="anchor" href="#basic-usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Basic Usage</h2>
+
+<p>YATP can be invoked from another Kodi video plugin using the following URL:</p>
+
+<pre><code>plugin://plugin.video.yatp/?action=play&amp;torrent=&lt;url-encoded path to a .torrent file or a magnet link&gt;
+</code></pre>
+
+<p>The respective list item must have its <em>'IsPlayable'</em> property set to <em>'true'</em>.</p>
+
+<p>YATP also allows to play local .torrent files containing videos.</p>
+
+<h2>
+<a id="torrent-client" class="anchor" href="#torrent-client" aria-hidden="true"><span class="octicon octicon-link"></span></a>Torrent Client</h2>
+
+<p>YATP can also be used as a simple torrent-client. It has 2 interfaces to control torrents: Kodi UI and Web UI.
+The Kodi UI is available from Kodi and the Web UI can be opened using the following URL:</p>
+
+<pre><code>http://&lt;Kodi hostname or IP&gt;:8668
+</code></pre>
+
+<p>The Web UI support basic operations with torrents: adding torrents for download and pausing/resuming/deleting them.</p>
+
+<p><strong>License:</strong> <a href="http://www.gnu.org/licenses/gpl-3.0.en.html">GPL v.3</a>.</p>
+
+<p>The plugin includes <a href="http://bottlepy.org/docs/dev/index.html">Bottle</a> module which is licensed separately
+by its author(-s).</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Kodi.yatp maintained by <a href="https://github.com/romanvm">romanvm</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
