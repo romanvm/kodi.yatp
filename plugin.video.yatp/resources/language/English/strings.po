@@ -224,5 +224,5 @@ msgid "Enable peer encryption"
 msgstr ""
 
 msgctxt "#32054"
-msgid "Enable torrent server"
+msgid "Enable torrent server (requires restart)"
 msgstr ""
