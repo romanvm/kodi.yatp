@@ -11,10 +11,14 @@ import sys
 import xbmc
 import xbmcgui
 import json_requests as jsonrq
-from libs.simpleplugin import Addon
+from xbmcaddon import Addon
 
 addon = Addon('plugin.video.yatp')
-string = addon.get_localized_string
+
+
+def string(id_):
+    return addon.getLocalizedString(id_).encode('utf-8')
+
 
 if __name__ == '__main__':
     if sys.argv[1] == 'pause':
