@@ -82,6 +82,8 @@ class Torrenter(object):
         settings = self._session.get_settings()
         settings['cache_size'] = 256
         settings['ignore_limits_on_local_network'] = False
+        settings['cache_size'] = 256
+        settings['optimistic_unchoke_interval'] = 15
         self._session.set_settings(settings)
         self._session.add_dht_router('router.bittorrent.com', 6881)
         self._session.add_dht_router('router.utorrent.com', 6881)
