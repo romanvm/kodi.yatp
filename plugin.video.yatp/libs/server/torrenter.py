@@ -565,14 +565,14 @@ class Streamer(Torrenter):
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
         print 'plugin.video.yatp. start_piece={0}, end_piece={1}, piece_length={2}'.format(start_piece, end_piece,
                                                                                            torr_info.piece_length())
+        self._streamed_file_data.append({'torr_handle': torr_handle,
+                                         'buffer_length': buffer_length,
+                                         'start_piece': start_piece,
+                                         'end_offset': end_offset,
+                                         'end_piece': end_piece,
+                                         'piece_length': torr_info.piece_length()})
         # Check if the torrent has been downloaded earlier
         if not self.check_piece_range(torr_handle, start_piece, end_piece):
-            self._streamed_file_data.append({'torr_handle': torr_handle,
-                                             'buffer_length': buffer_length,
-                                             'start_piece': start_piece,
-                                             'end_offset': end_offset,
-                                             'end_piece': end_piece,
-                                             'piece_length': torr_info.piece_length()})
             # Setup buffer download
             buffer_pool = (range(start_piece, start_piece + buffer_length + 1)
                            + range(end_piece - end_offset, end_piece + 1))
