@@ -22,8 +22,8 @@ def _play(path):
     """
     Play a videofile
 
-    :param path:
-    :return:
+    @param path:
+    @return:
     """
     plugin.log('Path to play: {0}'.format(path))
     success = True if path else False
@@ -34,8 +34,8 @@ def root(params):
     """
     Plugin root
 
-    :param params:
-    :return:
+    @param params:
+    @return:
     """
     return [{'label': string(32000),
              'thumb': os.path.join(icons, 'play.png'),
@@ -54,8 +54,8 @@ def select_torrent(params):
     """
     Select .torrent file to play
 
-    :param params:
-    :return:
+    @param params:
+    @return:
     """
     torrent = xbmcgui.Dialog().browse(1, string(32003), 'video', mask='.torrent')
     if torrent:
@@ -72,8 +72,8 @@ def play_torrent(params):
     """
     Play torrent
 
-    :param params:
-    :return:
+    @param params:
+    @return:
     """
     return _play(buffer_torrent(params['torrent'], params.get('file_index')))
 
@@ -83,8 +83,8 @@ def play_file(params):
     Stream a file from torrent by its index
 
     The torrent must be already added via JSON-RPC!
-    :param params:
-    :return:
+    @param params:
+    @return:
     """
     return _play(stream_torrent(params['file_index']))
 
@@ -93,8 +93,8 @@ def download_torrent(params):
     """
     Add torrent for downloading
 
-    :param params:
-    :return:
+    @param params:
+    @return:
     """
     download_dir = params.get('download_dir') or plugin.download_dir
     jsonrq.download_torrent(params['torrent'], download_dir)
@@ -107,8 +107,8 @@ def torrents(params):
     """
     Display the list of torrents in the session
 
-    :param params:
-    :return:
+    @param params:
+    @return:
     """
     listing = []
     torrent_list = sorted(jsonrq.get_all_torrent_info(), key=lambda i: i['added_time'], reverse=True)
@@ -159,8 +159,8 @@ def torrent_info(params):
     """
     Display current torrent info
 
-    :param params:
-    :return:
+    @param params:
+    @return:
     """
     torr_info = jsonrq.get_torrent_info(params['info_hash'])
     info_dialog = xbmcgui.DialogProgress()

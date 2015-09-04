@@ -20,10 +20,10 @@ class Timer(object):
         """
         Class constructor
 
-        :param interval: int - timer interval in seconds
-        :param func: a callable function
-        :param args: function positional args
-        :param kwargs: function kwargs
+        @param interval: int - timer interval in seconds
+        @param func: a callable function
+        @param args: function positional args
+        @param kwargs: function kwargs
         """
         self._interval = interval
         self._func = func
@@ -35,7 +35,7 @@ class Timer(object):
         """
         Timed function runner
 
-        :return:
+        @retrun:
         """
         timestamp = datetime.now()
         while not self._abort_flag.is_set():
@@ -48,7 +48,7 @@ class Timer(object):
         """
         Timer start
 
-        :return:
+        @retrun:
         """
         self._abort_flag.clear()
         self._thread.start()
@@ -57,7 +57,7 @@ class Timer(object):
         """
         Abort timer
 
-        :return:
+        @retrun:
         """
         self._abort_flag.set()
         try:
@@ -70,10 +70,10 @@ def check_seeding_limits(torrenter, max_ratio, max_time, expired_action, delete_
     """
     Check seding limits
 
-    :param torrenter:
-    :param max_ratio:
-    :param max_time:
-    :return:
+    @param torrenter:
+    @param max_ratio:
+    @param max_time:
+    @retrun:
     """
     for torrent in torrenter.get_all_torrents_info():
         try:
@@ -98,7 +98,7 @@ def save_resume_data(torrenter):
     """
     Save torrents resume data
 
-    :param torrenter:
-    :return:
+    @param torrenter:
+    @retrun:
     """
     torrenter.save_all_resume_data()

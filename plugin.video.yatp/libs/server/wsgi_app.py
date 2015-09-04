@@ -56,7 +56,7 @@ def root():
     """
     Root path
 
-    :return:
+    @return:
     """
     login, password = request.auth or (None, None)
     if addon.pass_protect and (login is None or (login, password) != addon.credentials):
@@ -72,7 +72,7 @@ def get_methods():
     """
     Display the list of available methods
 
-    :return:
+    @return:
     """
     methods_list = []
     docs_list = []
@@ -89,7 +89,7 @@ def json_rpc():
     """
     JSON-RPC requests processing
 
-    :return:
+    @return:
     """
     if DEBUG:
         addon.log('***** JSON request *****')
@@ -117,7 +117,7 @@ def get_torrents():
     """
     Get the list of available torrents with their params wrapped in JSON
 
-    :return:
+    @return:
     """
     response.content_type = 'application/json'
     reply = dumps(torrent_client.get_all_torrents_info())
@@ -131,8 +131,8 @@ def get_static(path):
     """
     Serve static files
 
-    :param path: relative path to a static file
-    :return:
+    @param path: relative path to a static file
+    @return:
     """
     return static_file(path, root=static_path)
 
@@ -142,8 +142,8 @@ def add_torrent(source):
     """
     Add .torrent file or torrent link
 
-    :param source: 'file' or 'link'
-    :return:
+    @param source: 'file' or 'link'
+    @return:
     """
     if source == 'file':
         buffer_ = StringIO()

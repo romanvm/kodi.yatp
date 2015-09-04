@@ -24,8 +24,8 @@ def add_torrent(torrent):
     """
     Add torrent for downloading
 
-    :param torrent:
-    :return:
+    @param torrent:
+    @return:
     """
     jsonrq.add_torrent(torrent)
     progress_dialog = xbmcgui.DialogProgress()
@@ -44,8 +44,8 @@ def select_file(torrent_data):
     """
     Select a videofile from the torrent to play
 
-    :param torrent_data:
-    :return:
+    @param torrent_data:
+    @return:
     """
     videofiles = []
     for file_index, file_ in enumerate(torrent_data['files']):
@@ -66,8 +66,8 @@ def stream_torrent(file_index):
     """
     Stream a videofile from torrent
 
-    :param file_index:
-    :return:
+    @param file_index:
+    @return:
     """
     torrent_data = jsonrq.get_last_added_torrent()
     if file_index >= len(torrent_data['files']) or file_index < 0:
@@ -97,8 +97,8 @@ def buffer_torrent(torrent, file_index=None):
     """
     Buffer a torrent and resolve a playable path from it
 
-    :param torrent: str - magnet link or .torrent file URL
-    :return:
+    @param torrent: str - magnet link or .torrent file URL
+    @return:
     """
     torrent_data = add_torrent(torrent)
     if torrent_data is not None:
