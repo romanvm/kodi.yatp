@@ -574,11 +574,11 @@ class Streamer(Torrenter):
         # Check if the torrent has been downloaded earlier
         if not self.check_piece_range(torr_handle, start_piece, end_piece):
             # Setup buffer download
-            buffer_pool = (range(start_piece, start_piece + buffer_length + 1)
-                           + range(end_piece - end_offset, end_piece + 1))
+            end_pool = range(end_piece - end_offset, end_piece + 1)
+            buffer_pool = range(start_piece, start_piece + buffer_length + 1) + end_pool
             print 'plugin.video.yatp. buffer_pool: {0}'.format(str(buffer_pool))
             buffer_pool_length = len(buffer_pool)
-            [torr_handle.piece_priority(piece, 7) for piece in buffer_pool]
+            [torr_handle.piece_priority(piece, 7) for piece in end_pool]
             self.start_sliding_window_async(torr_handle, start_piece, start_piece + buffer_length,
                                             end_piece - end_offset - 1)
             while len(buffer_pool) > 0 and not self._abort_buffering.is_set():
