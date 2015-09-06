@@ -115,7 +115,7 @@ class Torrenter(object):
         @return:
         """
         pe_settings = self._session.get_pe_settings()
-        pe_settings.pe_settings.in_enc_policy = pe_settings.out_enc_policy = libtorrent.enc_policy(enc_policy)
+        pe_settings.in_enc_policy = pe_settings.out_enc_policy = libtorrent.enc_policy(enc_policy)
         self._session.set_pe_settings(pe_settings)
 
     def set_speed_limits(self, dl_speed_limit=0, ul_speed_limit=0):
