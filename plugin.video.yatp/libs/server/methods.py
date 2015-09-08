@@ -12,7 +12,7 @@ The API is compliant with JSON-RPC 2.0, though 'jsonrpc' and 'id' keys are optio
 Example:
 {"method": "pause_torrent", "params": {"info_hash":"21df87c3cc3209e3b6011a88053aec35a58582a9"}}
 
-"params" is an object (dict) containing of method call parameters. Some methods do not take any parameters.
+"params" is a JSON object (dict) containing method call parameters. Some methods do not take any parameters.
 For those methods "params" key can be equal null or omitted.
 """
 
@@ -226,15 +226,16 @@ def set_encryption_policy(torrent_client, params):
     return 'OK'
 
 
-def set_speed_limits(torrent_client, params):
+def set_session_settings(torrent_client, params):
     """
     Set speed limits
 
-    params['dl_speed_limit']: int - download speed limit in KB/s, 0 - no limit
-    params['ul_speed_limit']: int - upload speed limit in KB/s, 0 - no limit
+    params - session settings key=value pairs.
+    More info can be found in
+    <a href=http://www.rasterbar.com/products/libtorrent/manual.html#session-customization">libtorrent API docs</a>.
     @return: 'OK'
     """
-    torrent_client.set_speed_limits(params['dl_speed_limit'], params['ul_speed_limit'])
+    torrent_client.set_session_settings(**params)
     return 'OK'
 
 

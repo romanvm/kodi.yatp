@@ -79,12 +79,9 @@ class Torrenter(object):
                 self._load_session_state()
             except TorrenterError:
                 self._save_session_state()
-        settings = self._session.get_settings()
-        settings['cache_size'] = 256
-        settings['ignore_limits_on_local_network'] = False
-        settings['cache_size'] = 256
-        settings['optimistic_unchoke_interval'] = 15
-        self._session.set_settings(settings)
+        self.set_session_settings(cache_size=256,  # 4MB
+                                  ignore_limits_on_local_network=False,
+                                  optimistic_unchoke_interval=15)
         self._session.add_dht_router('router.bittorrent.com', 6881)
         self._session.add_dht_router('router.utorrent.com', 6881)
         self._session.add_dht_router('router.bitcomet.com', 6881)
@@ -118,18 +115,19 @@ class Torrenter(object):
         pe_settings.in_enc_policy = pe_settings.out_enc_policy = libtorrent.enc_policy(enc_policy)
         self._session.set_pe_settings(pe_settings)
 
-    def set_speed_limits(self, dl_speed_limit=0, ul_speed_limit=0):
+    def set_session_settings(self, **settings):
         """
-        Set download and upload speed limits
+        Set session settings.
 
-        @param dl_speed_limit: int - KB/s
-        @param ul_speed_limit: int - KB/s
+        See U{libtorrent API docs<http://www.rasterbar.com/products/libtorrent/manual.html#session-customization>}
+        for more info.
+        @param settings: session settings key=value pairs
         @return:
         """
-        settings = self._session.get_settings()
-        settings['download_rate_limit'] = dl_speed_limit * 1024
-        settings['upload_rate_limit'] = ul_speed_limit * 1024
-        self._session.set_settings(settings)
+        ses_settings = self._session.get_settings()
+        for key, value in settings.iteritems():
+            ses_settings[key] = value
+        self._session.set_settings(ses_settings)
 
     def add_torrent(self, torrent, save_path, zero_priorities=False):
         """

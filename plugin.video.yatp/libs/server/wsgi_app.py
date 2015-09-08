@@ -36,7 +36,8 @@ if not os.path.exists(resume_dir):
 torrent_port = addon.torrent_port
 # Initialize torrent client
 torrent_client = Streamer(torrent_port, torrent_port + 10, True, resume_dir)
-torrent_client.set_speed_limits(addon.dl_speed_limit, addon.ul_speed_limit)
+torrent_client.set_session_settings(download_rate_limit=addon.dl_speed_limit * 1024,
+                                    upload_rate_limit=addon.ul_speed_limit * 1024)
 if not addon.enable_encryption:
     torrent_client.set_encryption_policy(2)
 # Timers
