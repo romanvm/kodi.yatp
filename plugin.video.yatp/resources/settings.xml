@@ -37,5 +37,11 @@
                  label="32053" default="true" />
         <setting id="start_server" type="bool"
                  label="32054" default="true" />
+        <setting id="connections_limit" type="number"
+                 label="32055" default="200"/>
+        <setting id="half_open_limit" type="number"
+                 label="32056" default="-1"/>
+        <setting id="unchoke_slots_limit" type="number"
+                 label="32057" default="8"/>
     </category>
 </settings>

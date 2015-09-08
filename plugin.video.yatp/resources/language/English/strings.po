@@ -226,3 +226,15 @@ msgstr ""
 msgctxt "#32054"
 msgid "Enable torrent server (requires restart)"
 msgstr ""
+
+msgctxt "#32055"
+msgid "Max. connections"
+msgstr ""
+
+msgctxt "#32055"
+msgid "Max. half-open connections (-1 - no limit)"
+msgstr ""
+
+msgctxt "#32055"
+msgid "Upload slots per torrent"
+msgstr ""

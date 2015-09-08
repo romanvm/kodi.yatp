@@ -226,3 +226,15 @@ msgstr "Включить шифрование пиров"
 msgctxt "#32054"
 msgid "Enable torrent server (requires restart)"
 msgstr "Включить торрент-сервер (требуется перезапуск)"
+
+msgctxt "#32055"
+msgid "Max. connections"
+msgstr "Лимит соединений"
+
+msgctxt "#32055"
+msgid "Max. half-open connections (-1 - no limit)"
+msgstr "Лимит полуоткрытых соединений (-1 — без лимита)"
+
+msgctxt "#32055"
+msgid "Upload slots per torrent"
+msgstr "Слотов отдачи на торрент"

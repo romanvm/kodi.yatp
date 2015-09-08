@@ -37,7 +37,10 @@ torrent_port = addon.torrent_port
 # Initialize torrent client
 torrent_client = Streamer(torrent_port, torrent_port + 10, True, resume_dir)
 torrent_client.set_session_settings(download_rate_limit=addon.dl_speed_limit * 1024,
-                                    upload_rate_limit=addon.ul_speed_limit * 1024)
+                                    upload_rate_limit=addon.ul_speed_limit * 1024,
+                                    connections_limit=addon.connections_limit,
+                                    half_open_limit=addon.half_open_limit,
+                                    unchoke_slots_limit=addon.unchoke_slots_limit)
 if not addon.enable_encryption:
     torrent_client.set_encryption_policy(2)
 # Timers
