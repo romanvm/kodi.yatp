@@ -229,9 +229,9 @@ class Addon(object):
                 return True  # Convert boolean strings to bool
             elif setting == 'false':
                 return False
-            elif re.search(r'^\d+$', setting) is not None:
+            elif re.search(r'^\-?\d+$', setting) is not None:
                 return long(setting)  # Convert numeric strings to long
-            elif re.search(r'^\d+\.\d+$', setting) is not None:
+            elif re.search(r'^\-?\d+\.\d+$', setting) is not None:
                 return float(setting)  # Convert numeric strings with a dot to float
         return setting
 
