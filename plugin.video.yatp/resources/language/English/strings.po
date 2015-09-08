@@ -231,10 +231,10 @@ msgctxt "#32055"
 msgid "Max. connections"
 msgstr ""
 
-msgctxt "#32055"
+msgctxt "#32056"
 msgid "Max. half-open connections (-1 - no limit)"
 msgstr ""
 
-msgctxt "#32055"
+msgctxt "#32057"
 msgid "Upload slots per torrent"
 msgstr ""

@@ -231,10 +231,10 @@ msgctxt "#32055"
 msgid "Max. connections"
 msgstr "Лимит соединений"
 
-msgctxt "#32055"
+msgctxt "#32056"
 msgid "Max. half-open connections (-1 - no limit)"
 msgstr "Лимит полуоткрытых соединений (-1 — без лимита)"
 
-msgctxt "#32055"
+msgctxt "#32057"
 msgid "Upload slots per torrent"
 msgstr "Слотов отдачи на торрент"
