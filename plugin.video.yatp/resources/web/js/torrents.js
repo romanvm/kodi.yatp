@@ -6,11 +6,12 @@ function pause_torrents()
     if (torrents.length > 0)
     {
         var hashes = '["' + torrents[0].info_hash;
+        var i;
         for (i=1; i<torrents.length; i++)
         {
-            hashes += '","' + torrents[i].info_hash
+            hashes += '","' + torrents[i].info_hash;
         }
-        hashes += '"]'
+        hashes += '"]';
         $.ajax({type:'POST',
                 url:'/json-rpc',
                 data:'{"method":"pause_group", "params":{"info_hashes":' + hashes + '}}',
@@ -26,11 +27,12 @@ function resume_torrents()
     if (torrents.length > 0)
     {
         var hashes = '["' + torrents[0].info_hash;
+        var i;
         for (i=1; i<torrents.length; i++)
         {
-            hashes += '","' + torrents[i].info_hash
+            hashes += '","' + torrents[i].info_hash;
         }
-        hashes += '"]'
+        hashes += '"]';
         $.ajax({type:'POST',
                 url:'/json-rpc',
                 data:'{"method":"resume_group", "params":{"info_hashes":' + hashes + '}}',
@@ -42,7 +44,7 @@ function resume_torrents()
 
 function confirm_remove_torrents()
 {
-    if ($('#torrents').datagrid('getSelected') != null)
+    if ($('#torrents').datagrid('getSelected') !== null)
     {
         $('#remove_torrent_dlg').dialog('open');
     } // end if
@@ -53,11 +55,12 @@ function remove_torrents()
     var torrents = $('#torrents').datagrid('getSelections');
     var delete_files = $('#delete_files').prop('checked');
     var hashes = '["' + torrents[0].info_hash;
+    var i;
     for (i=1; i<torrents.length; i++)
     {
-        hashes += '","' + torrents[i].info_hash
+        hashes += '","' + torrents[i].info_hash;
     }
-    hashes += '"]'
+    hashes += '"]';
     $.ajax({type:'POST',
             url:'/json-rpc',
             data:'{"method":"remove_group", "params":{"info_hashes":' + hashes + ',"delete_files":' + delete_files + '}}',
