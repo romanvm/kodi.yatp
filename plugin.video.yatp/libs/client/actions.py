@@ -104,7 +104,10 @@ def play_torrent(params):
     @param params:
     @return:
     """
-    return _play(buffer_torrent(params['torrent'], params.get('file_index')))
+    file_index = params.get('file_index')
+    if file_index is not None and file_index != 'auto':
+        file_index = int(file_index)
+    return _play(buffer_torrent(params['torrent'], file_index))
 
 
 def play_file(params):

@@ -91,7 +91,6 @@ def stream_torrent(file_index):
     @return:
     """
     torrent_data = jsonrq.get_last_added_torrent()
-    file_index = int(file_index)
     if file_index >= len(torrent_data['files']) or file_index < 0:
         raise IndexError('File index {0} is out of range!'.format(file_index))
     progress_dialog = xbmcgui.DialogProgress()
