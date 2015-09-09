@@ -48,7 +48,7 @@ def select_file(torrent_data):
     @return:
     """
     videofiles = []
-    for file_index, file_ in enumerate(torrent_data['files']):
+    for file_index, file_ in enumerate(torrent_data['files'][0]):
         if os.path.splitext(file_.lower())[1] in ('.avi', '.mkv', '.mp4', '.ts', '.m2ts', '.mov'):
             videofiles.append((file_index, os.path.basename(file_)))
     if videofiles:

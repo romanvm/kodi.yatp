@@ -144,7 +144,7 @@ class Torrenter(object):
             self._save_torrent_info(torr_handle)
         result = {'name': torr_handle.name().decode('utf-8'), 'info_hash': str(torr_handle.info_hash())}
         torr_info = torr_handle.get_torrent_info()
-        result['files'] = [file_.path.decode('utf-8') for file_ in torr_info.files()]
+        result['files'] = [[file_.path.decode('utf-8'), file_.size] for file_ in torr_info.files()]
         if zero_priorities:
             [torr_handle.piece_priority(piece, 0) for piece in xrange(torr_info.num_pieces())]
         self._last_added_torrent.append(result)
