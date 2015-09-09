@@ -55,7 +55,7 @@ def add_torrent(torrent):
         return None
 
 
-def select_file(torrent_data, auto=False):
+def select_file(torrent_data, dialog=False):
     """
     Select a videofile from the torrent to play
 
@@ -65,14 +65,14 @@ def select_file(torrent_data, auto=False):
     """
     videofiles = get_videofiles(torrent_data)
     if videofiles:
-        if len(videofiles) > 1 and auto:
+        if len(videofiles) > 1 and dialog:
+            # Show selection dialog
+            index = xbmcgui.Dialog().select(string(32017), [item[1] for item in videofiles])
+        elif len(videofiles) > 1 and not dialog:
             # Select the biggest file
             file_sizes = [video[2] for video in videofiles]
             max_size = max(file_sizes)
             index = file_sizes.index(max_size)
-        elif len(videofiles) > 1 and not auto:
-            # Show selection dialog
-            index = xbmcgui.Dialog().select(string(32017), [item[1] for item in videofiles])
         else:
             index = 0
         if index >= 0:
@@ -123,8 +123,8 @@ def buffer_torrent(torrent, file_index=None):
     """
     torrent_data = add_torrent(torrent)
     if torrent_data is not None:
-        if file_index is None or file_index == 'auto':
-            file_index = select_file(torrent_data, file_index == 'auto')
+        if file_index is None or file_index == 'dialog':
+            file_index = select_file(torrent_data, file_index == 'dialog')
         if file_index is None:
             jsonrq.remove_torrent(torrent_data['info_hash'], True)
             xbmcgui.Dialog().notification(addon.id, string(32022), addon.icon, 3000)

@@ -72,7 +72,7 @@ def play_torrent(params):
     @return:
     """
     file_index = params.get('file_index')
-    if file_index is not None and file_index != 'auto':
+    if file_index is not None and file_index != 'dialog':
         file_index = int(file_index)
     return _play(buffer_torrent(params['torrent'], file_index))
 
