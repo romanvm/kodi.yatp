@@ -40,26 +40,34 @@ def add_torrent(torrent):
         return None
 
 
-def select_file(torrent_data):
+def select_file(torrent_data, auto=False):
     """
     Select a videofile from the torrent to play
 
     @param torrent_data:
+    @param auto: auto-select the biggest videofile in a torrent
     @return:
     """
     videofiles = []
-    for file_index, file_ in enumerate(torrent_data['files'][0]):
-        if os.path.splitext(file_.lower())[1] in ('.avi', '.mkv', '.mp4', '.ts', '.m2ts', '.mov'):
-            videofiles.append((file_index, os.path.basename(file_)))
+    for file_index, file_ in enumerate(torrent_data['files']):
+        if os.path.splitext(file_[0].lower())[1] in ('.avi', '.mkv', '.mp4', '.ts', '.m2ts', '.mov'):
+            videofiles.append((file_index, os.path.basename(file_[0]), file_[1]))
     if videofiles:
-        if len(videofiles) > 1:
+        if len(videofiles) > 1 and auto:
+            file_sizes = [video[2] for video in videofiles]
+            max_size = max(file_sizes)
+            index = file_sizes.index(max_size)
+        elif len(videofiles) > 1 and not auto:
             videofiles = sorted(videofiles, key=lambda i: i[1])
             index = xbmcgui.Dialog().select(string(32017), [item[1] for item in videofiles])
         else:
             index = 0
-        return videofiles[index][0]
+        if index >= 0:
+            return videofiles[index][0]
+        else:
+            return -1
     else:
-        return -1
+        return None
 
 
 def stream_torrent(file_index):
@@ -102,9 +110,12 @@ def buffer_torrent(torrent, file_index=None):
     """
     torrent_data = add_torrent(torrent)
     if torrent_data is not None:
+        if file_index is None or file_index == 'auto':
+            file_index = select_file(torrent_data, file_index == 'auto')
         if file_index is None:
-            file_index = select_file(torrent_data)
-        if file_index >= 0:
+            jsonrq.remove_torrent(torrent_data['info_hash'], True)
+            xbmcgui.Dialog().notification(addon.id, string(32022), addon.icon, 3000)
+        elif file_index >= 0:
             url = stream_torrent(file_index)
             if url:
                 return url
