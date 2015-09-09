@@ -172,7 +172,7 @@ def stream_file(path):
     if sys.platform == 'win32':
         path = path.decode('utf-8')
     file_path = os.path.normpath(os.path.join(download_dir, path))
-    addon.log('File path: {0}'.format(file_path))
+    addon.log('File path: {0}'.format(file_path.encode('utf-8')))
     size = os.path.getsize(file_path)
     addon.log('File size: {0}'.format(size))
     mime = get_mime(path)

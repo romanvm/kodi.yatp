@@ -6,11 +6,10 @@
 
 import os
 import time
-import xbmc
 import xbmcgui
 from libs.simpleplugin import Plugin
 import json_requests as jsonrq
-from buffering import buffer_torrent, stream_torrent
+from buffering import buffer_torrent, stream_torrent, add_torrent, get_videofiles
 
 plugin = Plugin()
 string = plugin.get_localized_string
@@ -39,8 +38,7 @@ def root(params):
     """
     return [{'label': string(32000),
              'thumb': os.path.join(icons, 'play.png'),
-             'url': plugin.get_url(action='select_torrent', target='play'),
-             'is_folder': False},
+             'url': plugin.get_url(action='select_torrent', target='play')},
             {'label': string(32001),
              'thumb': os.path.join(icons, 'down.png'),
              'url': plugin.get_url(action='select_torrent', target='download'),
@@ -57,15 +55,44 @@ def select_torrent(params):
     @param params:
     @return:
     """
-    torrent = xbmcgui.Dialog().browse(1, string(32003), 'video', mask='.torrent')
+    dialog = xbmcgui.Dialog()
+    torrent = dialog.browse(1, string(32003), 'video', mask='.torrent')
+    del dialog
+    success = False
+    listing = []
     if torrent:
         plugin.log('Torrent selected: {0}'.format(torrent))
         if params['target'] == 'play':
-            path = buffer_torrent(os.path.normpath(torrent))
-            if path:
-                xbmc.Player().play(path)
+            torrent_data = add_torrent(os.path.normpath(torrent))
+            if torrent_data is not None:
+                videofiles = get_videofiles(torrent_data)
+                for file_ in videofiles:
+                    ext = os.path.splitext(file_[1].lower())[1]
+                    if ext == '.avi':
+                        thumb = os.path.join(icons, 'avi.png')
+                    elif ext == '.mp4':
+                        thumb = os.path.join(icons, 'mp4.png')
+                    elif ext == '.mkv':
+                        thumb = os.path.join(icons, 'mkv.png')
+                    elif ext == '.mov':
+                        thumb = os.path.join(icons, 'mov.png')
+                    else:
+                        thumb = os.path.join(icons, 'play.png')
+                    listing.append({'label': file_[1],
+                                    'thumb': thumb,
+                                    'url': plugin.get_url(action='play_file',
+                                                          info_hash=torrent_data['info_hash'],
+                                                          file_index=file_[0]),
+                                    'is_playable': True
+                                    })
+                success = True
+            else:
+                jsonrq.remove_torrent(torrent_data['info_hash'], True)
+                xbmcgui.Dialog().notification(plugin.id, string(32023), plugin.icon, 3000)
         else:
             download_torrent({'torrent': torrent})
+            return
+    return plugin.create_listing(listing, succeeded=success)
 
 
 def play_torrent(params):
@@ -98,9 +125,7 @@ def download_torrent(params):
     """
     download_dir = params.get('download_dir') or plugin.download_dir
     jsonrq.download_torrent(params['torrent'], download_dir)
-    time.sleep(1.0)
-    if jsonrq.check_torrent_added():
-        xbmcgui.Dialog().notification('YATP', string(32004), plugin.icon, 3000)
+    xbmcgui.Dialog().notification('YATP', string(32004), plugin.icon, 3000)
 
 
 def torrents(params):

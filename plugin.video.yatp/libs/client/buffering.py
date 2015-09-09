@@ -20,6 +20,21 @@ string = addon.get_localized_string
 media_url = 'http://127.0.0.1:{0}/stream/'.format(addon.server_port)
 
 
+def get_videofiles(torrent_data):
+    """
+    Get a sorted list of videofiles from a torrent
+
+    @param torrent_data:
+    @return: the sorted list of 3-item tuples (file_index, file_name, file_size)
+    """
+    videofiles = []
+    for file_index, file_ in enumerate(torrent_data['files']):
+        if os.path.splitext(file_[0].lower())[1] in ('.avi', '.mkv', '.mp4', '.ts', '.m2ts', '.mov'):
+            videofiles.append((file_index, os.path.basename(file_[0]), file_[1]))
+    videofiles = sorted(videofiles, key=lambda i: i[1])
+    return videofiles
+
+
 def add_torrent(torrent):
     """
     Add torrent for downloading
@@ -48,17 +63,13 @@ def select_file(torrent_data, auto=False):
     @param auto: auto-select the biggest videofile in a torrent
     @return:
     """
-    videofiles = []
-    for file_index, file_ in enumerate(torrent_data['files']):
-        if os.path.splitext(file_[0].lower())[1] in ('.avi', '.mkv', '.mp4', '.ts', '.m2ts', '.mov'):
-            videofiles.append((file_index, os.path.basename(file_[0]), file_[1]))
+    videofiles = get_videofiles(torrent_data)
     if videofiles:
         if len(videofiles) > 1 and auto:
             file_sizes = [video[2] for video in videofiles]
             max_size = max(file_sizes)
             index = file_sizes.index(max_size)
         elif len(videofiles) > 1 and not auto:
-            videofiles = sorted(videofiles, key=lambda i: i[1])
             index = xbmcgui.Dialog().select(string(32017), [item[1] for item in videofiles])
         else:
             index = 0
@@ -78,6 +89,7 @@ def stream_torrent(file_index):
     @return:
     """
     torrent_data = jsonrq.get_last_added_torrent()
+    file_index = int(file_index)
     if file_index >= len(torrent_data['files']) or file_index < 0:
         raise IndexError('File index {0} is out of range!'.format(file_index))
     progress_dialog = xbmcgui.DialogProgress()
@@ -92,7 +104,7 @@ def stream_torrent(file_index):
         sleep(1.0)
     if not progress_dialog.iscanceled():
         progress_dialog.close()
-        return media_url + quote(torrent_data['files'][file_index].replace('\\', '/').encode('utf-8'))
+        return media_url + quote(torrent_data['files'][file_index][0].replace('\\', '/').encode('utf-8'))
     else:
         if jsonrq.get_torrent_info(torrent_data['info_hash'])['state'] == 'downloading':
             jsonrq.remove_torrent(torrent_data['info_hash'], True)
