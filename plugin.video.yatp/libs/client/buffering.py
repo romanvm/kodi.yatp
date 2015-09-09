@@ -66,10 +66,12 @@ def select_file(torrent_data, auto=False):
     videofiles = get_videofiles(torrent_data)
     if videofiles:
         if len(videofiles) > 1 and auto:
+            # Select the biggest file
             file_sizes = [video[2] for video in videofiles]
             max_size = max(file_sizes)
             index = file_sizes.index(max_size)
         elif len(videofiles) > 1 and not auto:
+            # Show selection dialog
             index = xbmcgui.Dialog().select(string(32017), [item[1] for item in videofiles])
         else:
             index = 0

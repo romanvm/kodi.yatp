@@ -81,6 +81,8 @@ def select_torrent(params):
                     listing.append({'label': file_[1],
                                     'thumb': thumb,
                                     'url': plugin.get_url(action='play_file',
+                                                          # info_hash is used only as a unique torrent ID
+                                                          # for 'in progress'/'watched' marks to work correctly.
                                                           info_hash=torrent_data['info_hash'],
                                                           file_index=file_[0]),
                                     'is_playable': True
