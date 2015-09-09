@@ -55,46 +55,13 @@ def select_torrent(params):
     @param params:
     @return:
     """
-    dialog = xbmcgui.Dialog()
-    torrent = dialog.browse(1, string(32003), 'video', mask='.torrent')
-    del dialog
-    success = False
-    listing = []
+    torrent = xbmcgui.Dialog().browse(1, string(32003), 'video', mask='.torrent')
     if torrent:
         plugin.log('Torrent selected: {0}'.format(torrent))
         if params['target'] == 'play':
-            torrent_data = add_torrent(os.path.normpath(torrent))
-            if torrent_data is not None:
-                videofiles = get_videofiles(torrent_data)
-                for file_ in videofiles:
-                    ext = os.path.splitext(file_[1].lower())[1]
-                    if ext == '.avi':
-                        thumb = os.path.join(icons, 'avi.png')
-                    elif ext == '.mp4':
-                        thumb = os.path.join(icons, 'mp4.png')
-                    elif ext == '.mkv':
-                        thumb = os.path.join(icons, 'mkv.png')
-                    elif ext == '.mov':
-                        thumb = os.path.join(icons, 'mov.png')
-                    else:
-                        thumb = os.path.join(icons, 'play.png')
-                    listing.append({'label': file_[1],
-                                    'thumb': thumb,
-                                    'url': plugin.get_url(action='play_file',
-                                                          # info_hash is used only as a unique torrent ID
-                                                          # for 'in progress'/'watched' marks to work correctly.
-                                                          info_hash=torrent_data['info_hash'],
-                                                          file_index=file_[0]),
-                                    'is_playable': True
-                                    })
-                success = True
-            else:
-                jsonrq.remove_torrent(torrent_data['info_hash'], True)
-                xbmcgui.Dialog().notification(plugin.id, string(32023), plugin.icon, 3000)
+            return list_files({'torrent': torrent})
         else:
             download_torrent({'torrent': torrent})
-            return
-    return plugin.create_listing(listing, succeeded=success)
 
 
 def play_torrent(params):
@@ -208,6 +175,44 @@ def torrent_info(params):
         torr_info = jsonrq.get_torrent_info(params['info_hash'])
 
 
+def list_files(params):
+    """
+    Display the list of files in a torrent
+
+    @param params:
+    @return:
+    """
+    listing = []
+    torrent_data = add_torrent(params['torrent'])
+    success = torrent_data is not None
+    if success:
+        videofiles = get_videofiles(torrent_data)
+        for file_ in videofiles:
+            ext = os.path.splitext(file_[1].lower())[1]
+            if ext == '.avi':
+                thumb = os.path.join(icons, 'avi.png')
+            elif ext == '.mp4':
+                thumb = os.path.join(icons, 'mp4.png')
+            elif ext == '.mkv':
+                thumb = os.path.join(icons, 'mkv.png')
+            elif ext == '.mov':
+                thumb = os.path.join(icons, 'mov.png')
+            else:
+                thumb = os.path.join(icons, 'play.png')
+            listing.append({'label': file_[1],
+                            'thumb': thumb,
+                            'url': plugin.get_url(action='play_file',
+                                                  # info_hash is used only as a unique torrent ID
+                                                  # for 'in progress'/'watched' marks to work correctly.
+                                                  info_hash=torrent_data['info_hash'],
+                                                  file_index=file_[0]),
+                            'is_playable': True
+                            })
+    else:
+        xbmcgui.Dialog().notification(plugin.id, string(32023), plugin.icon, 3000)
+    return plugin.create_listing(listing, succeeded=success)
+
+
 plugin.actions['root'] = root
 plugin.actions['select_torrent'] = select_torrent
 plugin.actions['play'] = play_torrent
@@ -215,3 +220,4 @@ plugin.actions['play_file'] = play_file
 plugin.actions['download'] = download_torrent
 plugin.actions['torrents'] = torrents
 plugin.actions['torrent_info'] = torrent_info
+plugin.actions['list_files'] = list_files
