@@ -232,7 +232,7 @@ def set_session_settings(torrent_client, params):
 
     params - session settings key=value pairs.
     More info can be found in
-    <a href=http://www.rasterbar.com/products/libtorrent/manual.html#session-customization">libtorrent API docs</a>.
+    <a href="http://www.rasterbar.com/products/libtorrent/manual.html#session-customization">libtorrent API docs</a>.
     @return: 'OK'
     """
     torrent_client.set_session_settings(**params)

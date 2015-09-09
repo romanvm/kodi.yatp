@@ -155,8 +155,8 @@ class Torrenter(object):
         Add a torrent in a non-blocking way.
 
         This method will add a torrent in a separate thread. After calling the method,
-        the caller should periodically check torrent_added flag and, when
-        the flag is set, retrieve results from data_buffer.
+        the caller should periodically check is_torrent_added flag and, when
+        the flag is set, retrieve results from last_added_torrent.
         @param torrent: str - path to a .torrent file or a magnet link
         @param save_path: str - save path
         @param zero_priorities: bool
@@ -680,6 +680,6 @@ class Streamer(Torrenter):
         """
         Streamed file data
 
-        @return: tuple - (torr_handle, start_piece, num_pieces)
+        @return: dict
         """
         return self._streamed_file_data[0]
