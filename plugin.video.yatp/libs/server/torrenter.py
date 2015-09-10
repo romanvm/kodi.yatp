@@ -18,18 +18,21 @@ import datetime
 import cPickle as pickle
 from collections import deque
 from requests import get
-
+from libs.simpleplugin import Addon
+# Import libtorrent module
 try:
-    import libtorrent
+    import libtorrent  # Try to import global module
 except ImportError:
-    from python_libtorrent import get_libtorrent
+    from python_libtorrent import get_libtorrent  # Try to import from script.module.libtorrent
     libtorrent = get_libtorrent()
 
-print 'plugin.video.yatp. libtorrent version: {0}'.format(libtorrent.version)
+addon = Addon()
+addon.log('libtorrent version: {0}'.format(libtorrent.version))
 
 
 def load_torrent(url):
-        return get(url).content
+    """Load .torrent from URL"""
+    return get(url).content
 
 
 class TorrenterError(Exception):
@@ -197,23 +200,6 @@ class Torrenter(object):
         # torr_handle.auto_managed(False)
         self._torrents_pool[str(torr_handle.info_hash())] = torr_handle
         return torr_handle
-
-    @staticmethod
-    def check_piece_range(torr_handle, start_piece, end_piece):
-        """
-        Check if the range of pieces is downloaded
-
-        @param torr_handle:
-        @param start_piece:
-        @param end_piece:
-        @return:
-        """
-        result = True
-        for piece in xrange(start_piece, end_piece + 1):
-            if not torr_handle.have_piece(piece):
-                result = False
-                break
-        return result
 
     def _get_torrent_status(self, info_hash):
         """
@@ -563,8 +549,9 @@ class Streamer(Torrenter):
         buffer_length = (buffer_size * 1048576) / torr_info.piece_length() - end_offset
         # The index of the end piece in the file
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
-        print 'plugin.video.yatp. start_piece={0}, end_piece={1}, piece_length={2}'.format(start_piece, end_piece,
-                                                                                           torr_info.piece_length())
+        addon.log('start_piece={0}, end_piece={1}, piece_length={2}'.format(start_piece,
+                                                                            end_piece,
+                                                                            torr_info.piece_length()))
         self._streamed_file_data.append({'torr_handle': torr_handle,
                                          'buffer_length': buffer_length,
                                          'start_piece': start_piece,
@@ -576,7 +563,7 @@ class Streamer(Torrenter):
             # Setup buffer download
             end_pool = range(end_piece - end_offset, end_piece + 1)
             buffer_pool = range(start_piece, start_piece + buffer_length + 1) + end_pool
-            print 'plugin.video.yatp. buffer_pool: {0}'.format(str(buffer_pool))
+            addon.log('buffer_pool: {0}'.format(str(buffer_pool)))
             buffer_pool_length = len(buffer_pool)
             [torr_handle.piece_priority(piece, 7) for piece in end_pool]
             self.start_sliding_window_async(torr_handle, start_piece, start_piece + buffer_length,
@@ -618,7 +605,7 @@ class Streamer(Torrenter):
         self._abort_sliding.clear()
         [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start, window_end + 1)]
         while window_start <= last_piece and not self._abort_sliding.is_set():
-            print 'plugin.video.yatp. Sliding window position: {0}'.format(window_start)
+            addon.log('Sliding window position: {0}'.format(window_start))
             self._sliding_window_position.append(window_start)
             torr_handle.piece_priority(window_start, 7)
             if torr_handle.have_piece(window_start):
@@ -659,6 +646,23 @@ class Streamer(Torrenter):
         if self.streamed_file_data is not None and info_hash == str(self.streamed_file_data['torr_handle'].info_hash()):
             self.abort_buffering()
         super(Streamer, self).remove_torrent(info_hash, delete_files)
+
+    @staticmethod
+    def check_piece_range(torr_handle, start_piece, end_piece):
+        """
+        Check if the range of pieces is downloaded
+
+        @param torr_handle:
+        @param start_piece:
+        @param end_piece:
+        @return:
+        """
+        result = True
+        for piece in xrange(start_piece, end_piece + 1):
+            if not torr_handle.have_piece(piece):
+                result = False
+                break
+        return result
 
     @property
     def is_buffering_complete(self):
