@@ -43,5 +43,7 @@
                  label="32056" default="-1"/>
         <setting id="unchoke_slots_limit" type="number"
                  label="32057" default="8"/>
+        <setting id="connection_speed" type="number"
+                 label="32058" default="6"/>
     </category>
 </settings>

@@ -238,3 +238,7 @@ msgstr "Лимит полуоткрытых соединений (-1 — без 
 msgctxt "#32057"
 msgid "Upload slots per torrent"
 msgstr "Слотов отдачи на торрент"
+
+msgctxt "#32058"
+msgid "Max. connection attempts per second"
+msgstr "Макс. кол-во попыток соединений в секунду"

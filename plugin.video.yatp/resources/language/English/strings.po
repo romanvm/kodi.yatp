@@ -238,3 +238,7 @@ msgstr ""
 msgctxt "#32057"
 msgid "Upload slots per torrent"
 msgstr ""
+
+msgctxt "#32058"
+msgid "Max. connection attempts per second"
+msgstr ""
