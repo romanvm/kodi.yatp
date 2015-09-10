@@ -60,7 +60,7 @@ def select_file(torrent_data, dialog=False):
     Select a videofile from the torrent to play
 
     @param torrent_data:
-    @param auto: auto-select the biggest videofile in a torrent
+    @param dialog: show a dialog for selecting a videofile
     @return:
     """
     videofiles = get_videofiles(torrent_data)
@@ -107,10 +107,7 @@ def stream_torrent(file_index):
         progress_dialog.close()
         return media_url + quote(torrent_data['files'][file_index][0].replace('\\', '/').encode('utf-8'))
     else:
-        if jsonrq.get_torrent_info(torrent_data['info_hash'])['state'] == 'downloading':
-            jsonrq.remove_torrent(torrent_data['info_hash'], True)
-        else:
-            jsonrq.abort_buffering()
+        jsonrq.abort_buffering()
         return ''
 
 
