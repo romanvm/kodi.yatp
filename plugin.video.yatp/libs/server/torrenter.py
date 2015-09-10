@@ -194,7 +194,7 @@ class Torrenter(object):
         torr_handle = self._session.add_torrent(add_torrent_params)
         while not torr_handle.has_metadata():  # Wait until torrent metadata are populated
             time.sleep(0.1)
-        torr_handle.auto_managed(False)
+        # torr_handle.auto_managed(False)
         self._torrents_pool[str(torr_handle.info_hash())] = torr_handle
         return torr_handle
 
@@ -627,8 +627,8 @@ class Streamer(Torrenter):
                     window_end += 1
                     torr_handle.piece_priority(window_end, 1)
             time.sleep(0.1)
-        if not self._abort_sliding.is_set():
-            [torr_handle.piece_priority(piece, 1) for piece in xrange(torr_handle.get_torrent_info().num_pieces())]
+        # if not self._abort_sliding.is_set():
+        #     [torr_handle.piece_priority(piece, 1) for piece in xrange(torr_handle.get_torrent_info().num_pieces())]
         self._sliding_window_position.append(-1)
 
     def abort_buffering(self):
