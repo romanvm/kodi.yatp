@@ -13,16 +13,24 @@ torrent-client.
 - Support for magnet links, local and remote .torrent files.
 - Support for jump/seek to arbitrary parts of the video (it re-prioritizes pieces for download).
 
-**Warning!** To use YATP you need a binary compiled libtorrent module which is not included in the plugin.
-
-**Warning2!** The plugin is in WIP state and is subject to constant changes. Proper working distributions
+**Warning!** The plugin is in WIP state and is subject to constant changes. Proper working distributions
 will be provided after it is more or less finished.
+
+**Warning 2!** To use YATP you need a binary compiled libtorrent module which is not included in the plugin.
+The respective Kodi Python module addon for multiple platforms will be included in my repo along with YATP.
 ## Basic Usage
 YATP can be invoked from another Kodi video plugin using the following URL:
 ```
 plugin://plugin.video.yatp/?action=play&torrent=<url-encoded path to a .torrent file or a magnet link>
 ```
+This will play the biggest videofile in a torrent.
 The respective list item must have its *'IsPlayable'* property set to *'true'*.
+
+To show the list of videofiles in a torrent use this URL:
+```
+plugin://plugin.video.yatp/?action=list_files&torrent=<url-encoded path to a .torrent file or a magnet link>
+```
+This will open the list of videofiles as a Kodi virtual folder. Then you can select individual files to play.
 
 YATP also allows to play local .torrent files containing videos.
 ## Torrent Client
