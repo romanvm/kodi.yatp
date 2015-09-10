@@ -18,6 +18,7 @@ from libs.simpleplugin import Addon
 addon = Addon()
 string = addon.get_localized_string
 media_url = 'http://127.0.0.1:{0}/stream/'.format(addon.server_port)
+MEDIAFILES = ('.avi', '.mkv', '.mp4', '.ts', '.m2ts', '.mov')
 
 
 def get_videofiles(torrent_data):
@@ -29,7 +30,7 @@ def get_videofiles(torrent_data):
     """
     videofiles = []
     for file_index, file_ in enumerate(torrent_data['files']):
-        if os.path.splitext(file_[0].lower())[1] in ('.avi', '.mkv', '.mp4', '.ts', '.m2ts', '.mov'):
+        if os.path.splitext(file_[0].lower())[1] in MEDIAFILES:
             videofiles.append((file_index, os.path.basename(file_[0]), file_[1]))
     videofiles = sorted(videofiles, key=lambda i: i[1])
     return videofiles

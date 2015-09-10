@@ -85,7 +85,7 @@ def play_file(params):
     @param params:
     @return:
     """
-    return _play(stream_torrent(params['file_index']))
+    return _play(stream_torrent(int(params['file_index'])))
 
 
 def download_torrent(params):
