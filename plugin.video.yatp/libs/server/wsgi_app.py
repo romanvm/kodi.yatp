@@ -167,7 +167,7 @@ def add_torrent(source):
 @route('/stream/<path:path>')
 def stream_file(path):
     """Stream torrent"""
-    addon.log('********* Stream Test ***********')
+    addon.log('********* Stream Torrent ***********')
     addon.log('Method: ' + request.method)
     addon.log('Headers: ' + str(request.headers.items()))
     if sys.platform == 'win32':
