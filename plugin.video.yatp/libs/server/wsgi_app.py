@@ -213,7 +213,7 @@ def stream_file(path):
                                                       start_piece + streamed_file['buffer_length'] - 3,
                                                       streamed_file['end_piece'] - streamed_file['end_offset'] - 1)
                 # Wait until a specified number of pieces after a jump point are downloaded.
-                end_piece = min(start_piece + addon.jump_buffer, streamed_file['end_piece'])
+                end_piece = min(start_piece + streamed_file['buffer_length'], streamed_file['end_piece'])
                 while not torrent_client.check_piece_range(streamed_file['torr_handle'], start_piece, end_piece):
                     percent = int(100 * float(torrent_client.sliding_window_position - start_piece + 3) /
                                   (end_piece - start_piece))
