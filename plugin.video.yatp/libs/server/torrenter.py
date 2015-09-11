@@ -546,7 +546,8 @@ class Streamer(Torrenter):
         # The number of pieces at the start of the file
         # to be downloaded before the file can be played
         end_offset = 2097152 / torr_info.piece_length() + 2  # Experimentally tested
-        buffer_length = (buffer_size * 1048576) / torr_info.piece_length() - end_offset
+        # Buffer length - at least 5 pieces
+        buffer_length = max(5, (buffer_size * 1048576) / torr_info.piece_length() - end_offset)
         # The index of the end piece in the file
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
         addon.log('start_piece={0}, end_piece={1}, piece_length={2}'.format(start_piece,
