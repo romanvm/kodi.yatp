@@ -185,7 +185,7 @@ class Torrenter(object):
         if isinstance(torrent, dict):
             add_torrent_params['ti'] = libtorrent.torrent_info(torrent)
         elif torrent[:7] == 'magnet:':
-            add_torrent_params['url'] = torrent
+            add_torrent_params['url'] = str(torrent)  # libtorrent doesn't like unicode objects here
         elif torrent[:7] in ('http://', 'https:/'):
             # Here external http/https client is used in case if libtorrent module is compiled without OpenSSL
             add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(load_torrent(torrent)))
@@ -197,7 +197,7 @@ class Torrenter(object):
         torr_handle = self._session.add_torrent(add_torrent_params)
         while not torr_handle.has_metadata():  # Wait until torrent metadata are populated
             time.sleep(0.1)
-        # torr_handle.auto_managed(False)
+        torr_handle.auto_managed(False)
         self._torrents_pool[str(torr_handle.info_hash())] = torr_handle
         return torr_handle
 
