@@ -84,7 +84,8 @@ class Torrenter(object):
                 self._save_session_state()
         self.set_session_settings(cache_size=256,  # 4MB
                                   ignore_limits_on_local_network=False,
-                                  optimistic_unchoke_interval=15)
+                                  optimistic_unchoke_interval=15,
+                                  user_agent='uTorrent/2200(24683)')
         self._session.add_dht_router('router.bittorrent.com', 6881)
         self._session.add_dht_router('router.utorrent.com', 6881)
         self._session.add_dht_router('router.bitcomet.com', 6881)
