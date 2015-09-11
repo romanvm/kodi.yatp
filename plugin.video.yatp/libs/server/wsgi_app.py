@@ -201,7 +201,7 @@ def stream_file(path):
             # then serve the file via Bottle.
             return static_file(path, root=download_dir, mimetype=get_mime(path))
         else:
-            start_piece = streamed_file['start_piece'] - 1 + start_pos / streamed_file['piece_length']
+            start_piece = streamed_file['start_piece'] + start_pos / streamed_file['piece_length']
             addon.log('Start piece: {0}'.format(start_piece))
             addon.log('Streamed file: {0}'.format(str(streamed_file)))
             if start_pos > 0:
