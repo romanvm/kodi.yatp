@@ -14,7 +14,7 @@ function pause_torrents()
         hashes += '"]';
         $.ajax({type:'POST',
                 url:'/json-rpc',
-                data:'{"method":"pause_group", "params":{"info_hashes":' + hashes + '}}',
+                data:'{"method":"pause_group","params":{"info_hashes":' + hashes + '}}',
                 contentType:'application/json',
                 dataType:'json'
         }); // end ajax
@@ -35,7 +35,7 @@ function resume_torrents()
         hashes += '"]';
         $.ajax({type:'POST',
                 url:'/json-rpc',
-                data:'{"method":"resume_group", "params":{"info_hashes":' + hashes + '}}',
+                data:'{"method":"resume_group","params":{"info_hashes":' + hashes + '}}',
                 contentType:'application/json',
                 dataType:'json'
         }); // end ajax
@@ -163,7 +163,7 @@ $(function()
             {field:'num_peers',title:'Peers',width:50,align:'right'},
             {field:'added_time',title:'Added on',sortable:true,width:150},
             {field:'completed_time',title:'Completed on',sortable:true,width:150},
-            {field:'info_hash',title:'Hash',width:300}
+            {field:'info_hash',title:'Hash',width:1,hidden:true}
         ]] // end columns
     }); // end datagrid
     $('#add_torrent_dlg').dialog({
