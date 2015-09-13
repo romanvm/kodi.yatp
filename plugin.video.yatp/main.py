@@ -6,6 +6,9 @@
 """
 Plugin main module
 """
+# Todo: add more logging (buffer_pool, torrent data in a session).
+# Todo: improve controlled file serving by checking piece distance.
+# Todo: implement hachoir library for dynamic calculating of buffer_length.
 
 from libs.client.actions import plugin
 
