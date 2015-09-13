@@ -104,7 +104,7 @@ function pause_all()
     $.ajax({
             type:'POST',
             url:'/json-rpc',
-            data:'{"method": "pause_all"}',
+            data:'{"method":"pause_all"}',
             contentType:'application/json',
             dataType:'json'
         }); // end ajax
@@ -115,7 +115,7 @@ function resume_all()
     $.ajax({
             type:'POST',
             url:'/json-rpc',
-            data:'{"method": "resume_all"}',
+            data:'{"method":"resume_all"}',
             contentType:'application/json',
             dataType:'json'
         }); // end ajax
