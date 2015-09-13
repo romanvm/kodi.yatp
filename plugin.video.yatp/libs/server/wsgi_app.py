@@ -7,8 +7,6 @@
 Torrent streamer WSGI application for Web/JSON interface
 """
 
-DEBUG = True
-
 import os
 import sys
 import time
@@ -16,8 +14,6 @@ import re
 from cStringIO import StringIO
 from json import dumps
 from inspect import getmembers, isfunction
-from bottle import (route, default_app, request, template, response, debug,
-                    static_file, TEMPLATE_PATH, HTTPError, HTTPResponse)
 import methods
 from addon import Addon
 from torrenter import Streamer, libtorrent
@@ -25,8 +21,14 @@ from timers import Timer, check_seeding_limits, save_resume_data
 from onscreen_label import OnScreenLabel
 from utilities import get_mime, serve_file_from_torrent
 
-
 addon = Addon()
+
+sys.path.append(os.path.join(addon.path, 'site-packages'))
+from bottle import (route, default_app, request, template, response, debug,
+                    static_file, TEMPLATE_PATH, HTTPError, HTTPResponse)
+
+DEBUG = True
+
 onscreen_label = OnScreenLabel('', False)
 # Torrent client parameters
 download_dir = addon.download_dir
