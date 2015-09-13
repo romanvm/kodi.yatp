@@ -17,7 +17,7 @@ from inspect import getmembers, isfunction
 import methods
 from addon import Addon
 from torrenter import Streamer, libtorrent
-from timers import Timer, check_seeding_limits, save_resume_data
+from timers import Timer, check_seeding_limits, save_resume_data, log_torrents
 from onscreen_label import OnScreenLabel
 from utilities import get_mime, serve_file_from_torrent
 
@@ -52,6 +52,7 @@ max_time = addon.time_limit
 limits_timer = Timer(10, check_seeding_limits, torrent_client, max_ratio, max_time,
                      addon.expired_action, addon.delete_expired_files)
 save_resume_timer = Timer(30, save_resume_data, torrent_client)
+log_torrents_timer = Timer(5, log_torrents, torrent_client)
 # Bottle WSGI application
 static_path = os.path.join(addon.path, 'resources', 'web')
 TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))
