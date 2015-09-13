@@ -247,7 +247,7 @@ def set_session_settings(torrent_client, params):
     return 'OK'
 
 
-def prioritize_file(self, torrent_client, params):
+def prioritize_file(torrent_client, params):
     """
     Prioritize a file in a torrent
 
@@ -259,4 +259,16 @@ def prioritize_file(self, torrent_client, params):
     @return:
     """
     torrent_client.prioritize_file(params['info_hash'], params['file_index'], params['priority'])
+    return 'OK'
+
+
+def set_piece_priorities(torrent_client, params):
+    """
+    Set priorities for all pieces in a torrent
+
+    params['info_hash']: str - torrent info-hash
+    params['priority']: int - priority from 0 to 7.
+    @return: 'OK'
+    """
+    torrent_client.set_piece_priorities(params['info_hash'], params['priority'])
     return 'OK'

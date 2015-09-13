@@ -146,11 +146,12 @@ class Torrenter(object):
         torr_handle = self._add_torrent(torrent, save_path)
         if self._persistent:
             self._save_torrent_info(torr_handle)
-        result = {'name': torr_handle.name().decode('utf-8'), 'info_hash': str(torr_handle.info_hash())}
+        info_hash = str(torr_handle.info_hash())
+        result = {'name': torr_handle.name().decode('utf-8'), 'info_hash': info_hash}
         torr_info = torr_handle.get_torrent_info()
         result['files'] = [[file_.path.decode('utf-8'), file_.size] for file_ in torr_info.files()]
         if zero_priorities:
-            [torr_handle.piece_priority(piece, 0) for piece in xrange(torr_info.num_pieces())]
+            self.set_piece_priorities(info_hash, 0)
         self._last_added_torrent.append(result)
         self._torrent_added.set()
 
@@ -467,6 +468,17 @@ class Torrenter(object):
         @return:
         """
         self._torrents_pool[info_hash].file_priority(file_index, priority)
+
+    def set_piece_priorities(self, info_hash, priority=1):
+        """
+        Set priorities for all pieces in a torrent
+
+        @param info_hash: str
+        @param priority: int
+        @return:
+        """
+        torr_handle = self._torrents_pool[info_hash]
+        [torr_handle.piece_priority(piece, priority) for piece in xrange(torr_handle.get_torrent_info().num_pieces())]
 
     @property
     def is_torrent_added(self):
