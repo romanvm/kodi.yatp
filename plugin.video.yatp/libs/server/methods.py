@@ -16,6 +16,10 @@ Example:
 For those methods "params" key can be equal null or omitted.
 """
 
+from addon import Addon
+
+addon = Addon()
+
 
 def ping(torrent_client, params=None):
     """
@@ -37,9 +41,13 @@ def add_torrent(torrent_client, params):
     params['save_path']: str - save path (optional).
         If save path is missing or equals an empty string then the default save path is used.
     params['zero_priorities']: bool - zero priorities (do not start download immediately, optional, default - True)
+    paras['cookies']: dict - additional cookies to be passed if a .torrent file is downloaded via http/https
     @return: 'OK'
     """
-    torrent_client.add_torrent_async(params['torrent'], params['save_path'], params['zero_priorities'])
+    torrent_client.add_torrent_async(torrent=params['torrent'],
+                                     save_path=params.get('save_path') or addon.download_dir,
+                                     zero_priorities=params.get('zero_priorities', True),
+                                     cookies=params.get('cookies'))
     return 'OK'
 
 

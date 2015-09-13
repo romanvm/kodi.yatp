@@ -30,9 +30,9 @@ addon = Addon()
 addon.log('libtorrent version: {0}'.format(libtorrent.version))
 
 
-def load_torrent(url):
+def load_torrent(url, cookies=None):
     """Load .torrent from URL"""
-    return get(url).content
+    return get(url, cookies=cookies or {}).content
 
 
 class TorrenterError(Exception):
@@ -133,7 +133,7 @@ class Torrenter(object):
             ses_settings[key] = value
         self._session.set_settings(ses_settings)
 
-    def add_torrent(self, torrent, save_path, zero_priorities=False):
+    def add_torrent(self, torrent, save_path, zero_priorities=False, cookies=None):
         """
         Add a torrent download
 
@@ -154,7 +154,7 @@ class Torrenter(object):
         self._last_added_torrent.append(result)
         self._torrent_added.set()
 
-    def add_torrent_async(self, torrent, save_path, zero_priorities=False):
+    def add_torrent_async(self, torrent, save_path, zero_priorities=False, cookies=None):
         """
         Add a torrent in a non-blocking way.
 
@@ -166,11 +166,12 @@ class Torrenter(object):
         @param zero_priorities: bool
         @return:
         """
-        self._add_torrent_thread = threading.Thread(target=self.add_torrent, args=(torrent, save_path, zero_priorities))
+        self._add_torrent_thread = threading.Thread(target=self.add_torrent,
+                                                    args=(torrent, save_path, zero_priorities, cookies))
         self._add_torrent_thread.daemon = True
         self._add_torrent_thread.start()
 
-    def _add_torrent(self, torrent, save_path, resume_data=None):
+    def _add_torrent(self, torrent, save_path, resume_data=None, cookies=None):
         """
         Add a torrent to the pool.
 
@@ -189,7 +190,8 @@ class Torrenter(object):
             add_torrent_params['url'] = str(torrent)  # libtorrent doesn't like unicode objects here
         elif torrent[:7] in ('http://', 'https:/'):
             # Here external http/https client is used in case if libtorrent module is compiled without OpenSSL
-            add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(load_torrent(torrent)))
+            add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(load_torrent(torrent,
+                                                                                               cookies=cookies)))
         else:
             try:
                 add_torrent_params['ti'] = libtorrent.torrent_info(os.path.abspath(torrent))

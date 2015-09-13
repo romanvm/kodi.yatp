@@ -102,11 +102,6 @@ def json_rpc():
         addon.log('***** JSON request *****')
         addon.log(request.body.read())
     data = request.json
-    # Use the default download dir if param['save_path'] is empty or missing
-    if data['method'] == 'add_torrent' and not data['params'].get('save_path'):
-        data['params']['save_path'] = download_dir
-    if data['method'] == 'add_torrent' and data['params'].get('zero_priorities') is None:
-        data['params']['zero_priorities'] = True
     reply = {'jsonrpc': '2.0', 'id': data.get('id', '1')}
     reply['result'] = getattr(methods, data['method'])(torrent_client, data.get('params'))
     # try:
