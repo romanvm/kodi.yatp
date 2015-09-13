@@ -166,12 +166,12 @@ def buffer_torrent(torrent_client, params):
     """
     Stream torrent
 
-    params['info_hash']: str - torrent info-hash in lowercase
+    The torrent must be already added via add_torrent method!
     params['file_index']: int - the index of the file to be buffered
     params['buffer_size']: int - buffer size in MB
     @return: 'OK'
     """
-    torrent_client.buffer_torrent_async(params['info_hash'], params['file_index'], params['buffer_size'])
+    torrent_client.buffer_torrent_async(params['file_index'], params['buffer_size'])
     return 'OK'
 
 

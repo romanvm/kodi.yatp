@@ -517,28 +517,27 @@ class Streamer(Torrenter):
         self.abort_buffering()
         super(Streamer, self).__del__()
 
-    def buffer_torrent_async(self, info_hash, file_index, buffer_size=35):
+    def buffer_torrent_async(self, file_index, buffer_size=35):
         """
         Force sequential download of file for video playback.
 
         This method will stream a torrent in a separate thread. The caller should periodically
         check buffering_complete flag. If buffering needs to be terminated,
         the caller should call abort_buffering method.
-        @param info_hash: str
+        The torrent must be already added via add_torrent method!
         @param file_index: int - the numerical index of the file to be streamed.
         @param buffer_size: int - buffer size in MB
         @return:
         """
-        self._buffer_torrent_thread = threading.Thread(target=self.buffer_torrent,
-                                                       args=(info_hash, file_index, buffer_size))
+        self._buffer_torrent_thread = threading.Thread(target=self.buffer_torrent, args=(file_index, buffer_size))
         self._buffer_torrent_thread.daemon = True
         self._buffer_torrent_thread.start()
 
-    def buffer_torrent(self, info_hash, file_index, buffer_size=35):
+    def buffer_torrent(self, file_index, buffer_size=35):
         """
         Force sequential download of file for video playback.
 
-        @param info_hash: str
+        The torrent must be already added via add_torrent method!
         @param file_index: int - the numerical index of the file to be streamed.
         @param buffer_size: int - buffer size in MB
         @return:
@@ -547,7 +546,7 @@ class Streamer(Torrenter):
         self._buffering_complete.clear()
         self._abort_buffering.clear()
         self._buffer_percent.append(0)
-        torr_handle = self._torrents_pool[info_hash]
+        torr_handle = self._torrents_pool[self.last_added_torrent['info_hash']]
         if torr_handle.status().paused:
             torr_handle.resume()
         torr_info = torr_handle.get_torrent_info()
