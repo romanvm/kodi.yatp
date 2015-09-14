@@ -32,7 +32,7 @@ addon.log('libtorrent version: {0}'.format(libtorrent.version))
 
 def load_torrent(url, cookies=None):
     """Load .torrent from URL"""
-    return get(url, cookies=cookies or {}).content
+    return get(url, cookies=cookies).content
 
 
 class TorrenterError(Exception):
@@ -133,28 +133,6 @@ class Torrenter(object):
             ses_settings[key] = value
         self._session.set_settings(ses_settings)
 
-    def add_torrent(self, torrent, save_path, zero_priorities=False, cookies=None):
-        """
-        Add a torrent download
-
-        @param torrent: str
-        @param save_path: str
-        @param zero_priorities: bool
-        @return: dict {'name': str, 'info_hash': str, 'files': list}
-        """
-        self._torrent_added.clear()
-        torr_handle = self._add_torrent(torrent, save_path)
-        if self._persistent:
-            self._save_torrent_info(torr_handle)
-        info_hash = str(torr_handle.info_hash())
-        result = {'name': torr_handle.name().decode('utf-8'), 'info_hash': info_hash}
-        torr_info = torr_handle.get_torrent_info()
-        result['files'] = [[file_.path.decode('utf-8'), file_.size] for file_ in torr_info.files()]
-        if zero_priorities:
-            self.set_piece_priorities(info_hash, 0)
-        self._last_added_torrent.append(result)
-        self._torrent_added.set()
-
     def add_torrent_async(self, torrent, save_path, zero_priorities=False, cookies=None):
         """
         Add a torrent in a non-blocking way.
@@ -171,6 +149,28 @@ class Torrenter(object):
                                                     args=(torrent, save_path, zero_priorities, cookies))
         self._add_torrent_thread.daemon = True
         self._add_torrent_thread.start()
+
+    def add_torrent(self, torrent, save_path, zero_priorities=False, cookies=None):
+        """
+        Add a torrent download
+
+        @param torrent: str
+        @param save_path: str
+        @param zero_priorities: bool
+        @return: dict {'name': str, 'info_hash': str, 'files': list}
+        """
+        self._torrent_added.clear()
+        torr_handle = self._add_torrent(torrent, save_path, cookies)
+        if self._persistent:
+            self._save_torrent_info(torr_handle)
+        info_hash = str(torr_handle.info_hash())
+        result = {'name': torr_handle.name().decode('utf-8'), 'info_hash': info_hash}
+        torr_info = torr_handle.get_torrent_info()
+        result['files'] = [[file_.path.decode('utf-8'), file_.size] for file_ in torr_info.files()]
+        if zero_priorities:
+            self.set_piece_priorities(info_hash, 0)
+        self._last_added_torrent.append(result)
+        self._torrent_added.set()
 
     def _add_torrent(self, torrent, save_path, resume_data=None, cookies=None):
         """
@@ -191,8 +191,7 @@ class Torrenter(object):
             add_torrent_params['url'] = str(torrent)  # libtorrent doesn't like unicode objects here
         elif torrent[:7] in ('http://', 'https:/'):
             # Here external http/https client is used in case if libtorrent module is compiled without OpenSSL
-            add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(load_torrent(torrent,
-                                                                                               cookies=cookies)))
+            add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(load_torrent(torrent, cookies)))
         else:
             try:
                 add_torrent_params['ti'] = libtorrent.torrent_info(os.path.abspath(torrent))
@@ -558,23 +557,25 @@ class Streamer(Torrenter):
         # Start piece of the file
         start_piece = peer_req.piece
         # The number of pieces in the file
-        num_pieces = file_entry.size / torr_info.piece_length()
+        piece_length = torr_info.piece_length()
+        num_pieces = file_entry.size / piece_length
         # The number of pieces at the start of the file
         # to be downloaded before the file can be played
-        end_offset = 2097152 / torr_info.piece_length() + 2  # Experimentally tested
-        # Buffer length - at least 5 pieces
-        buffer_length = max(5, (buffer_size * 1048576) / torr_info.piece_length() - end_offset)
+        # end_offset = 2097152 / torr_info.piece_length() + 2  # Experimentally tested
+        end_offset = 524288 / piece_length + 1
+        # Buffer length - at least 3 pieces
+        buffer_length = max(3, (buffer_size * 1048576) / piece_length - end_offset)
         # The index of the end piece in the file
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
         addon.log('start_piece={0}, end_piece={1}, piece_length={2}'.format(start_piece,
                                                                             end_piece,
-                                                                            torr_info.piece_length()))
+                                                                            piece_length))
         self._streamed_file_data.append({'torr_handle': torr_handle,
                                          'buffer_length': buffer_length,
                                          'start_piece': start_piece,
                                          'end_offset': end_offset,
                                          'end_piece': end_piece,
-                                         'piece_length': torr_info.piece_length()})
+                                         'piece_length': piece_length})
         # Check if the file has been downloaded earlier
         if not self.check_piece_range(torr_handle, start_piece, end_piece):
             # Setup buffer download
