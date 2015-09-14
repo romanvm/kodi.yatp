@@ -96,7 +96,7 @@ def stream_torrent(file_index):
         raise IndexError('File index {0} is out of range!'.format(file_index))
     progress_dialog = xbmcgui.DialogProgress()
     progress_dialog.create(string(32014))
-    jsonrq.buffer_torrent(file_index, addon.buffer_size)
+    jsonrq.buffer_file(file_index, addon.buffer_size)
     while not (progress_dialog.iscanceled() or jsonrq.check_buffering_complete()):
         torrent_info = jsonrq.get_torrent_info(torrent_data['info_hash'])
         progress_dialog.update(jsonrq.get_buffer_percent(),

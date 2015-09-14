@@ -517,7 +517,7 @@ class Streamer(Torrenter):
         self.abort_buffering()
         super(Streamer, self).__del__()
 
-    def buffer_torrent_async(self, file_index, buffer_size=35):
+    def buffer_file_async(self, file_index, buffer_size=35):
         """
         Force sequential download of file for video playback.
 
@@ -529,11 +529,11 @@ class Streamer(Torrenter):
         @param buffer_size: int - buffer size in MB
         @return:
         """
-        self._buffer_torrent_thread = threading.Thread(target=self.buffer_torrent, args=(file_index, buffer_size))
+        self._buffer_torrent_thread = threading.Thread(target=self.buffer_file, args=(file_index, buffer_size))
         self._buffer_torrent_thread.daemon = True
         self._buffer_torrent_thread.start()
 
-    def buffer_torrent(self, file_index, buffer_size=35):
+    def buffer_file(self, file_index, buffer_size=35):
         """
         Force sequential download of file for video playback.
 
@@ -575,7 +575,7 @@ class Streamer(Torrenter):
                                          'end_offset': end_offset,
                                          'end_piece': end_piece,
                                          'piece_length': torr_info.piece_length()})
-        # Check if the torrent has been downloaded earlier
+        # Check if the file has been downloaded earlier
         if not self.check_piece_range(torr_handle, start_piece, end_piece):
             # Setup buffer download
             end_pool = range(end_piece - end_offset, end_piece + 1)

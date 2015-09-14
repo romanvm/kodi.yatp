@@ -162,7 +162,7 @@ def remove_group(torrent_client, params):
     return 'OK'
 
 
-def buffer_torrent(torrent_client, params):
+def buffer_file(torrent_client, params):
     """
     Stream torrent
 
@@ -171,7 +171,7 @@ def buffer_torrent(torrent_client, params):
     params['buffer_size']: int - buffer size in MB
     @return: 'OK'
     """
-    torrent_client.buffer_torrent_async(params['file_index'], params['buffer_size'])
+    torrent_client.buffer_file_async(params['file_index'], params['buffer_size'])
     return 'OK'
 
 
