@@ -542,6 +542,8 @@ class Streamer(Torrenter):
         @param buffer_size: int - buffer size in MB
         @return:
         """
+        if file_index >= len(self.last_added_torrent['files']) or file_index < 0:
+            raise IndexError('Invalid file index: {0}!'.format(file_index))
         # Clear flags
         self._buffering_complete.clear()
         self._abort_buffering.clear()
