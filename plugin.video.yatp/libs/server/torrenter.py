@@ -18,7 +18,7 @@ import datetime
 import cPickle as pickle
 from collections import deque
 from requests import get
-from libs.simpleplugin import Addon
+from addon import Addon
 # Import libtorrent module
 try:
     import libtorrent  # Try to import global module
