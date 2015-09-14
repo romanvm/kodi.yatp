@@ -5,10 +5,17 @@
 # Licence: GPL v.3: http://www.gnu.org/copyleft/gpl.html
 
 import os
+import sys
 import time
-from mimetypes import guess_type
+from cStringIO import StringIO
 import xbmc
 from addon import Addon
+
+addon = Addon()
+sys.path.append(os.path.join(addon.path, 'site-packages'))
+from hachoir_metadata import extractMetadata
+from hachoir_parser import guessParser
+from hachoir_core.stream.input import InputIOStream
 
 MIME = {'.mkv': 'video/x-matroska',
         '.mp4': 'video/mp4',
@@ -16,7 +23,6 @@ MIME = {'.mkv': 'video/x-matroska',
         '.ts': 'video/vnd.dlna.mpeg-tts',
         '.m2ts': 'video/vnd.dlna.mpeg-tts',
         '.mov': 'video/quicktime'}
-addon = Addon()
 
 
 def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, num_pieces, piece_length, label):
@@ -77,11 +83,32 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, n
             byte_position += piece_length
 
 
+def _parse_file(filename):
+    """Extract metatata from file"""
+    with open(filename, 'rb') as f:
+        s = StringIO(f.read(1024 * 64))
+    p = guessParser(InputIOStream(s, filename=unicode(filename), tags=[]))
+    return extractMetadata(p)
+
+
+def get_duration(filename):
+    """
+    Get videofile duration in seconds
+
+    @param filename:
+    @return:
+    """
+    metadata = _parse_file(filename)
+    if metadata is not None and metadata.getItem('duration', 0) is not None:
+        return metadata.getItem('duration', 0).value.total_seconds()
+    else:
+        return 0.0
+
+
 def get_mime(filename):
-    """Get mime type for filename"""
-    mime = MIME.get(os.path.splitext(filename)[1])
-    if mime is None:
-        mime = guess_type(filename, False)[0]
-    if mime is None:
-        mime = 'application/octet-stream'
-    return mime
+    """Get videofile mime type"""
+    metadata = _parse_file(filename)
+    if metadata is not None and metadata.getItem('mime_type', 0) is not None:
+        return metadata.getItem('mime_type', 0).value
+    else:
+        return 'application/octet-stream'
