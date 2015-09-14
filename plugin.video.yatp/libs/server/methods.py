@@ -36,12 +36,13 @@ def add_torrent(torrent_client, params):
 
     The method calls add_torrent_async() in a separate thread
     and returns immediately. Then you need to poll torrent added status
-    using check_torrent_added method.
+    using <i>check_torrent_added</i> method.
     params['torrent']: str - magnet link or torrent URL
     params['save_path']: str - save path (optional).
         If save path is missing or equals an empty string then the default save path is used.
-    params['zero_priorities']: bool - zero priorities (do not start download immediately, optional, default - True)
-    paras['cookies']: dict - additional cookies to be passed if a .torrent file is downloaded via http/https
+    params['zero_priorities']: bool - zero priorities (do not start download immediately, optional, default - True).
+    params['cookies']: dict - additional cookies to be sent if a .torrent file is downloaded via http/https.
+        This is a dictionary (a JSON object) of {'key': 'value'} pairs. (Optional, default - None.)
     @return: 'OK'
     """
     torrent_client.add_torrent_async(torrent=params['torrent'],
