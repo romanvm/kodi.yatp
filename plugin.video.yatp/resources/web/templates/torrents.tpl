@@ -37,6 +37,9 @@
         <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Resume all torrents"
            data-options="position:'right'" iconCls="icon-resume-red" plain="true" onclick="resume_all()"></a>
         <span class="button-sep"></span>
+        <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Restore selected 'finished' downloads"
+           data-options="position:'right'" iconCls="icon-restore" plain="true" onclick="restore_downloads()"></a>
+        <span class="button-sep"></span>
         <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Delete selected torrents"
            data-options="position:'right'" iconCls="icon-delete" plain="true" onclick="confirm_remove_torrents()"></a>
     </div>

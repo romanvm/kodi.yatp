@@ -121,6 +121,34 @@ function resume_all()
         }); // end ajax
 } // end resume_all
 
+function restore_downloads()
+{
+    var torrents = $('#torrents').datagrid('getSelections');
+    if (torrents.length > 0)
+    {
+        var hashes = '[';
+        if (torrents[0].state == 'finished')
+        {
+            hashes += '"' + torrents[0].info_hash + '"';
+        }
+        var i;
+        for (i=1; i<torrents.length; i++)
+        {
+            if (torrents[i].state == 'finished')
+            {
+                hashes += ',"' + torrents[i].info_hash + '"';
+            }
+        }
+        hashes += ']';
+        $.ajax({type:'POST',
+                url:'/json-rpc',
+                data:'{"method":"restore_downloads","params":{"info_hashes":' + hashes + '}}',
+                contentType:'application/json',
+                dataType:'json'
+        }); // end ajax
+    } // end if
+} // end restore_donwloads
+
 function grid_refresh()
 {
     $('#torrents').datagrid('reload'); // reload grid

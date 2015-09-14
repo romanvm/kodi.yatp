@@ -25,6 +25,9 @@
 .icon-torrent-add {
     background:url('/static/img/folder_torrents.png') no-repeat center center;
     }
+.icon-restore {
+    background:url('/static/img/restore.png') no-repeat center center;
+    }
 .button-sep {
     display:inline-block;
     width:0;

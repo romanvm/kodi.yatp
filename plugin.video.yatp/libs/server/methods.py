@@ -273,3 +273,14 @@ def set_piece_priorities(torrent_client, params):
     """
     torrent_client.set_piece_priorities(params['info_hash'], params['priority'])
     return 'OK'
+
+
+def restore_downloads(torrent_client, params):
+    """
+    Restore partial torrent downloads, i.e. torrents in 'finished' state.
+
+    params['info_hashes']: list of str - the list of info-hashes
+    @return: 'OK'
+    """
+    for info_hash in params['info_hashes']:
+        torrent_client.set_piece_priorities(info_hash, 1)
