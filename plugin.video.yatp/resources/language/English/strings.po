@@ -132,7 +132,7 @@ msgid "Folder for downloading files"
 msgstr ""
 
 msgctxt "#32031"
-msgid "Buffer size (MB)"
+msgid "Buffer duration (s)"
 msgstr ""
 
 msgctxt "#32032"
@@ -241,4 +241,12 @@ msgstr ""
 
 msgctxt "#32058"
 msgid "Max. connection attempts per second"
+msgstr ""
+
+msgctxt "#32059"
+msgid "Default buffer size (MB)"
+msgstr ""
+
+msgctxt "#32060"
+msgid "Sliding window length"
 msgstr ""

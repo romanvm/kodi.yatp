@@ -7,6 +7,7 @@
 import os
 import sys
 import time
+from mimetypes import guess_type
 from cStringIO import StringIO
 import xbmc
 from addon import Addon
@@ -20,8 +21,8 @@ from hachoir_core.stream.input import InputIOStream
 MIME = {'.mkv': 'video/x-matroska',
         '.mp4': 'video/mp4',
         '.avi': 'video/avi',
-        '.ts': 'video/vnd.dlna.mpeg-tts',
-        '.m2ts': 'video/vnd.dlna.mpeg-tts',
+        '.ts': 'video/MP2T',
+        '.m2ts': 'video/MP2T',
         '.mov': 'video/quicktime'}
 
 
@@ -57,6 +58,7 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, n
                     proximity = current_piece - player.getTime() * pieces_per_second < 2
                 else:
                     proximity = False
+                addon.log('Proximity: {}'.format(proximity))
                 if proximity and not xbmc.getCondVisibility('Player.Paused'):
                     xbmc.executebuiltin('Action(Pause)')
                     paused = True
@@ -96,7 +98,7 @@ def get_duration(filename):
     Get videofile duration in seconds
 
     @param filename:
-    @return:
+    @return: duration
     """
     metadata = _parse_file(filename)
     if metadata is not None and metadata.getItem('duration', 0) is not None:
@@ -106,9 +108,10 @@ def get_duration(filename):
 
 
 def get_mime(filename):
-    """Get videofile mime type"""
-    metadata = _parse_file(filename)
-    if metadata is not None and metadata.getItem('mime_type', 0) is not None:
-        return metadata.getItem('mime_type', 0).value
-    else:
-        return 'application/octet-stream'
+    """Get mime type for filename"""
+    mime = MIME.get(os.path.splitext(filename)[1])
+    if mime is None:
+        mime = guess_type(filename, False)[0]
+    if mime is None:
+        mime = 'application/octet-stream'
+    return mime

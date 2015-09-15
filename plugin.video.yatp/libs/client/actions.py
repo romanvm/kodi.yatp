@@ -7,6 +7,7 @@
 import os
 import time
 import xbmcgui
+from xbmc import LOGNOTICE
 from libs.simpleplugin import Plugin
 import json_requests as jsonrq
 from buffering import buffer_torrent, stream_torrent, add_torrent, get_videofiles
@@ -24,7 +25,7 @@ def _play(path):
     @param path:
     @return:
     """
-    plugin.log('Path to play: {0}'.format(path))
+    plugin.log('Path to play: {0}'.format(path), LOGNOTICE)
     success = True if path else False
     return plugin.resolve_url(path, success)
 
@@ -57,7 +58,7 @@ def select_torrent(params):
     """
     torrent = xbmcgui.Dialog().browse(1, string(32003), 'video', mask='.torrent')
     if torrent:
-        plugin.log('Torrent selected: {0}'.format(torrent))
+        plugin.log('Torrent selected: {0}'.format(torrent), LOGNOTICE)
         if params['target'] == 'play':
             return list_files({'torrent': torrent})
         else:

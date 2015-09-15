@@ -11,9 +11,11 @@ import os
 import sys
 import time
 import re
+from traceback import format_exc
 from cStringIO import StringIO
 from json import dumps
 from inspect import getmembers, isfunction
+from xbmc import LOGERROR
 import methods
 from addon import Addon
 from torrenter import Streamer, libtorrent
@@ -47,9 +49,8 @@ torrent_client.set_session_settings(download_rate_limit=addon.dl_speed_limit * 1
 if not addon.enable_encryption:
     torrent_client.set_encryption_policy(2)
 # Timers
-max_ratio = addon.ratio_limit
-max_time = addon.time_limit
-limits_timer = Timer(10, check_seeding_limits, torrent_client, max_ratio, max_time,
+limits_timer = Timer(10, check_seeding_limits, torrent_client,
+                     addon.ratio_limit, addon.time_limit,
                      addon.expired_action, addon.delete_expired_files)
 save_resume_timer = Timer(30, save_resume_data, torrent_client)
 log_torrents_timer = Timer(5, log_torrents, torrent_client)
@@ -104,11 +105,11 @@ def json_rpc():
         addon.log(request.body.read())
     data = request.json
     reply = {'jsonrpc': '2.0', 'id': data.get('id', '1')}
-    reply['result'] = getattr(methods, data['method'])(torrent_client, data.get('params'))
-    # try:
-    #     reply['result'] = getattr(methods, data['method'])(torrent_client, data.get('params'))
-    # except Exception, ex:
-    #     reply['error'] = '{0}: {1}'.format(str(ex.__class__)[7:-2], ex.message)
+    try:
+        reply['result'] = getattr(methods, data['method'])(torrent_client, data.get('params'))
+    except Exception, ex:
+        addon.log(format_exc(), LOGERROR)
+        reply['error'] = '{0}: {1}'.format(str(ex.__class__)[7:-2], format_exc())
     if DEBUG:
         addon.log('***** JSON response *****')
         addon.log(str(reply))
@@ -174,7 +175,7 @@ def stream_file(path):
     addon.log('File path: {0}'.format(file_path.encode('utf-8')))
     size = os.path.getsize(file_path)
     addon.log('File size: {0}'.format(size))
-    mime = get_mime(path)
+    mime = get_mime(file_path)
     headers = {'Content-Type': mime,
                'Content-Length': str(size),
                'Accept-Ranges': 'bytes'}
@@ -197,7 +198,7 @@ def stream_file(path):
             addon.log('Torrent is being seeded or the end piece requested.')
             # If the file is beeing seeded or Kodi checks the end piece,
             # then serve the file via Bottle.
-            return static_file(path, root=download_dir, mimetype=get_mime(path))
+            return static_file(path, root=download_dir, mimetype=get_mime(file_path))
         else:
             start_piece = streamed_file['start_piece'] + start_pos / streamed_file['piece_length']
             addon.log('Start piece: {0}'.format(start_piece))
