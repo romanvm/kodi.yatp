@@ -31,7 +31,6 @@ from bottle import (route, default_app, request, template, response, debug,
 
 DEBUG = True
 
-onscreen_label = OnScreenLabel('', False)
 # Torrent client parameters
 download_dir = addon.download_dir
 resume_dir = os.path.join(addon.config_dir, 'torrents')
@@ -200,6 +199,7 @@ def stream_file(path):
             # then serve the file via Bottle.
             return static_file(path, root=download_dir, mimetype=get_mime(file_path))
         else:
+            onscreen_label = OnScreenLabel('', False)
             start_piece = streamed_file['start_piece'] + start_pos / streamed_file['piece_length']
             addon.log('Start piece: {0}'.format(start_piece))
             addon.log('Streamed file: {0}'.format(str(streamed_file)))
@@ -208,9 +208,14 @@ def stream_file(path):
                 # Set sliding window start 1 piece before the jump point to minimize (hopefully) image distortion.
                 # Needs to be tested!
                 torrent_client.start_sliding_window_async(streamed_file['torr_handle'],
-                                                      start_piece - 1,
-                                                      start_piece + streamed_file['buffer_length'] - 1,
-                                                      streamed_file['end_piece'] - streamed_file['end_offset'] - 1)
+                                                          start_piece - 1,
+                                                          # By some strange voodoo magic, 'sliding_window_length'
+                                                          # property cannot be read directly from the addon settings here
+                                                          # because for some reason all peers are disconnected after that,
+                                                          # and seek fails.
+                                                          # That is why we obtain it via a thread-safe buffer.
+                                                          start_piece + streamed_file['sliding_window_length'] - 1,
+                                                          streamed_file['end_piece'] - streamed_file['end_offset'] - 1)
                 # Wait until a specified number of pieces after a jump point are downloaded.
                 end_piece = min(start_piece + streamed_file['buffer_length'], streamed_file['end_piece'])
                 while not torrent_client.check_piece_range(streamed_file['torr_handle'], start_piece, end_piece):
