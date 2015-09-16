@@ -62,7 +62,7 @@ debug(DEBUG)
 @route('/')
 def root():
     """
-    Root path
+    Display a web-UI
 
     @return:
     """
@@ -78,7 +78,7 @@ def root():
 @route('/json-rpc', method='GET')
 def get_methods():
     """
-    Display the list of available methods
+    Display brief JSON-RPC methods documentation
 
     @return:
     """
@@ -95,7 +95,7 @@ def get_methods():
 @route('/json-rpc', method='POST')
 def json_rpc():
     """
-    JSON-RPC requests processing
+    Process JSON-RPC requests
 
     @return:
     """
