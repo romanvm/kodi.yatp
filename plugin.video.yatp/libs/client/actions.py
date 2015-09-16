@@ -185,8 +185,7 @@ def list_files(params):
     """
     listing = []
     torrent_data = add_torrent(params['torrent'])
-    success = torrent_data is not None
-    if success:
+    if torrent_data is not None:
         videofiles = get_videofiles(torrent_data)
         for file_ in videofiles:
             ext = os.path.splitext(file_[1].lower())[1]
@@ -211,9 +210,9 @@ def list_files(params):
                             })
     else:
         xbmcgui.Dialog().notification(plugin.id, string(32023), plugin.icon, 3000)
-    return plugin.create_listing(listing, succeeded=success)
+    return plugin.create_listing(listing, cache_to_disk=True)
 
-
+# Map actions
 plugin.actions['root'] = root
 plugin.actions['select_torrent'] = select_torrent
 plugin.actions['play'] = play_torrent
