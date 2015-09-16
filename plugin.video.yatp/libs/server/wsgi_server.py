@@ -13,7 +13,9 @@ from SocketServer import ThreadingMixIn
 
 class CustomWSGIRequestHandler(WSGIRequestHandler):
     """Custom WSGI Request Handler"""
-    def log_message(self, format, *args):
+    protocol_version = 'HTTP/1.1'
+
+    def log_message(self, *args, **kwargs):
         """Disable log messages"""
         pass
 
@@ -21,6 +23,7 @@ class CustomWSGIRequestHandler(WSGIRequestHandler):
 class ThreadedWSGIServer(ThreadingMixIn, WSGIServer):
     """Multi-threaded WSGI server"""
     daemon_threads = True
+    allow_reuse_address = True
 
 
 def create_server(app, host='', port=8000):
