@@ -687,7 +687,7 @@ class Streamer(Torrenter):
         if duration:
             buffer_length = int(buffer_duration * num_pieces / duration)
             # For AVI files Kodi requests bigger chunks at the end of a file
-            end_offset = 4194304 / piece_length if os.path.splitext(filename)[1].lower() == '.avi' else 2
+            end_offset = 4194304 / piece_length if os.path.splitext(filename)[1].lower() == '.avi' else 1
         else:
             # Fallback if hachoir cannot parse the file
             end_offset = 4194304 / piece_length
