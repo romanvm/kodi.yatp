@@ -169,10 +169,9 @@ def buffer_file(torrent_client, params):
 
     The torrent must be already added via add_torrent method!
     params['file_index']: int - the index of the file to be buffered
-    params['buffer_size']: int - buffer size in MB
     @return: 'OK'
     """
-    torrent_client.buffer_file_async(params['file_index'], params['buffer_size'])
+    torrent_client.buffer_file_async(params['file_index'], addon.buffer_duration, addon.sliding_window_length)
     return 'OK'
 
 

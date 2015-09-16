@@ -3,8 +3,8 @@
     <category label="32029">
         <setting id="download_dir" type="folder"
                  label="32030" default="" />
-        <setting id="buffer_size" type="number"
-                 label="32031" default="10"/>
+        <setting id="buffer_duration" type="number"
+                 label="32031" default="20"/>
         <setting id="dl_speed_limit" type="number"
                  label="32047" default="0" />
         <setting id="ul_speed_limit" type="number"
@@ -31,8 +31,10 @@
                  label="32042" default="8668"/>
         <setting id="torrent_port" type="number"
                  label="32044" default="25335" />
-<!--        <setting id="jump_buffer" type="number"
-                 label="32051" default="30"/> -->
+        <setting id="default_buffer_size" type="number"
+                 label="32059" default="20"/>
+        <setting id="sliding_window_length" type="number"
+                 label="32060" default="30"/>
         <setting id="enable_encryption" type="bool"
                  label="32053" default="true" />
         <setting id="start_server" type="bool"

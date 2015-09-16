@@ -19,6 +19,7 @@ import cPickle as pickle
 from collections import deque
 from requests import get
 from addon import Addon
+from utilities import get_duration
 # Import libtorrent module
 try:
     import libtorrent  # Try to import global module
@@ -499,7 +500,7 @@ class Streamer(Torrenter):
     def __init__(self, *args, **kwargs):
         """Class constructor"""
         # Worker threads
-        self._buffer_torrent_thread = None
+        self._buffer_file_thread = None
         self._sliding_window_thread = None
         # Signal events
         self._buffering_complete = threading.Event()
@@ -516,7 +517,7 @@ class Streamer(Torrenter):
         self.abort_buffering()
         super(Streamer, self).__del__()
 
-    def buffer_file_async(self, file_index, buffer_size=35):
+    def buffer_file_async(self, file_index, buffer_duration, sliding_window_length):
         """
         Force sequential download of file for video playback.
 
@@ -525,20 +526,24 @@ class Streamer(Torrenter):
         the caller should call abort_buffering method.
         The torrent must be already added via add_torrent method!
         @param file_index: int - the numerical index of the file to be streamed.
-        @param buffer_size: int - buffer size in MB
+        @param buffer_duration: int - buffer duration in s
+        @param sliding_window_length: int - the length of a sliding window in pieces
         @return:
         """
-        self._buffer_torrent_thread = threading.Thread(target=self.buffer_file, args=(file_index, buffer_size))
-        self._buffer_torrent_thread.daemon = True
-        self._buffer_torrent_thread.start()
+        self._buffer_file_thread = threading.Thread(target=self._buffer_file, args=(file_index,
+                                                                                    buffer_duration,
+                                                                                    sliding_window_length))
+        self._buffer_file_thread.daemon = True
+        self._buffer_file_thread.start()
 
-    def buffer_file(self, file_index, buffer_size=35):
+    def _buffer_file(self, file_index, buffer_duration, sliding_window_length):
         """
         Force sequential download of file for video playback.
 
         The torrent must be already added via add_torrent method!
         @param file_index: int - the numerical index of the file to be streamed.
-        @param buffer_size: int - buffer size in MB
+        @param buffer_duration: int - buffer duration in s
+        @param sliding_window_length: int - the length of a sliding window in pieces
         @return:
         """
         if file_index >= len(self.last_added_torrent['files']) or file_index < 0:
@@ -559,13 +564,13 @@ class Streamer(Torrenter):
         # The number of pieces in the file
         piece_length = torr_info.piece_length()
         num_pieces = file_entry.size / piece_length
-        # The number of pieces at the start of the file
-        # to be downloaded before the file can be played
-        # end_offset = 2097152 / torr_info.piece_length() + 2  # Experimentally tested
-        end_offset = 524288 / piece_length + 1
-        # Buffer length - at least 3 pieces
-        buffer_length = max(3, (buffer_size * 1048576) / piece_length - end_offset)
-        # The index of the end piece in the file
+        torr_handle.piece_priority(start_piece, 7)
+        while not torr_handle.have_piece(start_piece):
+            time.sleep(0.1)
+        buffer_length, end_offset = self.calculate_buffers(os.path.join(addon.download_dir,
+                                                                        self.last_added_torrent['files'][file_index][0]),
+                                                           buffer_duration, num_pieces, piece_length)
+        addon.log('buffer_length={0}, end_offset={1}'.format(buffer_length, end_offset))
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
         addon.log('start_piece={0}, end_piece={1}, piece_length={2}'.format(start_piece,
                                                                             end_piece,
@@ -575,15 +580,18 @@ class Streamer(Torrenter):
                                          'start_piece': start_piece,
                                          'end_offset': end_offset,
                                          'end_piece': end_piece,
+                                         'sliding_window_length': sliding_window_length,
                                          'piece_length': piece_length})
         # Check if the file has been downloaded earlier
-        if not self.check_piece_range(torr_handle, start_piece, end_piece):
+        if not self.check_piece_range(torr_handle, start_piece + 1, end_piece):
             # Setup buffer download
             end_pool = range(end_piece - end_offset, end_piece + 1)
-            buffer_pool = range(start_piece, start_piece + buffer_length + 1) + end_pool
+            buffer_pool = range(start_piece + 1, start_piece + buffer_length + 1) + end_pool
             buffer_pool_length = len(buffer_pool)
             [torr_handle.piece_priority(piece, 7) for piece in end_pool]
-            self.start_sliding_window_async(torr_handle, start_piece, start_piece + buffer_length,
+            self.start_sliding_window_async(torr_handle,
+                                            start_piece + 1,
+                                            start_piece + sliding_window_length,
                                             end_piece - end_offset - 1)
             while len(buffer_pool) > 0 and not self._abort_buffering.is_set():
                 addon.log('Buffer pool: {0}'.format(str(buffer_pool)))
@@ -632,8 +640,6 @@ class Streamer(Torrenter):
                     window_end += 1
                     torr_handle.piece_priority(window_end, 1)
             time.sleep(0.1)
-        # if not self._abort_sliding.is_set():
-        #     [torr_handle.piece_priority(piece, 1) for piece in xrange(torr_handle.get_torrent_info().num_pieces())]
         self._sliding_window_position.append(-1)
 
     def abort_buffering(self):
@@ -645,7 +651,7 @@ class Streamer(Torrenter):
         self._abort_buffering.set()
         self._abort_sliding.set()
         try:
-            self._buffer_torrent_thread.join()
+            self._buffer_file_thread.join()
         except (RuntimeError, AttributeError):
             pass
         try:
@@ -664,6 +670,29 @@ class Streamer(Torrenter):
         if self.streamed_file_data is not None and info_hash == str(self.streamed_file_data['torr_handle'].info_hash()):
             self.abort_buffering()
         super(Streamer, self).remove_torrent(info_hash, delete_files)
+
+    @staticmethod
+    def calculate_buffers(filename, buffer_duration, num_pieces, piece_length):
+        """
+        Calculate buffer length in pieces for provided duration
+
+        @param filename:
+        @param buffer_duration:
+        @param num_pieces:
+        @param piece_length:
+        @return:
+        """
+        duration = get_duration(filename)
+        addon.log('Video duration: {0}s'.format(duration))
+        if duration:
+            buffer_length = int(buffer_duration * num_pieces / duration)
+            # For AVI files Kodi requests bigger chunks at the end of a file
+            end_offset = 4194304 / piece_length if os.path.splitext(filename)[1].lower() == '.avi' else 1
+        else:
+            # Fallback if hachoir cannot parse the file
+            end_offset = 4194304 / piece_length
+            buffer_length = 1048576 * addon.default_buffer_size / piece_length - end_offset
+        return buffer_length, end_offset
 
     @staticmethod
     def check_piece_range(torr_handle, start_piece, end_piece):
