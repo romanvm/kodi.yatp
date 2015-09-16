@@ -564,18 +564,13 @@ class Streamer(Torrenter):
         # The number of pieces in the file
         piece_length = torr_info.piece_length()
         num_pieces = file_entry.size / piece_length
-        # The number of pieces at the start of the file
-        end_offset = 524288 / piece_length + 1
         torr_handle.piece_priority(start_piece, 7)
         while not torr_handle.have_piece(start_piece):
             time.sleep(0.1)
-        # Buffer length - at least 3 pieces
-        # buffer_length = max(3, (buffer_size * 1048576) / piece_length - end_offset)
-        # The index of the end piece in the file
-        buffer_length = self.calculate_buffer_length(os.path.join(addon.download_dir,
-                                                                  self.last_added_torrent['files'][file_index][0]),
-                                                     buffer_duration, num_pieces, piece_length)
-        addon.log('buffer_length={}'.format(buffer_length))
+        buffer_length, end_offset = self.calculate_buffers(os.path.join(addon.download_dir,
+                                                                        self.last_added_torrent['files'][file_index][0]),
+                                                           buffer_duration, num_pieces, piece_length)
+        addon.log('buffer_length={0}, end_offset={1}'.format(buffer_length, end_offset))
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
         addon.log('start_piece={0}, end_piece={1}, piece_length={2}'.format(start_piece,
                                                                             end_piece,
@@ -677,7 +672,7 @@ class Streamer(Torrenter):
         super(Streamer, self).remove_torrent(info_hash, delete_files)
 
     @staticmethod
-    def calculate_buffer_length(filename, buffer_duration, num_pieces, piece_length):
+    def calculate_buffers(filename, buffer_duration, num_pieces, piece_length):
         """
         Calculate buffer length in pieces for provided duration
 
@@ -691,9 +686,13 @@ class Streamer(Torrenter):
         addon.log('Video duration: {0}s'.format(duration))
         if duration:
             buffer_length = int(buffer_duration * num_pieces / duration)
+            # For AVI files Kodi requests bigger chunks at the end of a file
+            end_offset = 4194304 / piece_length if os.path.splitext(filename)[1].lower() == '.avi' else 2
         else:
-            buffer_length = 1048576 * addon.default_buffer_size / piece_length
-        return buffer_length
+            # Fallback if hachoir cannot parse the file
+            end_offset = 4194304 / piece_length
+            buffer_length = 1048576 * addon.default_buffer_size / piece_length - end_offset
+        return buffer_length, end_offset
 
     @staticmethod
     def check_piece_range(torr_handle, start_piece, end_piece):
