@@ -1,7 +1,7 @@
 # Yet Anoter Torrent Player
 
 Yet Anoter Torrent Player (YATP) is a torrent streaming video plugin for [Kodi](http://kodi.tv) mediacenter.
-It allows to watch video torrents in Kodi without fully downloading them. The plugin can also act as a simple
+It allows to watch video torrents in Kodi without fully downloading them. The plugin can also act be used a simple
 torrent-client.
 
 **Main features:**
