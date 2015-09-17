@@ -27,7 +27,7 @@ class ThreadPoolMixin:
     pool_size = 5
 
     # How long to wait on an empty queue, in seconds. Can be a float.
-    timeout_on_get = 0.1
+    timeout_on_get = 0.2
 
     def __init__(self):
         self._request_queue = Queue.Queue(self.pool_size)

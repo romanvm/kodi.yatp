@@ -567,7 +567,7 @@ class Streamer(Torrenter):
         num_pieces = file_entry.size / piece_length
         torr_handle.piece_priority(start_piece, 7)
         while not torr_handle.have_piece(start_piece):
-            time.sleep(0.1)
+            time.sleep(0.2)
         buffer_length, end_offset = self.calculate_buffers(os.path.join(addon.download_dir,
                                                                         self.last_added_torrent['files'][file_index][0]),
                                                            buffer_duration, num_pieces, piece_length)
@@ -596,7 +596,7 @@ class Streamer(Torrenter):
                                             end_piece - end_offset - 1)
             while len(buffer_pool) > 0 and not self._abort_buffering.is_set():
                 addon.log('Buffer pool: {0}'.format(str(buffer_pool)))
-                time.sleep(0.1)
+                time.sleep(0.2)
                 for index, piece_ in enumerate(buffer_pool):
                     if torr_handle.have_piece(piece_):
                         del buffer_pool[index]
@@ -640,7 +640,7 @@ class Streamer(Torrenter):
                 if window_end < last_piece:
                     window_end += 1
                     torr_handle.piece_priority(window_end, 1)
-            time.sleep(0.1)
+            time.sleep(0.2)
         self._sliding_window_position.append(-1)
 
     def abort_buffering(self):
@@ -779,7 +779,7 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, n
                                                                   torrent_handle.status().download_payload_rate / 1024)
                     label.show()
                 addon.log('Waiting for piece #{0}...'.format(current_piece))
-                time.sleep(0.1)
+                time.sleep(0.2)
             if xbmc.getCondVisibility('Player.Paused') and paused:
                 xbmc.executebuiltin('Action(Play)')
                 paused = False

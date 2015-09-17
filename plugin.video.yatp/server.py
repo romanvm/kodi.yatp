@@ -29,7 +29,7 @@ wsgi_app.limits_timer.start()
 wsgi_app.save_resume_timer.start()
 wsgi_app.log_torrents_timer.start()
 httpd = create_server(wsgi_app.app, port=addon.server_port)
-httpd.timeout = 0.1
+httpd.timeout = 0.2
 start_trigger = True
 while not xbmc.abortRequested:
         httpd.handle_request()

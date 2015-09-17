@@ -225,7 +225,7 @@ def stream_file(path):
                         percent,
                         streamed_file['torr_handle'].status().download_payload_rate / 1024)
                     onscreen_label.show()
-                    time.sleep(0.5)
+                    time.sleep(0.2)
                 onscreen_label.hide()
             addon.log('Starting file chunks serving...')
             body = serve_file_from_torrent(open(file_path, 'rb'),
