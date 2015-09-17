@@ -570,7 +570,8 @@ class Streamer(Torrenter):
             time.sleep(0.2)
         buffer_length, end_offset = self.calculate_buffers(os.path.join(addon.download_dir,
                                                                         self.last_added_torrent['files'][file_index][0]),
-                                                           buffer_duration, num_pieces, piece_length)
+                                                           buffer_duration, addon.default_buffer_size,
+                                                           num_pieces, piece_length)
         addon.log('buffer_length={0}, end_offset={1}'.format(buffer_length, end_offset))
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
         addon.log('start_piece={0}, end_piece={1}, piece_length={2}'.format(start_piece,
@@ -673,7 +674,7 @@ class Streamer(Torrenter):
         super(Streamer, self).remove_torrent(info_hash, delete_files)
 
     @staticmethod
-    def calculate_buffers(filename, buffer_duration, num_pieces, piece_length):
+    def calculate_buffers(filename, buffer_duration, default_buffer_size, num_pieces, piece_length):
         """
         Calculate buffer length in pieces for provided duration
 
@@ -692,7 +693,7 @@ class Streamer(Torrenter):
         else:
             # Fallback if hachoir cannot parse the file
             end_offset = 4194304 / piece_length
-            buffer_length = 1048576 * addon.default_buffer_size / piece_length - end_offset
+            buffer_length = 1048576 * default_buffer_size / piece_length - end_offset
         return buffer_length, end_offset
 
     @staticmethod
