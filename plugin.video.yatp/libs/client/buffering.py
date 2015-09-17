@@ -8,7 +8,7 @@ Buffering torrent
 """
 
 import os
-from time import sleep
+import time
 from urllib import quote
 import xbmcgui
 import json_requests as jsonrq
@@ -48,7 +48,7 @@ def add_torrent(torrent):
     progress_dialog.create(string(32015))
     progress_dialog.update(0, string(32016))
     while not (progress_dialog.iscanceled() or jsonrq.check_torrent_added()):
-        sleep(1.0)
+        time.sleep(1.0)
     if not progress_dialog.iscanceled():
         progress_dialog.close()
         return jsonrq.get_last_added_torrent()
@@ -103,7 +103,7 @@ def stream_torrent(file_index):
                                string(32018).format(torrent_info['total_download']),
                                string(32019).format(torrent_info['dl_speed']),
                                string(32020).format(torrent_info['num_seeds']))
-        sleep(1.0)
+        time.sleep(1.0)
     if not progress_dialog.iscanceled():
         progress_dialog.close()
         return media_url + quote(torrent_data['files'][file_index][0].replace('\\', '/').encode('utf-8'))
