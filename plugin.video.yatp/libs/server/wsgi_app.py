@@ -9,13 +9,12 @@ Torrent streamer WSGI application for Web/JSON interface
 
 import os
 import sys
-import time
 import re
 from traceback import format_exc
 from cStringIO import StringIO
 from json import dumps
 from inspect import getmembers, isfunction
-from xbmc import LOGERROR
+import xbmc
 import methods
 from addon import Addon
 from torrenter import Streamer, libtorrent, serve_file_from_torrent
@@ -108,7 +107,7 @@ def json_rpc():
     try:
         reply['result'] = getattr(methods, data['method'])(torrent_client, data.get('params'))
     except Exception, ex:
-        addon.log(format_exc(), LOGERROR)
+        addon.log(format_exc(), xbmc.LOGERROR)
         reply['error'] = '{0}: {1}'.format(str(ex.__class__)[7:-2], format_exc())
     if DEBUG:
         addon.log('***** JSON response *****')
@@ -221,7 +220,7 @@ def stream_file(path):
                         percent,
                         streamed_file['torr_handle'].status().download_payload_rate / 1024)
                     onscreen_label.show()
-                    time.sleep(0.2)
+                    xbmc.sleep(500)  # xbmc.sleep works better here
                 onscreen_label.hide()
             addon.log('Starting file chunks serving...')
             body = serve_file_from_torrent(open(file_path, 'rb'),

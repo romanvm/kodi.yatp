@@ -793,7 +793,7 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, n
                                                                   torrent_handle.status().download_payload_rate / 1024)
                     label.show()
                 addon.log('Waiting for piece #{0}...'.format(current_piece))
-                time.sleep(0.2)
+                xbmc.sleep(500)  # xbmc.sleep works better here
             if xbmc.getCondVisibility('Player.Paused') and paused:
                 xbmc.executebuiltin('Action(Play)')
                 paused = False
