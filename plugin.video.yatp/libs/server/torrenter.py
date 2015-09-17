@@ -774,8 +774,9 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, n
                     torrent_handle.piece_priority(current_piece, 7)
                 if pieces_per_second:
                     # Pause if the currently played piece is close to the requested piece.
-                    addon.log('Currently played piece: {0}'.format(int(pieces_per_second * player.getTime())))
-                    proximity = current_piece - player.getTime() * pieces_per_second < 2
+                    addon.log('Currently played piece: {0}'.format(int(start_piece +
+                                                                       pieces_per_second * player.getTime())))
+                    proximity = current_piece - (start_piece + player.getTime() * pieces_per_second) < 2
                 else:
                     proximity = False
                 addon.log('Proximity: {0}'.format(proximity))
