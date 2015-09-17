@@ -53,15 +53,15 @@ msgstr "Приостановить"
 
 msgctxt "#32011"
 msgid "size: {0}MB; state: {1}; seeds: {2}; peers: {3}"
-msgstr "размер: {0}МБ; статус: {1}; сидов: {2}; пиров: {3}"
+msgstr "размер: {0} МБ; статус: {1}; сидов: {2}; пиров: {3}"
 
 msgctxt "#32012"
 msgid "DL speed: {0}KB/s; UL speed: {1}KB/s"
-msgstr "загрузка: {0}КБ/с; отдача: {1}КБ/с"
+msgstr "загрузка: {0} КБ/с; отдача: {1} КБ/с"
 
 msgctxt "#32013"
 msgid "total DL: {0}MB; total UL: {1}MB"
-msgstr "загружено: {0}МБ; отдано: {1}МБ"
+msgstr "загружено: {0} МБ; отдано: {1} МБ"
 
 msgctxt "#32014"
 msgid "Buffering torrent"
@@ -81,11 +81,11 @@ msgstr "Выберите видеофайл для проигрывания"
 
 msgctxt "#32018"
 msgid "Downloaded: {0}MB"
-msgstr "Загружено: {0}МБ."
+msgstr "Загружено: {0} МБ."
 
 msgctxt "#32019"
 msgid "Download speed: {0}KB/s"
-msgstr "Скорость загрузки: {0}КБ/с."
+msgstr "Скорость загрузки: {0} КБ/с."
 
 msgctxt "#32020"
 msgid "Seeds: {0}"
@@ -124,16 +124,16 @@ msgid "Torrent server started."
 msgstr "Торрент-сервер запущен."
 
 msgctxt "#32029"
-msgid "General"
-msgstr "Общие"
+msgid "Torrent"
+msgstr "Торрент"
 
 msgctxt "#32030"
 msgid "Folder for downloading files"
 msgstr "Папка для загрузки файлов"
 
 msgctxt "#32031"
-msgid "Buffer size (MB)"
-msgstr "Размер буфера (МБ)"
+msgid "Buffer duration (s)"
+msgstr "Длительность буфера (с)"
 
 msgctxt "#32032"
 msgid "Seeding ratio limit (0 - no limit)"
@@ -242,3 +242,19 @@ msgstr "Слотов отдачи на торрент"
 msgctxt "#32058"
 msgid "Max. connection attempts per second"
 msgstr "Макс. кол-во попыток соединений в секунду"
+
+msgctxt "#32059"
+msgid "Default buffer size (MB)"
+msgstr "Размер буфера по умолчанию (МБ)"
+
+msgctxt "#32060"
+msgid "Sliding window length"
+msgstr "Длина скользящего окна"
+
+msgctxt "#32061"
+msgid "Streaming"
+msgstr "Стриминг"
+
+msgctxt "#32062"
+msgid "Max open files"
+msgstr "Макс. кол-во открытых файлов"

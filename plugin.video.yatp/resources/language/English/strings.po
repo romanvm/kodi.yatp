@@ -124,7 +124,7 @@ msgid "Torrent server started."
 msgstr ""
 
 msgctxt "#32029"
-msgid "General"
+msgid "Torrent"
 msgstr ""
 
 msgctxt "#32030"
@@ -132,7 +132,7 @@ msgid "Folder for downloading files"
 msgstr ""
 
 msgctxt "#32031"
-msgid "Buffer size (MB)"
+msgid "Buffer duration (s)"
 msgstr ""
 
 msgctxt "#32032"
@@ -241,4 +241,20 @@ msgstr ""
 
 msgctxt "#32058"
 msgid "Max. connection attempts per second"
+msgstr ""
+
+msgctxt "#32059"
+msgid "Default buffer size (MB)"
+msgstr ""
+
+msgctxt "#32060"
+msgid "Sliding window length"
+msgstr ""
+
+msgctxt "#32061"
+msgid "Streaming"
+msgstr ""
+
+msgctxt "#32062"
+msgid "Max open files"
 msgstr ""

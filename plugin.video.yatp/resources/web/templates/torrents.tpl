@@ -19,6 +19,9 @@
     <div>
         <table id="torrents" title=""></table>
     </div>
+    <div>
+        <p>Use <strong>Ctrl</strong> key + click to select multiple rows.</p>
+    </div>
     <div id="toolbar">
         <a href="javascript:void(0)" class="easyui-linkbutton easyui-tooltip" title="Add .torrent file"
            data-options="position:'right'" iconCls="icon-torrent-add" plain="true"

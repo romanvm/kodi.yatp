@@ -45,7 +45,7 @@ class Timer(object):
             if datetime.now() - timestamp >= timedelta(seconds=self._interval):
                 self._func(*args, **kwargs)
                 timestamp = datetime.now()
-            sleep(0.1)
+            sleep(0.2)
 
     def start(self):
         """

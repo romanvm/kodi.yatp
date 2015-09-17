@@ -224,7 +224,7 @@ $(function()
         ] // end buttons
     }); // end dialog
     $('#add_link_dlg').dialog({
-        title: 'Add Torrent Link',
+        title: 'Add torrent link',
         iconCls: 'icon-link-add',
         width: 450,
         height: 170,

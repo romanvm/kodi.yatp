@@ -18,14 +18,14 @@ def _request(data):
     """
     Send JSON-RPC request
 
-    @param data:
+    @param data: JSON request as dict
     @return:
     """
     reply = post(json_rpc_url, json=data).json()
     try:
         return reply['result']
     except KeyError:
-        raise RuntimeError(reply['error'])
+        raise RuntimeError('JSON-RPC returned error:\n{0}'.format(reply['error']))
 
 
 def add_torrent(torrent):
@@ -40,8 +40,8 @@ def get_last_added_torrent():
     return _request({'method': 'get_last_added_torrent'})
 
 
-def buffer_file(file_index, buffer_size):
-    _request({'method': 'buffer_file', 'params': {'file_index': file_index, 'buffer_size': buffer_size}})
+def buffer_file(file_index):
+    _request({'method': 'buffer_file', 'params': {'file_index': file_index}})
 
 
 def check_buffering_complete():
