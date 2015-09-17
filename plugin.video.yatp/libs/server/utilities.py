@@ -46,7 +46,7 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, n
                 video_duration = int(player.getTotalTime())
             else:
                 pieces_per_second = float(num_pieces) / video_duration
-                addon.log('Pieces per second: {}'.format(pieces_per_second))
+                addon.log('Pieces per second: {0}'.format(pieces_per_second))
             addon.log('Current playtime: {0}'.format(player.getTime()))
             # Wait for the piece if it is not downloaded
             while not torrent_handle.have_piece(current_piece):
@@ -58,7 +58,7 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, n
                     proximity = current_piece - player.getTime() * pieces_per_second < 2
                 else:
                     proximity = False
-                addon.log('Proximity: {}'.format(proximity))
+                addon.log('Proximity: {0}'.format(proximity))
                 if proximity and not xbmc.getCondVisibility('Player.Paused'):
                     xbmc.executebuiltin('Action(Pause)')
                     paused = True

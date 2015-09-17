@@ -42,4 +42,5 @@ wsgi_app.save_resume_timer.abort()
 wsgi_app.log_torrents_timer.abort()
 wsgi_app.torrent_client.abort_buffering()
 del wsgi_app.torrent_client
+httpd.join()
 addon.log('***** Torrent Server stopped *****')
