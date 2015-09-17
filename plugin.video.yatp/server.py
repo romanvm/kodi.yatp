@@ -32,15 +32,15 @@ httpd = create_server(wsgi_app.app, port=addon.server_port)
 httpd.timeout = 0.2
 start_trigger = True
 while not xbmc.abortRequested:
-        httpd.handle_request()
-        if start_trigger:
-            addon.log('***** Torrent Server started *****')
-            xbmcgui.Dialog().notification('YATP', addon.get_localized_string(32028), addon.icon, 3000, False)
-            start_trigger = False
+    httpd.handle_request()
+    if start_trigger:
+        addon.log('***** Torrent Server started *****')
+        xbmcgui.Dialog().notification('YATP', addon.get_localized_string(32028), addon.icon, 3000, False)
+        start_trigger = False
+httpd.join()
+addon.log('***** Torrent Server stopped *****')
 wsgi_app.limits_timer.abort()
 wsgi_app.save_resume_timer.abort()
 wsgi_app.log_torrents_timer.abort()
 wsgi_app.torrent_client.abort_buffering()
 del wsgi_app.torrent_client
-httpd.join()
-addon.log('***** Torrent Server stopped *****')

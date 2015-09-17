@@ -32,7 +32,7 @@ addon = Addon()
 addon.log('libtorrent version: {0}'.format(libtorrent.version))
 
 
-def load_torrent(url, cookies=None):
+def _load_torrent(url, cookies=None):
     """Load .torrent from URL"""
     return get(url, cookies=cookies).content
 
@@ -193,7 +193,7 @@ class Torrenter(object):
             add_torrent_params['url'] = str(torrent)  # libtorrent doesn't like unicode objects here
         elif torrent[:7] in ('http://', 'https:/'):
             # Here external http/https client is used in case if libtorrent module is compiled without OpenSSL
-            add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(load_torrent(torrent, cookies)))
+            add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(_load_torrent(torrent, cookies)))
         else:
             try:
                 add_torrent_params['ti'] = libtorrent.torrent_info(os.path.abspath(torrent))
@@ -758,7 +758,10 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, n
             else:
                 pieces_per_second = float(num_pieces) / video_duration
                 addon.log('Pieces per second: {0}'.format(pieces_per_second))
-            addon.log('Current playtime: {0}'.format(player.getTime()))
+            try:
+                addon.log('Current playtime: {0}'.format(player.getTime()))
+            except RuntimeError:
+                pass  # Needed because getTime() may throw RuntimeError during seek
             # Wait for the piece if it is not downloaded
             while not torrent_handle.have_piece(current_piece):
                 if torrent_handle.piece_priority(current_piece) < 7:
