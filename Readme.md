@@ -11,13 +11,13 @@ torrent-client.
 - Speed, ratio and time limits for torrents.
 - Support for multi-file torrents - you can select individual video files for playback.
 - Support for magnet links, local and remote .torrent files.
-- Support for jump/seek to arbitrary parts of the video (it re-prioritizes pieces for download).
+- Support for jump/seek to arbitrary parts of the video.
 
 **Warning!** The plugin is in WIP state and is subject to constant changes. Proper working distributions
 will be provided after it is more or less finished.
 
 **Warning 2!** To use YATP you need a binary compiled libtorrent module which is not included in the plugin.
-The respective Kodi Python module addon for multiple platforms will be included in my repo along with YATP.
+The respective Kodi Python module addon for multiple platforms is provided in my repo along with YATP.
 ## Basic Usage
 YATP can be invoked from another Kodi video plugin using the following URL:
 ```
@@ -26,7 +26,7 @@ plugin://plugin.video.yatp/?action=play&torrent=<url-encoded path to a .torrent 
 This will play the biggest videofile in a torrent.
 The respective list item must have its *'IsPlayable'* property set to *'true'*.
 
-To show the list of videofiles in a torrent use this URL:
+Show the list of videofiles in a torrent:
 ```
 plugin://plugin.video.yatp/?action=list_files&torrent=<url-encoded path to a .torrent file or a magnet link>
 ```
@@ -43,5 +43,5 @@ The Web UI support basic operations with torrents: adding torrents for download 
 
 **License:** [GPL v.3](http://www.gnu.org/licenses/gpl-3.0.en.html).
 
-The plugin includes [Bottle](http://bottlepy.org/docs/dev/index.html) module which is licensed separately
-by its author(-s).
+The plugin includes [Bottle](http://bottlepy.org/docs/dev/index.html) and [hachoir](http://hachoir3.readthedocs.org)
+modules which are licensed separately by their authors.
