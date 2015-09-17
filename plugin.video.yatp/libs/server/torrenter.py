@@ -744,6 +744,12 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, n
     This iterator function serves a video file being downloaded to Kodi piece by piece.
     If some piece is not downloaded, the function prioritizes it
     and then waits until it is downloaded.
+    @param byte_position: the start byte
+    @param torrent_handle: streamed torrent's handle
+    @param start_piece: file's start piece
+    @param num_pieces: the number of pieces in the file
+    @param piece_length: piece length in bytes
+    @param label: on_screen_label instance to show waiting status
     """
     paused = False  # Needed to prevent unpausing video paused by a user.
     video_duration = 0
