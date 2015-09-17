@@ -171,7 +171,10 @@ def buffer_file(torrent_client, params):
     params['file_index']: int - the index of the file to be buffered
     @return: 'OK'
     """
-    torrent_client.buffer_file_async(params['file_index'], addon.buffer_duration, addon.sliding_window_length)
+    torrent_client.buffer_file_async(params['file_index'],
+                                     addon.buffer_duration,
+                                     addon.sliding_window_length,
+                                     addon.default_buffer_size)
     return 'OK'
 
 

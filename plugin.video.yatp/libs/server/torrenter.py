@@ -518,7 +518,7 @@ class Streamer(Torrenter):
         self.abort_buffering()
         super(Streamer, self).__del__()
 
-    def buffer_file_async(self, file_index, buffer_duration, sliding_window_length):
+    def buffer_file_async(self, file_index, buffer_duration, sliding_window_length, default_buffer_size):
         """
         Force sequential download of file for video playback.
 
@@ -529,15 +529,17 @@ class Streamer(Torrenter):
         @param file_index: int - the numerical index of the file to be streamed.
         @param buffer_duration: int - buffer duration in s
         @param sliding_window_length: int - the length of a sliding window in pieces
+        @param default_buffer_size: int - fallback buffer size if a video cannot be parsed by hachoir
         @return:
         """
         self._buffer_file_thread = threading.Thread(target=self._buffer_file, args=(file_index,
                                                                                     buffer_duration,
-                                                                                    sliding_window_length))
+                                                                                    sliding_window_length,
+                                                                                    default_buffer_size))
         self._buffer_file_thread.daemon = True
         self._buffer_file_thread.start()
 
-    def _buffer_file(self, file_index, buffer_duration, sliding_window_length):
+    def _buffer_file(self, file_index, buffer_duration, sliding_window_length, default_buffer_size):
         """
         Force sequential download of file for video playback.
 
@@ -545,6 +547,7 @@ class Streamer(Torrenter):
         @param file_index: int - the numerical index of the file to be streamed.
         @param buffer_duration: int - buffer duration in s
         @param sliding_window_length: int - the length of a sliding window in pieces
+        @param default_buffer_size: int - fallback buffer size if a video cannot be parsed by hachoir
         @return:
         """
         if file_index >= len(self.last_added_torrent['files']) or file_index < 0:
@@ -570,7 +573,8 @@ class Streamer(Torrenter):
             time.sleep(0.2)
         buffer_length, end_offset = self.calculate_buffers(os.path.join(addon.download_dir,
                                                                         self.last_added_torrent['files'][file_index][0]),
-                                                           buffer_duration, addon.default_buffer_size,
+                                                           buffer_duration,
+                                                           default_buffer_size,
                                                            num_pieces, piece_length)
         addon.log('buffer_length={0}, end_offset={1}'.format(buffer_length, end_offset))
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
@@ -582,7 +586,6 @@ class Streamer(Torrenter):
                                          'start_piece': start_piece,
                                          'end_offset': end_offset,
                                          'end_piece': end_piece,
-                                         'sliding_window_length': sliding_window_length,
                                          'piece_length': piece_length})
         # Check if the file has been downloaded earlier
         if not self.check_piece_range(torr_handle, start_piece + 1, end_piece):
