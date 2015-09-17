@@ -741,7 +741,7 @@ class Streamer(Torrenter):
         return self._streamed_file_data[0]
 
 
-def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, num_pieces, piece_length, label):
+def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, num_pieces, piece_length, oncreen_label):
     """
     Serve a file from torrent by pieces
 
@@ -753,61 +753,33 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, n
     @param start_piece: file's start piece
     @param num_pieces: the number of pieces in the file
     @param piece_length: piece length in bytes
-    @param label: on_screen_label instance to show waiting status
+    @param oncreen_label: on_screen_label instance to show waiting status
     """
     paused = False  # Needed to prevent unpausing video paused by a user.
-    video_duration = 0
-    pieces_per_second = 0
-    player = xbmc.Player()
     with file_:
         while True:
             current_piece = start_piece + byte_position / piece_length
-            if not video_duration:
-                addon.log('Video duration: {0}'.format(player.getTotalTime()))
-                video_duration = int(player.getTotalTime())
-            else:
-                pieces_per_second = float(num_pieces) / video_duration
-                addon.log('Pieces per second: {0}'.format(pieces_per_second))
-            try:
-                addon.log('Current playtime: {0}'.format(player.getTime()))
-            except RuntimeError:
-                pass  # Needed because getTime() may throw RuntimeError during seek
             # Wait for the piece if it is not downloaded
             while not torrent_handle.have_piece(current_piece):
                 if torrent_handle.piece_priority(current_piece) < 7:
                     torrent_handle.piece_priority(current_piece, 7)
-                if pieces_per_second:
-                    try:
-                        # Pause if the currently played piece is close to the requested piece.
-                        addon.log('Currently played piece: {0}'.format(int(start_piece +
-                                                                           pieces_per_second * player.getTime())))
-                        proximity = current_piece - (start_piece + player.getTime() * pieces_per_second) < 2
-                    except RuntimeError:
-                        proximity = False
-                else:
-                    proximity = False
-                addon.log('Proximity: {0}'.format(proximity))
-                if proximity and not xbmc.getCondVisibility('Player.Paused'):
+                if not xbmc.getCondVisibility('Player.Paused'):
                     xbmc.executebuiltin('Action(Pause)')
                     paused = True
-                    addon.log('serve_file - paused')
+                    addon.log('Paused to wait for piece #{0}.'.format(current_piece))
                 if paused:
-                    label.text = addon.get_localized_string(32050).format(current_piece,
+                    oncreen_label.text = addon.get_localized_string(32050).format(current_piece,
                                                                   torrent_handle.status().download_payload_rate / 1024)
-                    label.show()
+                    oncreen_label.show()
                 addon.log('Waiting for piece #{0}...'.format(current_piece))
-                xbmc.sleep(500)  # xbmc.sleep works better here
-            if xbmc.getCondVisibility('Player.Paused') and paused:
+                xbmc.sleep(1000)  # xbmc.sleep works better here
+            if paused:
                 xbmc.executebuiltin('Action(Play)')
                 paused = False
-                addon.log('serve_file - unpaused')
-            label.hide()
+                addon.log('Piece #{0} downloaded. Continue playback.'.format(current_piece))
+                oncreen_label.hide()
             # torrent_handle.flush_cache()
             addon.log('Serving piece #{0}'.format(current_piece))
-            try:
-                addon.log('Currently played piece: {0}'.format(int(pieces_per_second * player.getTime())))
-            except RuntimeError:
-                pass
             file_.seek(byte_position)
             chunk = file_.read(piece_length)
             if not chunk:
