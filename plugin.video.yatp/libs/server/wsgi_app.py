@@ -18,10 +18,10 @@ from inspect import getmembers, isfunction
 from xbmc import LOGERROR
 import methods
 from addon import Addon
-from torrenter import Streamer, libtorrent
+from torrenter import Streamer, libtorrent, serve_file_from_torrent
 from timers import Timer, check_seeding_limits, save_resume_data, log_torrents
 from onscreen_label import OnScreenLabel
-from utilities import get_mime, serve_file_from_torrent
+from utilities import get_mime
 
 addon = Addon()
 
