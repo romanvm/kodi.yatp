@@ -124,8 +124,8 @@ msgid "Torrent server started."
 msgstr "Торрент-сервер запущен."
 
 msgctxt "#32029"
-msgid "General"
-msgstr "Общие"
+msgid "Torrent"
+msgstr "Торрент"
 
 msgctxt "#32030"
 msgid "Folder for downloading files"
@@ -250,3 +250,11 @@ msgstr "Размер буфера по умолчанию (МБ)"
 msgctxt "#32060"
 msgid "Sliding window length"
 msgstr "Длина скользящего окна"
+
+msgctxt "#32061"
+msgid "Streaming"
+msgstr "Стриминг"
+
+msgctxt "#32062"
+msgid "Max open files"
+msgstr "Макс. кол-во открытых файлов"

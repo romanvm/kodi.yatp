@@ -124,7 +124,7 @@ msgid "Torrent server started."
 msgstr ""
 
 msgctxt "#32029"
-msgid "General"
+msgid "Torrent"
 msgstr ""
 
 msgctxt "#32030"
@@ -249,4 +249,12 @@ msgstr ""
 
 msgctxt "#32060"
 msgid "Sliding window length"
+msgstr ""
+
+msgctxt "#32061"
+msgid "Streaming"
+msgstr ""
+
+msgctxt "#32062"
+msgid "Max open files"
 msgstr ""

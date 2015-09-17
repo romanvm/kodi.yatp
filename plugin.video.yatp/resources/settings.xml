@@ -3,8 +3,6 @@
     <category label="32029">
         <setting id="download_dir" type="folder"
                  label="32030" default="" />
-        <setting id="buffer_duration" type="number"
-                 label="32031" default="20"/>
         <setting id="dl_speed_limit" type="number"
                  label="32047" default="0" />
         <setting id="ul_speed_limit" type="number"
@@ -18,6 +16,14 @@
         <setting id="delete_expired_files" type="bool"
                  label="32035" enable="eq(-1,1)" default="false"/>
     </category>
+    <category label="32061">
+        <setting id="buffer_duration" type="number"
+                 label="32031" default="20"/>
+        <setting id="default_buffer_size" type="number"
+                 label="32059" default="20"/>
+        <setting id="sliding_window_length" type="number"
+                 label="32060" default="30"/>
+    </category>
     <category label="32036">
         <setting id="pass_protect" type="bool"
                  label="32037" default="false" />
@@ -27,18 +33,14 @@
                  label="32039" default="yatp" option="hidden" enable="eq(-2,true)" />
     </category>
     <category label="32040">
+        <setting id="start_server" type="bool"
+                 label="32054" default="true" />
         <setting id="server_port" type="number"
                  label="32042" default="8668"/>
         <setting id="torrent_port" type="number"
                  label="32044" default="25335" />
-        <setting id="default_buffer_size" type="number"
-                 label="32059" default="20"/>
-        <setting id="sliding_window_length" type="number"
-                 label="32060" default="30"/>
         <setting id="enable_encryption" type="bool"
                  label="32053" default="true" />
-        <setting id="start_server" type="bool"
-                 label="32054" default="true" />
         <setting id="connections_limit" type="number"
                  label="32055" default="200"/>
         <setting id="half_open_limit" type="number"
@@ -47,5 +49,7 @@
                  label="32057" default="8"/>
         <setting id="connection_speed" type="number"
                  label="32058" default="6"/>
+        <setting id="file_pool_size" type="number"
+                 label="32062" default="40"/>
     </category>
 </settings>

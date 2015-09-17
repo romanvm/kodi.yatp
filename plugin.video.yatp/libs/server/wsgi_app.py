@@ -44,7 +44,8 @@ torrent_client.set_session_settings(download_rate_limit=addon.dl_speed_limit * 1
                                     connections_limit=addon.connections_limit,
                                     half_open_limit=addon.half_open_limit,
                                     unchoke_slots_limit=addon.unchoke_slots_limit,
-                                    connection_speed=addon.connection_speed)
+                                    connection_speed=addon.connection_speed,
+                                    file_pool_size=addon.file_pool_size)
 if not addon.enable_encryption:
     torrent_client.set_encryption_policy(2)
 # Timers
