@@ -6,8 +6,8 @@
 
 from __future__ import division
 import threading
+import time
 from datetime import datetime, timedelta
-from time import sleep
 from addon import Addon
 
 _addon = Addon()
@@ -40,12 +40,12 @@ class Timer(object):
 
         @retrun:
         """
-        timestamp = datetime.now()
+        timestamp = time.time()
         while not self._abort_flag.is_set():
-            if datetime.now() - timestamp >= timedelta(seconds=self._interval):
+            if time.time() - timestamp >= self._interval:
                 self._func(*args, **kwargs)
-                timestamp = datetime.now()
-            sleep(0.2)
+                timestamp = time.time()
+            time.sleep(0.1)
 
     def start(self):
         """
