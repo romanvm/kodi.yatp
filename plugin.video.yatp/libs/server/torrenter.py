@@ -11,12 +11,14 @@ The module implements a simple torrent client based on python-libtorrent library
 and with torrent media streaming capability.
 """
 
+from __future__ import division
 import os
 import time
 import threading
 import datetime
 import cPickle as pickle
 from collections import deque
+from math import ceil
 from requests import get
 import xbmc
 from addon import Addon
@@ -412,13 +414,13 @@ class Torrenter(object):
         torr_status = self._get_torrent_status(info_hash)
         completed_time = str(datetime.datetime.fromtimestamp(int(torr_status.completed_time)))
         return {'name': torr_info.name().decode('utf-8'),
-                'size': torr_info.total_size() / 1048576,
+                'size': int(torr_info.total_size() / 1048576),
                 'state': str(torr_status.state) if not torr_status.paused else 'paused',
                 'progress': int(torr_status.progress * 100),
-                'dl_speed': torr_status.download_payload_rate / 1024,
-                'ul_speed': torr_status.upload_payload_rate / 1024,
-                'total_download': torr_status.total_done / 1048576,
-                'total_upload': torr_status.total_payload_upload / 1048576,
+                'dl_speed': int(torr_status.download_payload_rate / 1024),
+                'ul_speed': int(torr_status.upload_payload_rate / 1024),
+                'total_download': int(torr_status.total_done / 1048576),
+                'total_upload': int(torr_status.total_payload_upload / 1048576),
                 'num_seeds': torr_status.num_seeds,
                 'num_peers': torr_status.num_peers,
                  # Timestamp in 'YYYY-MM-DD HH:MM:SS' format
@@ -518,7 +520,7 @@ class Streamer(Torrenter):
         self.abort_buffering()
         super(Streamer, self).__del__()
 
-    def buffer_file_async(self, file_index, buffer_duration, sliding_window_length):
+    def buffer_file_async(self, file_index, buffer_duration, sliding_window_length, default_buffer_size):
         """
         Force sequential download of file for video playback.
 
@@ -529,15 +531,17 @@ class Streamer(Torrenter):
         @param file_index: int - the numerical index of the file to be streamed.
         @param buffer_duration: int - buffer duration in s
         @param sliding_window_length: int - the length of a sliding window in pieces
+        @param default_buffer_size: int - fallback buffer size if a video cannot be parsed by hachoir
         @return:
         """
         self._buffer_file_thread = threading.Thread(target=self._buffer_file, args=(file_index,
                                                                                     buffer_duration,
-                                                                                    sliding_window_length))
+                                                                                    sliding_window_length,
+                                                                                    default_buffer_size))
         self._buffer_file_thread.daemon = True
         self._buffer_file_thread.start()
 
-    def _buffer_file(self, file_index, buffer_duration, sliding_window_length):
+    def _buffer_file(self, file_index, buffer_duration, sliding_window_length, default_buffer_size):
         """
         Force sequential download of file for video playback.
 
@@ -545,6 +549,7 @@ class Streamer(Torrenter):
         @param file_index: int - the numerical index of the file to be streamed.
         @param buffer_duration: int - buffer duration in s
         @param sliding_window_length: int - the length of a sliding window in pieces
+        @param default_buffer_size: int - fallback buffer size if a video cannot be parsed by hachoir
         @return:
         """
         if file_index >= len(self.last_added_torrent['files']) or file_index < 0:
@@ -564,15 +569,17 @@ class Streamer(Torrenter):
         start_piece = peer_req.piece
         # The number of pieces in the file
         piece_length = torr_info.piece_length()
-        num_pieces = file_entry.size / piece_length
+        num_pieces = int(ceil(file_entry.size / piece_length))
+        end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
         torr_handle.piece_priority(start_piece, 7)
         while not torr_handle.have_piece(start_piece):
             time.sleep(0.2)
         buffer_length, end_offset = self.calculate_buffers(os.path.join(addon.download_dir,
-                                                                        self.last_added_torrent['files'][file_index][0]),
-                                                           buffer_duration, num_pieces, piece_length)
+                                                                    self.last_added_torrent['files'][file_index][0]),
+                                                           buffer_duration,
+                                                           default_buffer_size,
+                                                           num_pieces, piece_length)
         addon.log('buffer_length={0}, end_offset={1}'.format(buffer_length, end_offset))
-        end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
         addon.log('start_piece={0}, end_piece={1}, piece_length={2}'.format(start_piece,
                                                                             end_piece,
                                                                             piece_length))
@@ -581,13 +588,12 @@ class Streamer(Torrenter):
                                          'start_piece': start_piece,
                                          'end_offset': end_offset,
                                          'end_piece': end_piece,
-                                         'sliding_window_length': sliding_window_length,
                                          'piece_length': piece_length})
         # Check if the file has been downloaded earlier
         if not self.check_piece_range(torr_handle, start_piece + 1, end_piece):
             # Setup buffer download
             end_pool = range(end_piece - end_offset, end_piece + 1)
-            buffer_pool = range(start_piece + 1, start_piece + buffer_length + 1) + end_pool
+            buffer_pool = range(start_piece, start_piece + buffer_length) + end_pool
             buffer_pool_length = len(buffer_pool)
             [torr_handle.piece_priority(piece, 7) for piece in end_pool]
             self.start_sliding_window_async(torr_handle,
@@ -600,7 +606,7 @@ class Streamer(Torrenter):
                 for index, piece_ in enumerate(buffer_pool):
                     if torr_handle.have_piece(piece_):
                         del buffer_pool[index]
-                buffer_ = int(100 * float(buffer_pool_length - len(buffer_pool)) / buffer_pool_length)
+                buffer_ = int(100.0 * (buffer_pool_length - len(buffer_pool)) / buffer_pool_length)
                 self._buffer_percent.append(buffer_)
             if not self._abort_buffering.is_set():
                 torr_handle.flush_cache()
@@ -673,7 +679,7 @@ class Streamer(Torrenter):
         super(Streamer, self).remove_torrent(info_hash, delete_files)
 
     @staticmethod
-    def calculate_buffers(filename, buffer_duration, num_pieces, piece_length):
+    def calculate_buffers(filename, buffer_duration, default_buffer_size, num_pieces, piece_length):
         """
         Calculate buffer length in pieces for provided duration
 
@@ -686,13 +692,13 @@ class Streamer(Torrenter):
         duration = get_duration(filename)
         addon.log('Video duration: {0}s'.format(duration))
         if duration:
-            buffer_length = int(buffer_duration * num_pieces / duration)
+            buffer_length = int(ceil(buffer_duration * num_pieces / duration))
             # For AVI files Kodi requests bigger chunks at the end of a file
-            end_offset = 4194304 / piece_length if os.path.splitext(filename)[1].lower() == '.avi' else 1
+            end_offset = int(round(4194304 / piece_length), 0) if os.path.splitext(filename)[1].lower() == '.avi' else 1
         else:
             # Fallback if hachoir cannot parse the file
-            end_offset = 4194304 / piece_length
-            buffer_length = 1048576 * addon.default_buffer_size / piece_length - end_offset
+            end_offset = int(round(4194304 / piece_length), 0)
+            buffer_length = int(ceil(1048576 * default_buffer_size / piece_length)) - end_offset
         return buffer_length, end_offset
 
     @staticmethod
@@ -737,7 +743,7 @@ class Streamer(Torrenter):
         return self._streamed_file_data[0]
 
 
-def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, num_pieces, piece_length, label):
+def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, piece_length, oncreen_label):
     """
     Serve a file from torrent by pieces
 
@@ -747,66 +753,38 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, n
     @param byte_position: the start byte
     @param torrent_handle: streamed torrent's handle
     @param start_piece: file's start piece
-    @param num_pieces: the number of pieces in the file
     @param piece_length: piece length in bytes
-    @param label: on_screen_label instance to show waiting status
+    @param oncreen_label: on_screen_label instance to show waiting status
     """
     paused = False  # Needed to prevent unpausing video paused by a user.
-    video_duration = 0
-    pieces_per_second = 0
-    player = xbmc.Player()
     with file_:
         while True:
-            current_piece = start_piece + byte_position / piece_length
-            if not video_duration:
-                addon.log('Video duration: {0}'.format(player.getTotalTime()))
-                video_duration = int(player.getTotalTime())
-            else:
-                pieces_per_second = float(num_pieces) / video_duration
-                addon.log('Pieces per second: {0}'.format(pieces_per_second))
-            try:
-                addon.log('Current playtime: {0}'.format(player.getTime()))
-            except RuntimeError:
-                pass  # Needed because getTime() may throw RuntimeError during seek
+            current_piece = start_piece + int(byte_position / piece_length)
+            addon.log('Checking piece #{0}'.format(current_piece))
             # Wait for the piece if it is not downloaded
             while not torrent_handle.have_piece(current_piece):
                 if torrent_handle.piece_priority(current_piece) < 7:
                     torrent_handle.piece_priority(current_piece, 7)
-                if pieces_per_second:
-                    try:
-                        # Pause if the currently played piece is close to the requested piece.
-                        addon.log('Currently played piece: {0}'.format(int(start_piece +
-                                                                           pieces_per_second * player.getTime())))
-                        proximity = current_piece - (start_piece + player.getTime() * pieces_per_second) < 2
-                    except RuntimeError:
-                        proximity = False
-                else:
-                    proximity = False
-                addon.log('Proximity: {0}'.format(proximity))
-                if proximity and not xbmc.getCondVisibility('Player.Paused'):
+                if not xbmc.getCondVisibility('Player.Paused'):
                     xbmc.executebuiltin('Action(Pause)')
                     paused = True
-                    addon.log('serve_file - paused')
+                    addon.log('Paused to wait for piece #{0}.'.format(current_piece))
                 if paused:
-                    label.text = addon.get_localized_string(32050).format(current_piece,
+                    oncreen_label.text = addon.get_localized_string(32050).format(current_piece,
                                                                   torrent_handle.status().download_payload_rate / 1024)
-                    label.show()
+                    oncreen_label.show()
                 addon.log('Waiting for piece #{0}...'.format(current_piece))
-                time.sleep(0.2)
-            if xbmc.getCondVisibility('Player.Paused') and paused:
+                xbmc.sleep(1000)  # xbmc.sleep works better here
+            if paused:
                 xbmc.executebuiltin('Action(Play)')
                 paused = False
-                addon.log('serve_file - unpaused')
-            label.hide()
+                addon.log('Piece #{0} downloaded. Continue playback.'.format(current_piece))
+                oncreen_label.hide()
             # torrent_handle.flush_cache()
-            addon.log('Serving piece #{0}'.format(current_piece))
-            try:
-                addon.log('Currently played piece: {0}'.format(int(pieces_per_second * player.getTime())))
-            except RuntimeError:
-                pass
             file_.seek(byte_position)
             chunk = file_.read(piece_length)
             if not chunk:
                 break
+            addon.log('Serving piece #{0}'.format(current_piece))
             yield chunk
             byte_position += piece_length

@@ -17,12 +17,12 @@
                  label="32035" enable="eq(-1,1)" default="false"/>
     </category>
     <category label="32061">
-        <setting id="buffer_duration" type="number"
-                 label="32031" default="20"/>
-        <setting id="default_buffer_size" type="number"
-                 label="32059" default="20"/>
+        <setting id="buffer_duration" type="slider"
+                 label="32031" default="20" range="5,60"/>
+        <setting id="default_buffer_size" type="slider"
+                 label="32059" default="20" range="5,100"/>
         <setting id="sliding_window_length" type="number"
-                 label="32060" default="30"/>
+                 label="32060" default="50"/>
     </category>
     <category label="32036">
         <setting id="pass_protect" type="bool"
