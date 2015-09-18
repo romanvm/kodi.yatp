@@ -414,13 +414,13 @@ class Torrenter(object):
         torr_status = self._get_torrent_status(info_hash)
         completed_time = str(datetime.datetime.fromtimestamp(int(torr_status.completed_time)))
         return {'name': torr_info.name().decode('utf-8'),
-                'size': torr_info.total_size() / 1048576,
+                'size': int(torr_info.total_size() / 1048576),
                 'state': str(torr_status.state) if not torr_status.paused else 'paused',
                 'progress': int(torr_status.progress * 100),
-                'dl_speed': torr_status.download_payload_rate / 1024,
-                'ul_speed': torr_status.upload_payload_rate / 1024,
-                'total_download': torr_status.total_done / 1048576,
-                'total_upload': torr_status.total_payload_upload / 1048576,
+                'dl_speed': int(torr_status.download_payload_rate / 1024),
+                'ul_speed': int(torr_status.upload_payload_rate / 1024),
+                'total_download': int(torr_status.total_done / 1048576),
+                'total_upload': int(torr_status.total_payload_upload / 1048576),
                 'num_seeds': torr_status.num_seeds,
                 'num_peers': torr_status.num_peers,
                  # Timestamp in 'YYYY-MM-DD HH:MM:SS' format
