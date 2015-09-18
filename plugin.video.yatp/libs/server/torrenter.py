@@ -741,7 +741,7 @@ class Streamer(Torrenter):
         return self._streamed_file_data[0]
 
 
-def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, num_pieces, piece_length, oncreen_label):
+def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, piece_length, oncreen_label):
     """
     Serve a file from torrent by pieces
 
@@ -751,7 +751,6 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, n
     @param byte_position: the start byte
     @param torrent_handle: streamed torrent's handle
     @param start_piece: file's start piece
-    @param num_pieces: the number of pieces in the file
     @param piece_length: piece length in bytes
     @param oncreen_label: on_screen_label instance to show waiting status
     """

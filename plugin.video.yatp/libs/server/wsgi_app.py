@@ -227,7 +227,6 @@ def stream_file(path):
                                            start_pos,
                                            streamed_file['torr_handle'],
                                            streamed_file['start_piece'],
-                                           streamed_file['end_piece'] - streamed_file['start_piece'],
                                            streamed_file['piece_length'],
                                            onscreen_label)
     else:
