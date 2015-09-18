@@ -11,12 +11,14 @@ The module implements a simple torrent client based on python-libtorrent library
 and with torrent media streaming capability.
 """
 
+from __future__ import division
 import os
 import time
 import threading
 import datetime
 import cPickle as pickle
 from collections import deque
+from math import ceil
 from requests import get
 import xbmc
 from addon import Addon
@@ -567,7 +569,7 @@ class Streamer(Torrenter):
         start_piece = peer_req.piece
         # The number of pieces in the file
         piece_length = torr_info.piece_length()
-        num_pieces = file_entry.size / piece_length
+        num_pieces = int(ceil(file_entry.size / piece_length))
         torr_handle.piece_priority(start_piece, 7)
         while not torr_handle.have_piece(start_piece):
             time.sleep(0.2)
@@ -591,7 +593,7 @@ class Streamer(Torrenter):
         if not self.check_piece_range(torr_handle, start_piece + 1, end_piece):
             # Setup buffer download
             end_pool = range(end_piece - end_offset, end_piece + 1)
-            buffer_pool = range(start_piece + 1, start_piece + buffer_length + 1) + end_pool
+            buffer_pool = range(start_piece, start_piece + buffer_length + 1) + end_pool
             buffer_pool_length = len(buffer_pool)
             [torr_handle.piece_priority(piece, 7) for piece in end_pool]
             self.start_sliding_window_async(torr_handle,
@@ -604,7 +606,7 @@ class Streamer(Torrenter):
                 for index, piece_ in enumerate(buffer_pool):
                     if torr_handle.have_piece(piece_):
                         del buffer_pool[index]
-                buffer_ = int(100 * float(buffer_pool_length - len(buffer_pool)) / buffer_pool_length)
+                buffer_ = int(100.0 * (buffer_pool_length - len(buffer_pool)) / buffer_pool_length)
                 self._buffer_percent.append(buffer_)
             if not self._abort_buffering.is_set():
                 torr_handle.flush_cache()
@@ -690,13 +692,13 @@ class Streamer(Torrenter):
         duration = get_duration(filename)
         addon.log('Video duration: {0}s'.format(duration))
         if duration:
-            buffer_length = int(buffer_duration * num_pieces / duration)
+            buffer_length = int(ceil(buffer_duration * num_pieces / duration))
             # For AVI files Kodi requests bigger chunks at the end of a file
-            end_offset = 4194304 / piece_length if os.path.splitext(filename)[1].lower() == '.avi' else 1
+            end_offset = int(ceil(4194304 / piece_length)) if os.path.splitext(filename)[1].lower() == '.avi' else 1
         else:
             # Fallback if hachoir cannot parse the file
-            end_offset = 4194304 / piece_length
-            buffer_length = 1048576 * default_buffer_size / piece_length - end_offset
+            end_offset = int(ceil(4194304 / piece_length))
+            buffer_length = int(ceil(1048576 * default_buffer_size / piece_length)) - end_offset
         return buffer_length, end_offset
 
     @staticmethod
@@ -757,7 +759,7 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
     paused = False  # Needed to prevent unpausing video paused by a user.
     with file_:
         while True:
-            current_piece = start_piece + byte_position / piece_length
+            current_piece = start_piece + int(byte_position / piece_length)
             # Wait for the piece if it is not downloaded
             while not torrent_handle.have_piece(current_piece):
                 if torrent_handle.piece_priority(current_piece) < 7:
