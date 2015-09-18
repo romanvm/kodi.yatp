@@ -45,7 +45,7 @@ class Timer(object):
             if time.time() - timestamp >= self._interval:
                 self._func(*args, **kwargs)
                 timestamp = time.time()
-            time.sleep(0.1)
+            time.sleep(0.2)
 
     def start(self):
         """
@@ -69,30 +69,29 @@ class Timer(object):
             pass
 
 
-def check_seeding_limits(torrenter, max_ratio, max_time, expired_action, delete_expired):
+def check_seeding_limits(torrenter):
     """
     Check seding limits
 
     @param torrenter:
-    @param max_ratio:
-    @param max_time:
     @retrun:
     """
     for torrent in torrenter.get_all_torrents_info():
+        if _addon.ratio_limit:
+            try:
+                ratio = torrent['total_upload'] / torrent['total_download']
+            except ZeroDivisionError:
+                ratio = 0
+            if _addon.ratio_limit and torrent['state'] == 'seeding' and ratio >= _addon.ratio_limit:
+                torrenter.pause_torrent(torrent['info_hash'])
         try:
-            ratio = torrent['total_upload'] / torrent['total_download']
-        except ZeroDivisionError:
-            ratio = 0
-        if max_ratio and torrent['state'] == 'seeding' and ratio >= max_ratio:
-            torrenter.pause_torrent(torrent['info_hash'])
-        try:
-            if (max_time and
-                (datetime.now() - datetime.strptime(torrent['completed_time'], '%Y-%m-%d %H:%M:%S') >=
-                     timedelta(hours=max_time))):
-                if expired_action == 'pause' and torrent['state'] == 'seeding':
+            if (_addon.time_limit and
+                    (datetime.now() - datetime.strptime(torrent['completed_time'], '%Y-%m-%d %H:%M:%S') >=
+                         timedelta(hours=_addon.time_limit))):
+                if _addon.expired_action == 'pause' and torrent['state'] == 'seeding':
                     torrenter.pause_torrent(torrent['info_hash'])
-                elif expired_action == 'delete' and torrent['state'] in ('seeding', 'paused'):
-                    torrenter.remove_torrent(torrent['info_hash'], delete_expired)
+                elif _addon.expired_action == 'delete' and torrent['state'] in ('seeding', 'paused'):
+                    torrenter.remove_torrent(torrent['info_hash'], _addon.delete_expired_files)
         except ValueError:
             pass
 
