@@ -41,7 +41,8 @@ def get_duration(filename):
     """
     metadata = _parse_file(filename)
     if metadata is not None and metadata.getItem('duration', 0) is not None:
-        return metadata.getItem('duration', 0).value.total_seconds()
+        duration = metadata.getItem('duration', 0).value
+        return duration.seconds + 0.000001 * duration.microseconds
     else:
         return 0.0
 
