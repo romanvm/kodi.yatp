@@ -200,7 +200,7 @@ def stream_file(path):
             # then serve the file via Bottle.
             return static_file(path, root=download_dir, mimetype=get_mime(file_path))
         else:
-            onscreen_label = OnScreenLabel('', False)
+            onscreen_label = OnScreenLabel('')
             start_piece = streamed_file['start_piece'] + start_pos / streamed_file['piece_length']
             addon.log('Start piece: {0}'.format(start_piece))
             addon.log('Streamed file: {0}'.format(str(streamed_file)))

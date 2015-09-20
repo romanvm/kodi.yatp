@@ -11,7 +11,7 @@ from addon import Addon
 
 
 class OnScreenLabel(object):
-    def __init__(self, text='', visible=True):
+    def __init__(self, text='', visible=False):
         self._window = xbmcgui.Window(12005)
         self._back = xbmcgui.ControlImage(10, 150, 830, 60,
                                       os.path.join(Addon().path, 'resources', 'icons', 'OverlayDialogBackground.png'))
