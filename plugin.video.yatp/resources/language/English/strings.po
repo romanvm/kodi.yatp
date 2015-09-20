@@ -258,3 +258,7 @@ msgstr ""
 msgctxt "#32062"
 msgid "Max open files"
 msgstr ""
+
+msgctxt "#32063"
+msgid "Store persistent torrent data on disk"
+msgstr ""

@@ -26,8 +26,9 @@ from libs.server.wsgi_server import create_server
 sleep(2.0)
 addon.log('***** Starting Torrent Server... *****')
 wsgi_app.limits_timer.start()
-wsgi_app.save_resume_timer.start()
 wsgi_app.log_torrents_timer.start()
+if addon.persistent:
+    wsgi_app.save_resume_timer.start()
 httpd = create_server(wsgi_app.app, port=addon.server_port)
 httpd.timeout = 0.2
 start_trigger = True
@@ -39,7 +40,8 @@ while not xbmc.abortRequested:
         start_trigger = False
 addon.log('***** Torrent Server stopped *****')
 wsgi_app.limits_timer.abort()
-wsgi_app.save_resume_timer.abort()
 wsgi_app.log_torrents_timer.abort()
+if addon.persistent:
+    wsgi_app.save_resume_timer.abort()
 wsgi_app.torrent_client.abort_buffering()
 del wsgi_app.torrent_client

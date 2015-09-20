@@ -258,3 +258,7 @@ msgstr "Стриминг"
 msgctxt "#32062"
 msgid "Max open files"
 msgstr "Макс. кол-во открытых файлов"
+
+msgctxt "#32063"
+msgid "Store persistent torrent data on disk"
+msgstr "Хранить данные торрентов на диске"
