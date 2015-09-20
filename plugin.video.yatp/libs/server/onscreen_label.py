@@ -9,6 +9,7 @@ import os
 import xbmcgui
 from addon import Addon
 
+
 class OnScreenLabel(object):
     def __init__(self, text='', visible=True):
         self._window = xbmcgui.Window(12005)
