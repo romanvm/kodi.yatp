@@ -687,10 +687,10 @@ class Streamer(Torrenter):
         if duration:
             buffer_length = int(ceil(buffer_duration * num_pieces / duration))
             # For AVI files Kodi requests bigger chunks at the end of a file
-            end_offset = int(round(4194304 / piece_length), 0) if os.path.splitext(filename)[1].lower() == '.avi' else 1
+            end_offset = int(round(4194304 / piece_length, 0)) if os.path.splitext(filename)[1].lower() == '.avi' else 1
         else:
             # Fallback if hachoir cannot parse the file
-            end_offset = int(round(4194304 / piece_length), 0)
+            end_offset = int(round(4194304 / piece_length, 0))
             buffer_length = int(ceil(1048576 * default_buffer_size / piece_length)) - end_offset
         return buffer_length, end_offset
 
@@ -773,7 +773,6 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
                 paused = False
                 addon.log('Piece #{0} downloaded. Continue playback.'.format(current_piece))
                 oncreen_label.hide()
-            # torrent_handle.flush_cache()
             file_.seek(byte_position)
             chunk = file_.read(piece_length)
             if not chunk:
