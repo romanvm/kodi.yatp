@@ -11,12 +11,12 @@ from addon import Addon
 
 
 class OnScreenLabel(object):
-    def __init__(self, text='', visible=True):
+    def __init__(self, text='', visible=False):
         self._window = xbmcgui.Window(12005)
-        self._back = xbmcgui.ControlImage(10, 10, 830, 60,
+        self._back = xbmcgui.ControlImage(10, 150, 830, 60,
                                       os.path.join(Addon().path, 'resources', 'icons', 'OverlayDialogBackground.png'))
         self._window.addControl(self._back)
-        self._label = xbmcgui.ControlLabel(30, 25, 800, 50, text, textColor='0xFFFFFF00')
+        self._label = xbmcgui.ControlLabel(30, 165, 800, 50, text, textColor='0xFFFFFF00')
         self._window.addControl(self._label)
         if not visible:
             self.hide()

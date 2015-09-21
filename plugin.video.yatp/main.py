@@ -6,8 +6,6 @@
 """
 Plugin main module
 """
-# Todo: improve controlled file serving with checking piece distance.
-# Todo: implement hachoir library for dynamic calculating of buffer_length.
 
 from libs.client.actions import plugin
 

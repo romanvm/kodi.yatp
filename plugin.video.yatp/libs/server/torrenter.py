@@ -34,11 +34,6 @@ addon = Addon()
 addon.log('libtorrent version: {0}'.format(libtorrent.version))
 
 
-def _load_torrent(url, cookies=None):
-    """Load .torrent from URL"""
-    return get(url, cookies=cookies).content
-
-
 class TorrenterError(Exception):
     """Custom exception"""
     pass
@@ -88,7 +83,6 @@ class Torrenter(object):
                 self._save_session_state()
         self.set_session_settings(cache_size=256,  # 4MB
                                   ignore_limits_on_local_network=False,
-                                  optimistic_unchoke_interval=15,
                                   user_agent='uTorrent/2200(24683)')
         self._session.add_dht_router('router.bittorrent.com', 6881)
         self._session.add_dht_router('router.utorrent.com', 6881)
@@ -195,7 +189,7 @@ class Torrenter(object):
             add_torrent_params['url'] = str(torrent)  # libtorrent doesn't like unicode objects here
         elif torrent[:7] in ('http://', 'https:/'):
             # Here external http/https client is used in case if libtorrent module is compiled without OpenSSL
-            add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(_load_torrent(torrent, cookies)))
+            add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(self.load_torrent(torrent, cookies)))
         else:
             try:
                 add_torrent_params['ti'] = libtorrent.torrent_info(os.path.abspath(torrent))
@@ -261,9 +255,8 @@ class Torrenter(object):
         @return:
         """
         if self._persistent:
-            state_file = open(os.path.join(self._resume_dir, 'session.state'), mode='wb')
-            pickle.dump(self._session.save_state(), state_file)
-            state_file.close()
+            with open(os.path.join(self._resume_dir, 'session.state'), mode='wb') as state_file:
+                pickle.dump(self._session.save_state(), state_file)
         else:
             raise TorrenterError('Trying to save the state of a non-persistent instance!')
 
@@ -274,11 +267,10 @@ class Torrenter(object):
         @return:
         """
         try:
-            state_file = open(os.path.join(self._resume_dir, 'session.state'), mode='rb')
+            with open(os.path.join(self._resume_dir, 'session.state'), mode='rb') as state_file:
+                self._session.load_state(pickle.load(state_file))
         except IOError:
             raise TorrenterError('.state file not found!')
-        self._session.load_state(pickle.load(state_file))
-        state_file.close()
 
     def pause_torrent(self, info_hash, graceful_pause=1):
         """
@@ -314,13 +306,12 @@ class Torrenter(object):
             torrent_handle = self._torrents_pool[info_hash]
             if torrent_handle.need_save_resume_data() or force_save:
                 resume_data = libtorrent.bencode(torrent_handle.write_resume_data())
-                meta_file = open(os.path.join(self._resume_dir, info_hash + '.resume'), mode='r+b')
-                metadata = pickle.load(meta_file)
-                metadata['resume_data'] = resume_data
-                meta_file.seek(0)
-                pickle.dump(metadata, meta_file)
-                meta_file.truncate()
-                meta_file.close()
+                with open(os.path.join(self._resume_dir, info_hash + '.resume'), mode='r+b') as meta_file:
+                    metadata = pickle.load(meta_file)
+                    metadata['resume_data'] = resume_data
+                    meta_file.seek(0)
+                    pickle.dump(metadata, meta_file)
+                    meta_file.truncate()
         else:
             raise TorrenterError('Trying to save torrent metadata for a non-persistent instance!')
 
@@ -352,16 +343,14 @@ class Torrenter(object):
             torr_file = libtorrent.create_torrent(torr_info)
             torr_content = torr_file.generate()
             torr_bencoded = libtorrent.bencode(torr_content)
-            t_file = open(torr_filepath, 'wb')
-            t_file.write(torr_bencoded)
-            t_file.close()
+            with open(torr_filepath, 'wb') as t_file:
+                t_file.write(torr_bencoded)
             metadata = {'name': torr_handle.name(),
                         'info_hash': info_hash,
                         'save_path': torr_handle.save_path(),
                         'resume_data': None}
-            m_file = open(meta_filepath, mode='wb')
-            pickle.dump(metadata, m_file)
-            m_file.close()
+            with open(meta_filepath, mode='wb') as m_file:
+                pickle.dump(metadata, m_file)
         else:
             raise TorrenterError('Trying to save torrent metadata for a non-persistent instance!')
 
@@ -372,9 +361,8 @@ class Torrenter(object):
         @param filepath: str
         @return:
         """
-        m_file = open(filepath, mode='rb')
-        metadata = pickle.load(m_file)
-        m_file.close()
+        with open(filepath, mode='rb') as m_file:
+            metadata = pickle.load(m_file)
         torrent = os.path.join(self._resume_dir, metadata['info_hash'] + '.torrent')
         self._add_torrent(torrent, metadata['save_path'], metadata['resume_data'])
 
@@ -482,6 +470,11 @@ class Torrenter(object):
         """
         torr_handle = self._torrents_pool[info_hash]
         [torr_handle.piece_priority(piece, priority) for piece in xrange(torr_handle.get_torrent_info().num_pieces())]
+
+    @staticmethod
+    def load_torrent(url, cookies=None):
+        """Load .torrent from URL"""
+        return get(url, cookies=cookies).content
 
     @property
     def is_torrent_added(self):
@@ -646,7 +639,7 @@ class Streamer(Torrenter):
                 if window_end < last_piece:
                     window_end += 1
                     torr_handle.piece_priority(window_end, 1)
-            time.sleep(0.2)
+            time.sleep(0.1)
         self._sliding_window_position.append(-1)
 
     def abort_buffering(self):
@@ -694,10 +687,10 @@ class Streamer(Torrenter):
         if duration:
             buffer_length = int(ceil(buffer_duration * num_pieces / duration))
             # For AVI files Kodi requests bigger chunks at the end of a file
-            end_offset = int(round(4194304 / piece_length), 0) if os.path.splitext(filename)[1].lower() == '.avi' else 1
+            end_offset = int(round(4194304 / piece_length, 0)) if os.path.splitext(filename)[1].lower() == '.avi' else 1
         else:
             # Fallback if hachoir cannot parse the file
-            end_offset = int(round(4194304 / piece_length), 0)
+            end_offset = int(round(4194304 / piece_length, 0))
             buffer_length = int(ceil(1048576 * default_buffer_size / piece_length)) - end_offset
         return buffer_length, end_offset
 
@@ -780,7 +773,6 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
                 paused = False
                 addon.log('Piece #{0} downloaded. Continue playback.'.format(current_piece))
                 oncreen_label.hide()
-            # torrent_handle.flush_cache()
             file_.seek(byte_position)
             chunk = file_.read(piece_length)
             if not chunk:

@@ -13,6 +13,8 @@ torrent-client.
 - Support for magnet links, local and remote .torrent files.
 - Support for jump/seek to arbitrary parts of the video.
 
+See [project's Wiki](https://github.com/romanvm/kodi.yatp/wiki) for more info.
+
 **Warning!** The plugin is in WIP state and is subject to constant changes. Proper working distributions
 will be provided after it is more or less finished.
 
