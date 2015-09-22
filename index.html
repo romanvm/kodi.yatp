@@ -35,7 +35,7 @@
 <a id="yet-anoter-torrent-player" class="anchor" href="#yet-anoter-torrent-player" aria-hidden="true"><span class="octicon octicon-link"></span></a>Yet Anoter Torrent Player</h1>
 
 <p>Yet Anoter Torrent Player (YATP) is a torrent streaming video plugin for <a href="http://kodi.tv">Kodi</a> mediacenter.
-It allows to watch video torrents in Kodi without fully downloading them. The plugin can also act as a simple
+It allows to watch video torrents in Kodi without fully downloading them. The plugin can also act be used a simple
 torrent-client.</p>
 
 <p><strong>Main features:</strong></p>
@@ -46,13 +46,16 @@ torrent-client.</p>
 <li>Speed, ratio and time limits for torrents.</li>
 <li>Support for multi-file torrents - you can select individual video files for playback.</li>
 <li>Support for magnet links, local and remote .torrent files.</li>
-<li>Support for jump/seek to arbitrary parts of the video (it re-prioritizes pieces for download).</li>
+<li>Support for jump/seek to arbitrary parts of the video.</li>
 </ul>
 
-<p><strong>Warning!</strong> To use YATP you need a binary compiled libtorrent module which is not included in the plugin.</p>
+<p>See <a href="https://github.com/romanvm/kodi.yatp/wiki">project's Wiki</a> for more info.</p>
 
-<p><strong>Warning2!</strong> The plugin is in WIP state and is subject to constant changes. Proper working distributions
+<p><strong>Warning!</strong> The plugin is in WIP state and is subject to constant changes. Proper working distributions
 will be provided after it is more or less finished.</p>
+
+<p><strong>Warning 2!</strong> To use YATP you need a binary compiled libtorrent module which is not included in the plugin.
+The respective Kodi Python module addon for multiple platforms is provided in my repo along with YATP.</p>
 
 <h2>
 <a id="basic-usage" class="anchor" href="#basic-usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Basic Usage</h2>
@@ -62,7 +65,15 @@ will be provided after it is more or less finished.</p>
 <pre><code>plugin://plugin.video.yatp/?action=play&amp;torrent=&lt;url-encoded path to a .torrent file or a magnet link&gt;
 </code></pre>
 
-<p>The respective list item must have its <em>'IsPlayable'</em> property set to <em>'true'</em>.</p>
+<p>This will play the biggest videofile in a torrent.
+The respective list item must have its <em>'IsPlayable'</em> property set to <em>'true'</em>.</p>
+
+<p>Show the list of videofiles in a torrent:</p>
+
+<pre><code>plugin://plugin.video.yatp/?action=list_files&amp;torrent=&lt;url-encoded path to a .torrent file or a magnet link&gt;
+</code></pre>
+
+<p>This will open the list of videofiles as a Kodi virtual folder. Then you can select individual files to play.</p>
 
 <p>YATP also allows to play local .torrent files containing videos.</p>
 
@@ -79,8 +90,8 @@ The Kodi UI is available from Kodi and the Web UI can be opened using the follow
 
 <p><strong>License:</strong> <a href="http://www.gnu.org/licenses/gpl-3.0.en.html">GPL v.3</a>.</p>
 
-<p>The plugin includes <a href="http://bottlepy.org/docs/dev/index.html">Bottle</a> module which is licensed separately
-by its author(-s).</p>
+<p>The plugin includes <a href="http://bottlepy.org/docs/dev/index.html">Bottle</a> and <a href="http://hachoir3.readthedocs.org">hachoir</a>
+modules which are licensed separately by their authors.</p>
       </section>
     </div>
 
