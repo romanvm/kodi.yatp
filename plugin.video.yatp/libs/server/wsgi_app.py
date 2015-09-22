@@ -28,8 +28,6 @@ sys.path.append(os.path.join(addon.path, 'site-packages'))
 from bottle import (route, default_app, request, template, response, debug,
                     static_file, TEMPLATE_PATH, HTTPError, HTTPResponse)
 
-DEBUG = True
-
 # Torrent client parameters
 download_dir = addon.download_dir
 resume_dir = os.path.join(addon.config_dir, 'torrents')
@@ -57,7 +55,7 @@ if addon.persistent:
 # Bottle WSGI application
 static_path = os.path.join(addon.path, 'resources', 'web')
 TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))
-debug(DEBUG)
+debug(False)
 
 
 @route('/')
