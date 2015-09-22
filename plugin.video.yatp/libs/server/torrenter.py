@@ -17,7 +17,6 @@ import time
 import threading
 import datetime
 import cPickle as pickle
-from collections import deque
 from math import ceil
 from requests import get
 import xbmc
@@ -37,6 +36,23 @@ addon.log('libtorrent version: {0}'.format(libtorrent.version))
 class TorrenterError(Exception):
     """Custom exception"""
     pass
+
+
+class Buffer(object):
+    """Thread-safe data buffer"""
+    def __init__(self, contents=None):
+        self._lock = threading.Lock()
+        self._contents = contents
+
+    @property
+    def contents(self):
+        with self._lock:
+            return self._contents
+
+    @contents.setter
+    def contents(self, value):
+        with self._lock:
+            self._contents = value
 
 
 class Torrenter(object):
@@ -70,9 +86,8 @@ class Torrenter(object):
         self._add_torrent_thread = None
         # Signal events
         self._torrent_added = threading.Event()
-        # Inter-thread data buffers.
-        # deque containers for 1 items are used because deque.append operation is atomic.
-        self._last_added_torrent = deque([None], 1)
+        # Inter-thread data buffer.
+        self._last_added_torrent = Buffer()
         # Initialize session
         self._session = libtorrent.session()
         self._session.listen_on(start_port, end_port)
@@ -165,7 +180,7 @@ class Torrenter(object):
         result = {'name': torr_handle.name().decode('utf-8'), 'info_hash': info_hash}
         torr_info = torr_handle.get_torrent_info()
         result['files'] = [[file_.path.decode('utf-8'), file_.size] for file_ in torr_info.files()]
-        self._last_added_torrent.append(result)
+        self._last_added_torrent.contents = result
         self._torrent_added.set()
 
     def _add_torrent(self, torrent, save_path, resume_data=None, paused=False, cookies=None):
@@ -483,7 +498,7 @@ class Torrenter(object):
     @property
     def last_added_torrent(self):
         """The last added torrent info"""
-        return self._last_added_torrent[0]
+        return self._last_added_torrent.contents
 
 
 class Streamer(Torrenter):
@@ -502,9 +517,9 @@ class Streamer(Torrenter):
         self._abort_buffering = threading.Event()
         self._abort_sliding = threading.Event()
         # Inter-thread data buffers
-        self._buffer_percent = deque([0], 1)
-        self._streamed_file_data = deque([None], 1)
-        self._sliding_window_position = deque([-1], 1)
+        self._buffer_percent = Buffer(0)
+        self._streamed_file_data = Buffer()
+        self._sliding_window_position = Buffer(-1)
         super(Streamer, self).__init__(*args, **kwargs)
 
     def __del__(self):
@@ -549,7 +564,7 @@ class Streamer(Torrenter):
         # Clear flags
         self._buffering_complete.clear()
         self._abort_buffering.clear()
-        self._buffer_percent.append(0)
+        self._buffer_percent.contents= 0
         torr_handle = self._torrents_pool[self.last_added_torrent['info_hash']]
         torr_info = torr_handle.get_torrent_info()
         # Pick the file to be streamed from the torrent files
@@ -576,12 +591,12 @@ class Streamer(Torrenter):
         addon.log('start_piece={0}, end_piece={1}, piece_length={2}'.format(start_piece,
                                                                             end_piece,
                                                                             piece_length))
-        self._streamed_file_data.append({'torr_handle': torr_handle,
-                                         'buffer_length': buffer_length,
-                                         'start_piece': start_piece,
-                                         'end_offset': end_offset,
-                                         'end_piece': end_piece,
-                                         'piece_length': piece_length})
+        self._streamed_file_data.contents = {'torr_handle': torr_handle,
+                                             'buffer_length': buffer_length,
+                                             'start_piece': start_piece,
+                                             'end_offset': end_offset,
+                                             'end_piece': end_piece,
+                                             'piece_length': piece_length}
         # Check if the file has been downloaded earlier
         if not self.check_piece_range(torr_handle, start_piece + 1, end_piece):
             # Setup buffer download
@@ -600,8 +615,8 @@ class Streamer(Torrenter):
                 for index, piece_ in enumerate(buffer_pool):
                     if torr_handle.have_piece(piece_):
                         del buffer_pool[index]
-                buffer_ = int(100.0 * (buffer_pool_length - len(buffer_pool)) / buffer_pool_length)
-                self._buffer_percent.append(buffer_)
+                self._buffer_percent.contents = int(100.0 * (buffer_pool_length - len(buffer_pool)) /
+                                                    buffer_pool_length)
             if not self._abort_buffering.is_set():
                 torr_handle.flush_cache()
                 self._buffering_complete.set()
@@ -634,7 +649,7 @@ class Streamer(Torrenter):
         [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start, window_end + 1)]
         while window_start <= last_piece and not self._abort_sliding.is_set():
             addon.log('Sliding window position: {0}'.format(window_start))
-            self._sliding_window_position.append(window_start)
+            self._sliding_window_position.contents = window_start
             torr_handle.piece_priority(window_start, 7)
             if torr_handle.have_piece(window_start):
                 window_start += 1
@@ -642,7 +657,7 @@ class Streamer(Torrenter):
                     window_end += 1
                     torr_handle.piece_priority(window_end, 1)
             time.sleep(0.1)
-        self._sliding_window_position.append(-1)
+        self._sliding_window_position.contents = -1
 
     def abort_buffering(self):
         """
@@ -721,12 +736,12 @@ class Streamer(Torrenter):
     @property
     def sliding_window_position(self):
         """Sliding window position"""
-        return self._sliding_window_position[0]
+        return self._sliding_window_position.contents
 
     @property
     def buffer_percent(self):
         """Buffer %"""
-        return self._buffer_percent[0]
+        return self._buffer_percent.contents
 
     @property
     def streamed_file_data(self):
@@ -735,7 +750,7 @@ class Streamer(Torrenter):
 
         @return: dict
         """
-        return self._streamed_file_data[0]
+        return self._streamed_file_data.contents
 
 
 def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, piece_length, oncreen_label):
