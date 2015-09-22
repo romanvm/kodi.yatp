@@ -40,7 +40,7 @@
         <setting id="torrent_port" type="number"
                  label="32044" default="25335" />
         <setting id="persistent" type="bool"
-                 label="33063" default="true" />
+                 label="32063" default="true" />
         <setting id="enable_encryption" type="bool"
                  label="32053" default="true" />
         <setting id="connections_limit" type="number"

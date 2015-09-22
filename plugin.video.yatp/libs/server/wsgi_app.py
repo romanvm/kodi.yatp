@@ -28,8 +28,6 @@ sys.path.append(os.path.join(addon.path, 'site-packages'))
 from bottle import (route, default_app, request, template, response, debug,
                     static_file, TEMPLATE_PATH, HTTPError, HTTPResponse)
 
-DEBUG = True
-
 # Torrent client parameters
 download_dir = addon.download_dir
 resume_dir = os.path.join(addon.config_dir, 'torrents')
@@ -57,7 +55,7 @@ if addon.persistent:
 # Bottle WSGI application
 static_path = os.path.join(addon.path, 'resources', 'web')
 TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))
-debug(DEBUG)
+debug(False)
 
 
 @route('/')
@@ -100,9 +98,8 @@ def json_rpc():
 
     @return:
     """
-    if DEBUG:
-        addon.log('***** JSON request *****')
-        addon.log(request.body.read())
+    addon.log('***** JSON request *****')
+    addon.log(request.body.read())
     data = request.json
     reply = {'jsonrpc': '2.0', 'id': data.get('id', '1')}
     try:
@@ -110,9 +107,8 @@ def json_rpc():
     except Exception, ex:
         addon.log(format_exc(), xbmc.LOGERROR)
         reply['error'] = '{0}: {1}'.format(str(ex.__class__)[7:-2], format_exc())
-    if DEBUG:
-        addon.log('***** JSON response *****')
-        addon.log(str(reply))
+    addon.log('***** JSON response *****')
+    addon.log(str(reply))
     return reply
 
 
