@@ -13,23 +13,37 @@ and with torrent media streaming capability.
 
 from __future__ import division
 import os
+import sys
 import time
 import threading
 import datetime
+import platform
 import cPickle as pickle
 from math import ceil
+from traceback import format_exc
 from requests import get
 import xbmc
 from addon import Addon
 from utilities import get_duration
+
+addon = Addon()
+
 # Import libtorrent module
 try:
     import libtorrent  # Try to import global module
 except ImportError:
-    from python_libtorrent import get_libtorrent  # Try to import from script.module.libtorrent
-    libtorrent = get_libtorrent()
+    try:
+        from python_libtorrent import get_libtorrent  # Try to import from script.module.libtorrent
+        libtorrent = get_libtorrent()
+    except:
+        addon.log(format_exc(), xbmc.LOGERROR)
+        addon.log('Platform: "{0}"; machine: "{1}"; processor: "{2}"; system: "{3}"'.format(
+            sys.platform,
+            platform.machine(),
+            platform.processor(),
+            platform.system()))
+        raise RuntimeError('Your platform is not supported!')
 
-addon = Addon()
 addon.log('libtorrent version: {0}'.format(libtorrent.version))
 
 
