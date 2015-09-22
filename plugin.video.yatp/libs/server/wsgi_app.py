@@ -100,9 +100,8 @@ def json_rpc():
 
     @return:
     """
-    if DEBUG:
-        addon.log('***** JSON request *****')
-        addon.log(request.body.read())
+    addon.log('***** JSON request *****')
+    addon.log(request.body.read())
     data = request.json
     reply = {'jsonrpc': '2.0', 'id': data.get('id', '1')}
     try:
@@ -110,9 +109,8 @@ def json_rpc():
     except Exception, ex:
         addon.log(format_exc(), xbmc.LOGERROR)
         reply['error'] = '{0}: {1}'.format(str(ex.__class__)[7:-2], format_exc())
-    if DEBUG:
-        addon.log('***** JSON response *****')
-        addon.log(str(reply))
+    addon.log('***** JSON response *****')
+    addon.log(str(reply))
     return reply
 
 
