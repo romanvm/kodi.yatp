@@ -763,8 +763,9 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
                     paused = True
                     addon.log('Paused to wait for piece #{0}.'.format(current_piece))
                 if paused:
-                    oncreen_label.text = addon.get_localized_string(32050).format(current_piece,
-                                                                  torrent_handle.status().download_payload_rate / 1024)
+                    oncreen_label.text = addon.get_localized_string(32050).format(
+                        current_piece,
+                        int(torrent_handle.status().download_payload_rate / 1024))
                     oncreen_label.show()
                 addon.log('Waiting for piece #{0}...'.format(current_piece))
                 xbmc.sleep(1000)  # xbmc.sleep works better here
