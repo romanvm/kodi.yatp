@@ -31,7 +31,7 @@ addon.log('Platform: "{0}"; machine: "{1}"; processor: "{2}"; system: "{3}"'.for
             sys.platform,
             platform.machine(),
             platform.processor(),
-            platform.system()), xbmc.LOGINFO)  # This is for potential statistic and debugging purposes
+            platform.system()), xbmc.LOGNOTICE)  # This is for potential statistic and debugging purposes
 
 # Import libtorrent module
 try:
