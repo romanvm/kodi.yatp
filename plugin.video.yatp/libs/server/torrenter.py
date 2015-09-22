@@ -27,6 +27,11 @@ from addon import Addon
 from utilities import get_duration
 
 addon = Addon()
+addon.log('Platform: "{0}"; machine: "{1}"; processor: "{2}"; system: "{3}"'.format(
+            sys.platform,
+            platform.machine(),
+            platform.processor(),
+            platform.system()), xbmc.LOGINFO)  # This is for potential statistic and debugging purposes
 
 # Import libtorrent module
 try:
@@ -37,11 +42,6 @@ except ImportError:
         libtorrent = get_libtorrent()
     except:
         addon.log(format_exc(), xbmc.LOGERROR)
-        addon.log('Platform: "{0}"; machine: "{1}"; processor: "{2}"; system: "{3}"'.format(
-            sys.platform,
-            platform.machine(),
-            platform.processor(),
-            platform.system()))
         raise RuntimeError('Your platform is not supported!')
 
 addon.log('libtorrent version: {0}'.format(libtorrent.version))
