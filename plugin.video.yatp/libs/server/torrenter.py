@@ -131,7 +131,7 @@ class Torrenter(object):
             ses_settings[key] = value
         self._session.set_settings(ses_settings)
 
-    def add_torrent_async(self, torrent, save_path, zero_priorities=False, cookies=None):
+    def add_torrent_async(self, torrent, save_path, paused=False, cookies=None):
         """
         Add a torrent in a non-blocking way.
 
@@ -144,11 +144,11 @@ class Torrenter(object):
         @return:
         """
         self._add_torrent_thread = threading.Thread(target=self.add_torrent,
-                                                    args=(torrent, save_path, zero_priorities, cookies))
+                                                    args=(torrent, save_path, paused, cookies))
         self._add_torrent_thread.daemon = True
         self._add_torrent_thread.start()
 
-    def add_torrent(self, torrent, save_path, zero_priorities=False, cookies=None):
+    def add_torrent(self, torrent, save_path, paused=False, cookies=None):
         """
         Add a torrent download
 
@@ -158,19 +158,17 @@ class Torrenter(object):
         @return: dict {'name': str, 'info_hash': str, 'files': list}
         """
         self._torrent_added.clear()
-        torr_handle = self._add_torrent(torrent, save_path, cookies)
+        torr_handle = self._add_torrent(torrent, save_path, paused=paused, cookies=cookies)
         if self._persistent:
             self._save_torrent_info(torr_handle)
         info_hash = str(torr_handle.info_hash())
         result = {'name': torr_handle.name().decode('utf-8'), 'info_hash': info_hash}
         torr_info = torr_handle.get_torrent_info()
         result['files'] = [[file_.path.decode('utf-8'), file_.size] for file_ in torr_info.files()]
-        if zero_priorities:
-            self.set_piece_priorities(info_hash, 0)
         self._last_added_torrent.append(result)
         self._torrent_added.set()
 
-    def _add_torrent(self, torrent, save_path, resume_data=None, cookies=None):
+    def _add_torrent(self, torrent, save_path, resume_data=None, paused=False, cookies=None):
         """
         Add a torrent to the pool.
 
@@ -180,7 +178,8 @@ class Torrenter(object):
         @return: object - torr_handle
         """
         add_torrent_params = {'save_path': os.path.abspath(save_path),
-                              'storage_mode': libtorrent.storage_mode_t.storage_mode_sparse}
+                              'storage_mode': libtorrent.storage_mode_t.storage_mode_sparse,
+                              'paused': paused}
         if resume_data is not None:
             add_torrent_params['resume_data'] = resume_data
         if isinstance(torrent, dict):
@@ -552,8 +551,6 @@ class Streamer(Torrenter):
         self._abort_buffering.clear()
         self._buffer_percent.append(0)
         torr_handle = self._torrents_pool[self.last_added_torrent['info_hash']]
-        if torr_handle.status().paused:
-            torr_handle.resume()
         torr_info = torr_handle.get_torrent_info()
         # Pick the file to be streamed from the torrent files
         file_entry = torr_info.files()[file_index]
@@ -564,6 +561,9 @@ class Streamer(Torrenter):
         piece_length = torr_info.piece_length()
         num_pieces = int(ceil(file_entry.size / piece_length))
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
+        self.set_piece_priorities(self.last_added_torrent['info_hash'], 0)
+        if torr_handle.status().paused:
+            torr_handle.resume()
         torr_handle.piece_priority(start_piece, 7)
         while not torr_handle.have_piece(start_piece):
             time.sleep(0.2)
@@ -589,6 +589,7 @@ class Streamer(Torrenter):
             buffer_pool = range(start_piece, start_piece + buffer_length) + end_pool
             buffer_pool_length = len(buffer_pool)
             [torr_handle.piece_priority(piece, 7) for piece in end_pool]
+            # torr_handle.set_sequential_download(True)
             self.start_sliding_window_async(torr_handle,
                                             start_piece + 1,
                                             start_piece + sliding_window_length,
@@ -629,6 +630,7 @@ class Streamer(Torrenter):
         of a media file for streaming purposes.
         """
         self._abort_sliding.clear()
+        window_end = min(window_end, last_piece)
         [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start, window_end + 1)]
         while window_start <= last_piece and not self._abort_sliding.is_set():
             addon.log('Sliding window position: {0}'.format(window_start))
