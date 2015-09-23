@@ -20,7 +20,6 @@ import datetime
 import platform
 import cPickle as pickle
 from math import ceil
-from traceback import format_exc
 from requests import get
 import xbmc
 from addon import Addon
@@ -33,16 +32,12 @@ addon.log('Platform: "{0}"; machine: "{1}"; processor: "{2}"; system: "{3}"'.for
             platform.processor(),
             platform.system()), xbmc.LOGNOTICE)  # This is for potential statistic and debugging purposes
 
-# Import libtorrent module
 try:
     import libtorrent  # Try to import global module
 except ImportError:
-    try:
-        from python_libtorrent import get_libtorrent  # Try to import from script.module.libtorrent
-        libtorrent = get_libtorrent()
-    except:
-        addon.log(format_exc(), xbmc.LOGERROR)
-        raise RuntimeError('Your platform is not supported!')
+    sys.path.append(os.path.join(addon.path, 'site-packages'))
+    from python_libtorrent import get_libtorrent
+    libtorrent = get_libtorrent()
 
 addon.log('libtorrent version: {0}'.format(libtorrent.version))
 

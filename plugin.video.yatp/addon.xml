@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.yatp"
-version="2.9.9z"
+version="3.0.0~rc1"
 name="Yet Another Torrent Player"
 provider-name="Roman V. M.">
 <requires>
     <import addon="xbmc.python" version="2.14.0"/>
     <import addon="script.module.requests" version="2.6.0"/>
-    <import addon="script.module.libtorrent" version="0.16.0"/>
 </requires>
 <extension point="xbmc.python.pluginsource" library="main.py">
     <provides>video</provides>
