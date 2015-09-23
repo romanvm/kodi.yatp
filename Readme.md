@@ -15,7 +15,7 @@ torrent-client.
 
 See [project's Wiki](https://github.com/romanvm/kodi.yatp/wiki) for more info.
 
-The plugin is avaliable in [My Kodi addons repository](https://romanvm.github.io/kodi_repo/repo/repository.romanvm/repository.romanvm-2.0.0.zip).
+The plugin is avaliable in [my Kodi addons repository](https://romanvm.github.io/kodi_repo/repo/repository.romanvm/repository.romanvm-2.0.0.zip).
 
 **License:** [GPL v.3](http://www.gnu.org/licenses/gpl-3.0.en.html).
 
