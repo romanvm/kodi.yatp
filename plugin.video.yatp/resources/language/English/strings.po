@@ -92,7 +92,7 @@ msgid "Seeds: {0}"
 msgstr ""
 
 msgctxt "#32021"
-msgid "No video is selected"
+msgid "No video is selected."
 msgstr ""
 
 msgctxt "#32022"
@@ -124,7 +124,7 @@ msgid "Torrent server started."
 msgstr ""
 
 msgctxt "#32029"
-msgid "Torrent"
+msgid "Torrents"
 msgstr ""
 
 msgctxt "#32030"
