@@ -48,10 +48,11 @@ torrent_client.set_session_settings(download_rate_limit=addon.dl_speed_limit * 1
 if not addon.enable_encryption:
     torrent_client.set_encryption_policy(2)
 # Timers
-limits_timer = Timer(10, check_seeding_limits, torrent_client)
-log_torrents_timer = Timer(5, log_torrents, torrent_client)
+if addon.enable_limits:
+    limits_timer = Timer(10, check_seeding_limits, torrent_client)
 if addon.persistent:
     save_resume_timer = Timer(30, save_resume_data, torrent_client)
+log_torrents_timer = Timer(5, log_torrents, torrent_client)
 # Bottle WSGI application
 static_path = os.path.join(addon.path, 'resources', 'web')
 TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))

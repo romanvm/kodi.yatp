@@ -262,3 +262,7 @@ msgstr ""
 msgctxt "#32063"
 msgid "Store persistent torrent data on disk"
 msgstr ""
+
+msgctxt "#32064"
+msgid "Enable torrent limits (requires restart)"
+msgstr ""

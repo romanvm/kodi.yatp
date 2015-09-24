@@ -90,7 +90,7 @@ def check_seeding_limits(torrenter):
                          timedelta(hours=_addon.time_limit))):
                 if _addon.expired_action == 'pause' and torrent['state'] == 'seeding':
                     torrenter.pause_torrent(torrent['info_hash'])
-                elif _addon.expired_action == 'delete' and torrent['state'] in ('seeding', 'paused'):
+                elif _addon.expired_action == 1 and torrent['state'] in ('seeding', 'paused'):
                     torrenter.remove_torrent(torrent['info_hash'], _addon.delete_expired_files)
         except ValueError:
             pass
