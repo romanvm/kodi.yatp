@@ -92,7 +92,7 @@ msgid "Seeds: {0}"
 msgstr ""
 
 msgctxt "#32021"
-msgid "No video is selected"
+msgid "No video is selected."
 msgstr ""
 
 msgctxt "#32022"
@@ -124,7 +124,7 @@ msgid "Torrent server started."
 msgstr ""
 
 msgctxt "#32029"
-msgid "Torrent"
+msgid "Torrents"
 msgstr ""
 
 msgctxt "#32030"
@@ -261,4 +261,8 @@ msgstr ""
 
 msgctxt "#32063"
 msgid "Store persistent torrent data on disk"
+msgstr ""
+
+msgctxt "#32064"
+msgid "Enable torrent limits (requires restart)"
 msgstr ""
