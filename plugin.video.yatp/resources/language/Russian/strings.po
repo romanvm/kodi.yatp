@@ -264,5 +264,5 @@ msgid "Store persistent torrent data on disk"
 msgstr "Хранить данные торрентов на диске"
 
 msgctxt "#32064"
-msgid "Enable torrent limits (requires restart)"
-msgstr "Включить лимиты торрентов (требуется перезапуск)"
+msgid "Enable seeding limits (requires restart)"
+msgstr "Включить лимиты сидирования (требуется перезапуск)"
