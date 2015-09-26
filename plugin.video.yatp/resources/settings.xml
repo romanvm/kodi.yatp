@@ -3,20 +3,20 @@
     <category label="32029">
         <setting id="download_dir" type="folder"
                  label="32030" default="" />
+        <setting id="dl_speed_limit" type="number"
+                 label="32047" default="0" />
+        <setting id="ul_speed_limit" type="number"
+                 label="32048" default="0" />
         <setting id="enable_limits" type="bool"
                  label="32064" default="false"/>
-        <setting id="dl_speed_limit" type="number"
-                 label="32047" enable="eq(-1,true)" default="0" />
-        <setting id="ul_speed_limit" type="number"
-                 label="32048" enable="eq(-2,true)" default="0" />
         <setting id="ratio_limit" type="labelenum"
-                 label="32032" enable="eq(-3,true)" values="0|1|1.5|2|3|4|5" default="1.5" />
+                 label="32032" enable="eq(-1,true)" values="0|1|1.5|2|3|4|5" default="1.5" />
         <setting id="time_limit" type="number"
-                 label="32033" enable="eq(-4,true)" default="0" />
+                 label="32033" enable="eq(-2,true)" default="0" />
         <setting id="expired_action" type="enum"
-                 label="32034" enable="eq(-5,true)" lvalues="32045|32046" default="32045" />
+                 label="32034" enable="eq(-3,true)" lvalues="32045|32046" default="32045" />
         <setting id="delete_expired_files" type="bool"
-                 label="32035" enable="eq(-6,true)+eq(-1,1)" default="false"/>
+                 label="32035" enable="eq(-4,true)+eq(-1,1)" default="false"/>
     </category>
     <category label="32061">
         <setting id="buffer_duration" type="slider"
