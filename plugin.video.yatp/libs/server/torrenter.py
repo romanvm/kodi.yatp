@@ -26,11 +26,8 @@ from addon import Addon
 from utilities import get_duration
 
 addon = Addon()
-addon.log('Platform: "{0}"; machine: "{1}"; processor: "{2}"; system: "{3}"'.format(
-            sys.platform,
-            platform.machine(),
-            platform.processor(),
-            platform.system()), xbmc.LOGNOTICE)  # This is for potential statistic and debugging purposes
+# This is for potential statistic and debugging purposes
+addon.log('sys.platform: "{0}". platform.uname: "{1}"'.format(sys.platform, str(platform.uname())), xbmc.LOGNOTICE)
 
 try:
     import libtorrent  # Try to import global module
