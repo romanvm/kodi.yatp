@@ -26,11 +26,8 @@ from addon import Addon
 from utilities import get_duration
 
 addon = Addon()
-addon.log('Platform: "{0}"; machine: "{1}"; processor: "{2}"; system: "{3}"'.format(
-            sys.platform,
-            platform.machine(),
-            platform.processor(),
-            platform.system()), xbmc.LOGNOTICE)  # This is for potential statistic and debugging purposes
+# This is for potential statistic and debugging purposes
+addon.log('sys.platform: "{0}". platform.uname: "{1}"'.format(sys.platform, str(platform.uname())), xbmc.LOGNOTICE)
 
 try:
     import libtorrent  # Try to import global module
@@ -70,27 +67,17 @@ class Torrenter(object):
 
     Implements a simple torrent client.
     """
-    def __init__(self, start_port=6881, end_port=6891, persistent=False, resume_dir=''):
+    def __init__(self, start_port=6881, end_port=6891):
         """
         Class constructor
 
-        If persistent=False, Torrenter does not store any persistend data
-        for torrents.
         @param start_port: int
         @param end_port: int
-        @param dl_speed_limit: int - download speed limit in KB/s
-        @param ul_speed_limit: int - uplpad speed lomit in KB/s
-        @param persistent: bool - store persistent data
-        @param resume_dir: str - the dir where session and torrents persistent data are stored.
         @return:
         """
         # torrents_pool is used to map torrent handles to their sha1 hexdigests
         # Item format {hexdigest: torr_handle}
         self._torrents_pool = {}
-        # Use persistent storage for session and torrents info
-        self._persistent = persistent
-        # The directory where session and torrent data are stored
-        self._resume_dir = os.path.abspath(resume_dir)
         # Worker threads
         self._add_torrent_thread = None
         # Signal events
@@ -100,11 +87,6 @@ class Torrenter(object):
         # Initialize session
         self._session = libtorrent.session()
         self._session.listen_on(start_port, end_port)
-        if self._persistent:
-            try:
-                self._load_session_state()
-            except TorrenterError:
-                self._save_session_state()
         self.set_session_settings(cache_size=256,  # 4MB
                                   ignore_limits_on_local_network=False,
                                   user_agent='uTorrent/2200(24683)')
@@ -112,8 +94,6 @@ class Torrenter(object):
         self._session.add_dht_router('router.utorrent.com', 6881)
         self._session.add_dht_router('router.bitcomet.com', 6881)
         self._session.start_dht()
-        if self._persistent:
-            self._load_torrents()
 
     def __del__(self):
         """
@@ -126,8 +106,6 @@ class Torrenter(object):
             self._add_torrent_thread.join()
         except (RuntimeError, AttributeError):
             pass
-        if self._persistent:
-            self.save_all_resume_data()
         del self._session
 
     def set_encryption_policy(self, enc_policy=1):
@@ -164,7 +142,8 @@ class Torrenter(object):
         the flag is set, retrieve results from last_added_torrent.
         @param torrent: str - path to a .torrent file or a magnet link
         @param save_path: str - save path
-        @param zero_priorities: bool
+        @param paused: bool
+        @param cookies: dict
         @return:
         """
         self._add_torrent_thread = threading.Thread(target=self.add_torrent,
@@ -178,13 +157,12 @@ class Torrenter(object):
 
         @param torrent: str
         @param save_path: str
-        @param zero_priorities: bool
-        @return: dict {'name': str, 'info_hash': str, 'files': list}
+        @param paused: bool
+        @param cookies: dict
+        @return:
         """
         self._torrent_added.clear()
         torr_handle = self._add_torrent(torrent, save_path, paused=paused, cookies=cookies)
-        if self._persistent:
-            self._save_torrent_info(torr_handle)
         info_hash = str(torr_handle.info_hash())
         result = {'name': torr_handle.name().decode('utf-8'), 'info_hash': info_hash}
         torr_info = torr_handle.get_torrent_info()
@@ -264,36 +242,8 @@ class Torrenter(object):
         """
         try:
             self._session.remove_torrent(self._torrents_pool[info_hash], delete_files)
-            del self._torrents_pool[info_hash]
-            if self._persistent:
-                os.remove(os.path.join(self._resume_dir, info_hash + '.resume'))
-                os.remove(os.path.join(self._resume_dir, info_hash + '.torrent'))
-        except (KeyError, OSError):
-            raise TorrenterError('Invalid torrent hash or info files not found!')
-
-    def _save_session_state(self):
-        """
-        Save session state
-
-        @return:
-        """
-        if self._persistent:
-            with open(os.path.join(self._resume_dir, 'session.state'), mode='wb') as state_file:
-                pickle.dump(self._session.save_state(), state_file)
-        else:
-            raise TorrenterError('Trying to save the state of a non-persistent instance!')
-
-    def _load_session_state(self):
-        """
-        Load session state
-
-        @return:
-        """
-        try:
-            with open(os.path.join(self._resume_dir, 'session.state'), mode='rb') as state_file:
-                self._session.load_state(pickle.load(state_file))
-        except IOError:
-            raise TorrenterError('.state file not found!')
+        except KeyError:
+            raise TorrenterError('Invalid torrent hash!')
 
     def pause_torrent(self, info_hash, graceful_pause=1):
         """
@@ -317,88 +267,6 @@ class Torrenter(object):
             self._torrents_pool[info_hash].resume()
         except KeyError:
             raise TorrenterError('Invalid torrent hash!')
-
-    def _save_resume_data(self, info_hash, force_save=False):
-        """
-        Save fast-resume data for a torrent.
-
-        @param info_hash: str
-        @return:
-        """
-        if self._persistent:
-            torrent_handle = self._torrents_pool[info_hash]
-            if torrent_handle.need_save_resume_data() or force_save:
-                resume_data = libtorrent.bencode(torrent_handle.write_resume_data())
-                with open(os.path.join(self._resume_dir, info_hash + '.resume'), mode='r+b') as meta_file:
-                    metadata = pickle.load(meta_file)
-                    metadata['resume_data'] = resume_data
-                    meta_file.seek(0)
-                    pickle.dump(metadata, meta_file)
-                    meta_file.truncate()
-        else:
-            raise TorrenterError('Trying to save torrent metadata for a non-persistent instance!')
-
-    def save_all_resume_data(self, force_save=False):
-        """
-        Save fast-resume data for all torrents
-
-        @return:
-        """
-        if self._persistent:
-            for key in self._torrents_pool.iterkeys():
-                self._save_resume_data(key, force_save)
-            self._session.save_state()
-        else:
-            raise TorrenterError('Trying to save torrent metadata for a non-persistent instance!')
-
-    def _save_torrent_info(self, torr_handle):
-        """
-        Save torrent metatata and a .torrent file for resume.
-
-        @param torr_handle: object - torrent handle
-        @return:
-        """
-        if self._persistent:
-            info_hash = str(torr_handle.info_hash())
-            torr_filepath = os.path.join(self._resume_dir, info_hash + '.torrent')
-            meta_filepath = os.path.join(self._resume_dir, info_hash + '.resume')
-            torr_info = torr_handle.get_torrent_info()
-            torr_file = libtorrent.create_torrent(torr_info)
-            torr_content = torr_file.generate()
-            torr_bencoded = libtorrent.bencode(torr_content)
-            with open(torr_filepath, 'wb') as t_file:
-                t_file.write(torr_bencoded)
-            metadata = {'name': torr_handle.name(),
-                        'info_hash': info_hash,
-                        'save_path': torr_handle.save_path(),
-                        'resume_data': None}
-            with open(meta_filepath, mode='wb') as m_file:
-                pickle.dump(metadata, m_file)
-        else:
-            raise TorrenterError('Trying to save torrent metadata for a non-persistent instance!')
-
-    def _load_torrent_info(self, filepath):
-        """
-        Load torrent state from a pickle file and add the torrent to the pool.
-
-        @param filepath: str
-        @return:
-        """
-        with open(filepath, mode='rb') as m_file:
-            metadata = pickle.load(m_file)
-        torrent = os.path.join(self._resume_dir, metadata['info_hash'] + '.torrent')
-        self._add_torrent(torrent, metadata['save_path'], metadata['resume_data'])
-
-    def _load_torrents(self):
-        """
-        Load all torrents
-
-        @return:
-        """
-        dir_listing = os.listdir(self._resume_dir)
-        for item in dir_listing:
-            if item[-7:] == '.resume':
-                self._load_torrent_info(os.path.join(self._resume_dir, item))
 
     def get_torrent_info(self, info_hash):
         """
@@ -510,7 +378,177 @@ class Torrenter(object):
         return self._last_added_torrent.contents
 
 
-class Streamer(Torrenter):
+class TorrenterPersistent(Torrenter):
+    """
+    A persistent version of Torrenter
+
+    It stores the session state and torrents data on disk
+    """
+    def __init__(self, start_port=6881, end_port=6891, persistent=False, resume_dir=''):
+        """
+        Class constructor
+
+        @param start_port: int
+        @param end_port: int
+        @param persistent: bool - store persistent torrent data on disk
+        @param resume_dir: str - the directory to store persistent torrent data
+        @return:
+        """
+        super(TorrenterPersistent, self).__init__(start_port, end_port)
+        # Use persistent storage for session and torrents info
+        self._persistent = persistent
+        # The directory where session and torrent data are stored
+        self._resume_dir = os.path.abspath(resume_dir)
+        if self._persistent:
+            try:
+                self._load_session_state()
+            except TorrenterError:
+                self._save_session_state()
+            self._load_torrents()
+
+    def __del__(self):
+        """Class destructor"""
+        if self._persistent:
+            self.save_all_resume_data()
+        super(TorrenterPersistent, self).__del__()
+
+    def add_torrent(self, torrent, save_path, paused=False, cookies=None):
+        """
+        Add a torrent download
+
+        @param torrent: str
+        @param save_path: str
+        @param paused: bool
+        @param cookies: dict
+        @return:
+        """
+        super(TorrenterPersistent, self).add_torrent(torrent, save_path, paused, cookies)
+        if self._persistent:
+            self._save_torrent_info(self._torrents_pool[self._last_added_torrent.contents['info_hash']])
+
+    def _save_session_state(self):
+        """
+        Save session state
+
+        @return:
+        """
+        if self._persistent:
+            with open(os.path.join(self._resume_dir, 'session.state'), mode='wb') as state_file:
+                pickle.dump(self._session.save_state(), state_file)
+        else:
+            raise TorrenterError('Trying to save the state of a non-persistent instance!')
+
+    def _load_session_state(self):
+        """
+        Load session state
+
+        @return:
+        """
+        try:
+            with open(os.path.join(self._resume_dir, 'session.state'), mode='rb') as state_file:
+                self._session.load_state(pickle.load(state_file))
+        except IOError:
+            raise TorrenterError('.state file not found!')
+
+    def _save_resume_data(self, info_hash, force_save=False):
+        """
+        Save fast-resume data for a torrent.
+
+        @param info_hash: str
+        @return:
+        """
+        if self._persistent:
+            torrent_handle = self._torrents_pool[info_hash]
+            if torrent_handle.need_save_resume_data() or force_save:
+                resume_data = libtorrent.bencode(torrent_handle.write_resume_data())
+                with open(os.path.join(self._resume_dir, info_hash + '.resume'), mode='r+b') as meta_file:
+                    metadata = pickle.load(meta_file)
+                    metadata['resume_data'] = resume_data
+                    meta_file.seek(0)
+                    pickle.dump(metadata, meta_file)
+                    meta_file.truncate()
+        else:
+            raise TorrenterError('Trying to save torrent metadata for a non-persistent instance!')
+
+    def save_all_resume_data(self, force_save=False):
+        """
+        Save fast-resume data for all torrents
+
+        @return:
+        """
+        if self._persistent:
+            for key in self._torrents_pool.iterkeys():
+                self._save_resume_data(key, force_save)
+            self._session.save_state()
+        else:
+            raise TorrenterError('Trying to save torrent metadata for a non-persistent instance!')
+
+    def _save_torrent_info(self, torr_handle):
+        """
+        Save torrent metatata and a .torrent file for resume.
+
+        @param torr_handle: object - torrent handle
+        @return:
+        """
+        if self._persistent:
+            info_hash = str(torr_handle.info_hash())
+            torr_filepath = os.path.join(self._resume_dir, info_hash + '.torrent')
+            meta_filepath = os.path.join(self._resume_dir, info_hash + '.resume')
+            torr_info = torr_handle.get_torrent_info()
+            torr_file = libtorrent.create_torrent(torr_info)
+            torr_content = torr_file.generate()
+            torr_bencoded = libtorrent.bencode(torr_content)
+            with open(torr_filepath, 'wb') as t_file:
+                t_file.write(torr_bencoded)
+            metadata = {'name': torr_handle.name(),
+                        'info_hash': info_hash,
+                        'save_path': torr_handle.save_path(),
+                        'resume_data': None}
+            with open(meta_filepath, mode='wb') as m_file:
+                pickle.dump(metadata, m_file)
+        else:
+            raise TorrenterError('Trying to save torrent metadata for a non-persistent instance!')
+
+    def _load_torrent_info(self, filepath):
+        """
+        Load torrent state from a pickle file and add the torrent to the pool.
+
+        @param filepath: str
+        @return:
+        """
+        with open(filepath, mode='rb') as m_file:
+            metadata = pickle.load(m_file)
+        torrent = os.path.join(self._resume_dir, metadata['info_hash'] + '.torrent')
+        self._add_torrent(torrent, metadata['save_path'], metadata['resume_data'])
+
+    def _load_torrents(self):
+        """
+        Load all torrents
+
+        @return:
+        """
+        dir_listing = os.listdir(self._resume_dir)
+        for item in dir_listing:
+            if item[-7:] == '.resume':
+                self._load_torrent_info(os.path.join(self._resume_dir, item))
+
+    def remove_torrent(self, info_hash, delete_files=False):
+        """
+        Remove a torrent from download
+
+        @param info_hash: str
+        @return:
+        """
+        super(TorrenterPersistent, self).remove_torrent(info_hash, delete_files)
+        if self._persistent:
+            try:
+                os.remove(os.path.join(self._resume_dir, info_hash + '.resume'))
+                os.remove(os.path.join(self._resume_dir, info_hash + '.torrent'))
+            except OSError:
+                raise TorrenterError('Info files not found!')
+
+
+class Streamer(TorrenterPersistent):
     """
     Torrent Streamer class
 
@@ -573,7 +611,7 @@ class Streamer(Torrenter):
         # Clear flags
         self._buffering_complete.clear()
         self._abort_buffering.clear()
-        self._buffer_percent.contents= 0
+        self._buffer_percent.contents = 0
         torr_handle = self._torrents_pool[self.last_added_torrent['info_hash']]
         torr_info = torr_handle.get_torrent_info()
         # Pick the file to be streamed from the torrent files
@@ -730,12 +768,10 @@ class Streamer(Torrenter):
         @param end_piece:
         @return:
         """
-        result = True
         for piece in xrange(start_piece, end_piece + 1):
             if not torr_handle.have_piece(piece):
-                result = False
-                break
-        return result
+                return False
+        return True
 
     @property
     def is_buffering_complete(self):
