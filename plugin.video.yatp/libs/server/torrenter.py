@@ -67,18 +67,12 @@ class Torrenter(object):
 
     Implements a simple torrent client.
     """
-    def __init__(self, start_port=6881, end_port=6891, persistent=False, resume_dir=''):
+    def __init__(self, start_port=6881, end_port=6891):
         """
         Class constructor
 
-        If persistent=False, Torrenter does not store any persistend data
-        for torrents.
         @param start_port: int
         @param end_port: int
-        @param dl_speed_limit: int - download speed limit in KB/s
-        @param ul_speed_limit: int - uplpad speed lomit in KB/s
-        @param persistent: bool - store persistent data
-        @param resume_dir: str - the dir where session and torrents persistent data are stored.
         @return:
         """
         # torrents_pool is used to map torrent handles to their sha1 hexdigests
@@ -148,7 +142,8 @@ class Torrenter(object):
         the flag is set, retrieve results from last_added_torrent.
         @param torrent: str - path to a .torrent file or a magnet link
         @param save_path: str - save path
-        @param zero_priorities: bool
+        @param paused: bool
+        @param cookies: dict
         @return:
         """
         self._add_torrent_thread = threading.Thread(target=self.add_torrent,
@@ -162,8 +157,9 @@ class Torrenter(object):
 
         @param torrent: str
         @param save_path: str
-        @param zero_priorities: bool
-        @return: dict {'name': str, 'info_hash': str, 'files': list}
+        @param paused: bool
+        @param cookies: dict
+        @return:
         """
         self._torrent_added.clear()
         torr_handle = self._add_torrent(torrent, save_path, paused=paused, cookies=cookies)
@@ -386,9 +382,18 @@ class TorrenterPersistent(Torrenter):
     """
     A persistent version of Torrenter
 
-    It stores the session state and torrents data on dissk
+    It stores the session state and torrents data on disk
     """
     def __init__(self, start_port=6881, end_port=6891, persistent=False, resume_dir=''):
+        """
+        Class constructor
+
+        @param start_port: int
+        @param end_port: int
+        @param persistent: bool - store persistent torrent data on disk
+        @param resume_dir: str - the directory to store persistent torrent data
+        @return:
+        """
         super(TorrenterPersistent, self).__init__(start_port, end_port)
         # Use persistent storage for session and torrents info
         self._persistent = persistent
@@ -402,6 +407,7 @@ class TorrenterPersistent(Torrenter):
             self._load_torrents()
 
     def __del__(self):
+        """Class destructor"""
         if self._persistent:
             self.save_all_resume_data()
         super(TorrenterPersistent, self).__del__()
@@ -412,12 +418,13 @@ class TorrenterPersistent(Torrenter):
 
         @param torrent: str
         @param save_path: str
-        @param zero_priorities: bool
-        @return: dict {'name': str, 'info_hash': str, 'files': list}
+        @param paused: bool
+        @param cookies: dict
+        @return:
         """
         super(TorrenterPersistent, self).add_torrent(torrent, save_path, paused, cookies)
         if self._persistent:
-            self._save_torrent_info(self._last_added_torrent.contents['torr_handle'])
+            self._save_torrent_info(self._torrents_pool[self._last_added_torrent.contents['info_hash']])
 
     def _save_session_state(self):
         """
@@ -541,7 +548,7 @@ class TorrenterPersistent(Torrenter):
                 raise TorrenterError('Info files not found!')
 
 
-class Streamer(Torrenter):
+class Streamer(TorrenterPersistent):
     """
     Torrent Streamer class
 
@@ -604,7 +611,7 @@ class Streamer(Torrenter):
         # Clear flags
         self._buffering_complete.clear()
         self._abort_buffering.clear()
-        self._buffer_percent.contents= 0
+        self._buffer_percent.contents = 0
         torr_handle = self._torrents_pool[self.last_added_torrent['info_hash']]
         torr_info = torr_handle.get_torrent_info()
         # Pick the file to be streamed from the torrent files
