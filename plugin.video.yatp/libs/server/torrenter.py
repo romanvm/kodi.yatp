@@ -190,7 +190,8 @@ class Torrenter(object):
             add_torrent_params['url'] = str(torrent)  # libtorrent doesn't like unicode objects here
         elif torrent[:7] in ('http://', 'https:/'):
             # Here external http/https client is used in case if libtorrent module is compiled without OpenSSL
-            add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(self.load_torrent(torrent, cookies)))
+            torr_file = get(torrent, cookies=cookies).content
+            add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(torr_file))
         else:
             try:
                 add_torrent_params['ti'] = libtorrent.torrent_info(os.path.abspath(torrent))
@@ -361,11 +362,6 @@ class Torrenter(object):
         """
         torr_handle = self._torrents_pool[info_hash]
         [torr_handle.piece_priority(piece, priority) for piece in xrange(torr_handle.get_torrent_info().num_pieces())]
-
-    @staticmethod
-    def load_torrent(url, cookies=None):
-        """Load .torrent from URL"""
-        return get(url, cookies=cookies).content
 
     @property
     def is_torrent_added(self):
