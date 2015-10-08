@@ -106,14 +106,14 @@ def save_resume_data(torrenter):
     torrenter.save_all_resume_data()
 
 
-def log_torrents(torrenter):
-    """
-    Log torrents in the torrent session
-
-    @param torrenter:
-    @return:
-    """
-    torrents = torrenter.get_all_torrents_info()
-    _addon.log('Torrents:')
-    for torrent in torrents:
-        _addon.log(str(torrent))
+# def log_torrents(torrenter):
+#     """
+#     Log torrents in the torrent session
+#
+#     @param torrenter:
+#     @return:
+#     """
+#     torrents = torrenter.get_all_torrents_info()
+#     _addon.log('Torrents:')
+#     for torrent in torrents:
+#         _addon.log(str(torrent))

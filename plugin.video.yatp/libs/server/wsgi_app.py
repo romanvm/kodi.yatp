@@ -18,7 +18,7 @@ import xbmc
 import methods
 from addon import Addon
 from torrenter import Streamer, libtorrent, serve_file_from_torrent
-from timers import Timer, check_seeding_limits, save_resume_data, log_torrents
+from timers import Timer, check_seeding_limits, save_resume_data
 from onscreen_label import OnScreenLabel
 from utilities import get_mime
 
@@ -52,7 +52,6 @@ if addon.enable_limits:
     limits_timer = Timer(10, check_seeding_limits, torrent_client)
 if addon.persistent:
     save_resume_timer = Timer(30, save_resume_data, torrent_client)
-log_torrents_timer = Timer(5, log_torrents, torrent_client)
 # Bottle WSGI application
 static_path = os.path.join(addon.path, 'resources', 'web')
 TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))

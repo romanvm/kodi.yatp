@@ -17,19 +17,18 @@ if not addon.start_server:
     addon.log('Torrent Server is disabled in Settings.', xbmc.LOGWARNING)
     sys.exit()
 
-from time import sleep
+import time
 import xbmcgui
 from libs.server import wsgi_app
 from libs.server.wsgi_server import create_server
 
 
-sleep(2.0)
+time.sleep(2.0)
 addon.log('***** Starting Torrent Server... *****')
 if addon.enable_limits:
     wsgi_app.limits_timer.start()
 if addon.persistent:
     wsgi_app.save_resume_timer.start()
-wsgi_app.log_torrents_timer.start()
 httpd = create_server(wsgi_app.app, port=addon.server_port)
 httpd.timeout = 0.2
 start_trigger = True
@@ -45,5 +44,4 @@ if addon.enable_limits:
     wsgi_app.limits_timer.abort()
 if addon.persistent:
     wsgi_app.save_resume_timer.abort()
-wsgi_app.log_torrents_timer.abort()
 del wsgi_app.torrent_client
