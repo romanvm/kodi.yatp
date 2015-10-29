@@ -13,9 +13,6 @@ from libs.server.addon import Addon
 
 
 addon = Addon()
-if not addon.start_server:
-    addon.log('Torrent Server is disabled in Settings.', xbmc.LOGWARNING)
-    sys.exit()
 
 import time
 import xbmcgui

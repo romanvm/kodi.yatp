@@ -35,8 +35,6 @@
                  label="32039" default="yatp" option="hidden" enable="eq(-2,true)" />
     </category>
     <category label="32040">
-        <setting id="start_server" type="bool"
-                 label="32054" default="true" />
         <setting id="server_port" type="number"
                  label="32042" default="8668"/>
         <setting id="torrent_port" type="number"
