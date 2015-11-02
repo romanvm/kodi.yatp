@@ -126,7 +126,7 @@ class Addon(object):
     def __init__(self, id_=''):
         """Class constructor"""
         self._addon = xbmcaddon.Addon(id_)
-        self._configdir = xbmc.translatePath('special://profile/addon_data/{0}'.format(self.id)).decode('utf-8')
+        self._configdir = xbmc.translatePath(self._addon.getAddonInfo('profile')).decode('utf-8')
         if not os.path.exists(self._configdir):
             os.mkdir(self._configdir)
 
