@@ -7,19 +7,23 @@
 
 import os
 import xbmcgui
-from addon import Addon
+from xbmcaddon import Addon
 
 
 class OnScreenLabel(object):
-    def __init__(self, text='', visible=False):
+    def __init__(self, text=''):
         self._window = xbmcgui.Window(12005)
-        self._back = xbmcgui.ControlImage(10, 150, 830, 60,
-                                      os.path.join(Addon().path, 'resources', 'icons', 'OverlayDialogBackground.png'))
+        self._back = xbmcgui.ControlImage(10, 20, 830, 60,
+                                          os.path.join(Addon().getAddonInfo('path'),
+                                                       'resources', 'icons',
+                                                       'OverlayDialogBackground.png'))
+        self._label = xbmcgui.ControlLabel(30, 35, 800, 50, text, textColor='0xFFFFFF00')
+        self._is_added = False
+
+    def _add_controls(self):
         self._window.addControl(self._back)
-        self._label = xbmcgui.ControlLabel(30, 165, 800, 50, text, textColor='0xFFFFFF00')
         self._window.addControl(self._label)
-        if not visible:
-            self.hide()
+        self._is_added = True
 
     @property
     def text(self):
@@ -30,6 +34,8 @@ class OnScreenLabel(object):
         self._label.setLabel(value)
 
     def show(self):
+        if not self._is_added:
+            self._add_controls()
         self._back.setVisible(True)
         self._label.setVisible(True)
 

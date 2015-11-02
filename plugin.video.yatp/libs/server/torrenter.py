@@ -835,6 +835,7 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
             file_.seek(byte_position)
             chunk = file_.read(piece_length)
             if not chunk:
+                del oncreen_label
                 break
             addon.log('Serving piece #{0}'.format(current_piece))
             yield chunk
