@@ -216,10 +216,8 @@ class Torrenter(object):
         except KeyError:
             raise TorrenterError('Invalid torrent hash!')
         if torr_handle.is_valid():
-            torr_status = torr_handle.status()
-        else:
-            torr_status = None
-        return torr_status
+            return torr_handle.status()
+        return None
 
     def _get_torrent_info(self, info_hash):
         """
@@ -229,10 +227,12 @@ class Torrenter(object):
         @return: object torrent_info
         """
         try:
-            torr_info = self._torrents_pool[info_hash].get_torrent_info()
+            torr_handle = self._torrents_pool[info_hash]
         except KeyError:
             raise TorrenterError('Invalid torrent hash!')
-        return torr_info
+        if torr_handle.is_valid():
+            return torr_handle.get_torrent_info()
+        return None
 
     def remove_torrent(self, info_hash, delete_files=False):
         """
@@ -288,10 +288,12 @@ class Torrenter(object):
         completed_time - see above
         info_hash - torrent's info_hash hexdigest in lowecase
         @param info_hash: str
-        @return: dict - torrent info
+        @return: dict - torrent info or None for invalid torrent
         """
         torr_info = self._get_torrent_info(info_hash)
         torr_status = self._get_torrent_status(info_hash)
+        if torr_info is None or torr_status is None:
+            return None
         completed_time = str(datetime.datetime.fromtimestamp(int(torr_status.completed_time)))
         return {'name': torr_info.name().decode('utf-8'),
                 'size': int(torr_info.total_size() / 1048576),
@@ -318,7 +320,9 @@ class Torrenter(object):
         """
         listing = []
         for info_hash in self._torrents_pool.iterkeys():
-            listing.append(self.get_torrent_info(info_hash))
+            torrent_info = self.get_torrent_info(info_hash)
+            if torrent_info is not None:
+                listing.append(torrent_info)
         return listing
 
     def pause_all(self, graceful_pause=1):
