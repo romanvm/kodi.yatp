@@ -269,7 +269,7 @@ class Addon(object):
             value = str(value)
         self._addon.setSetting(id_, value)
 
-    def log(self, message, level=xbmc.LOGNOTICE):
+    def log(self, message, level=xbmc.LOGDEBUG):
         """
         Add message to Kodi log starting with Addon ID
 
