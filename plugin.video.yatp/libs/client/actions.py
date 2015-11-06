@@ -27,7 +27,7 @@ def _play(path):
     """
     plugin.log('Path to play: {0}'.format(path), LOGNOTICE)
     success = True if path else False
-    return plugin.resolve_url(path, success)
+    return plugin.resolve_url(path, succeeded=success)
 
 
 def root(params):
