@@ -176,7 +176,7 @@ msgid "Torrent server host"
 msgstr ""
 
 msgctxt "#32042"
-msgid "Torrent server port"
+msgid "YATP server port"
 msgstr ""
 
 msgctxt "#32043"

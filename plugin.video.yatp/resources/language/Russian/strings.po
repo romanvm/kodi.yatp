@@ -176,8 +176,8 @@ msgid "Torrent server host"
 msgstr "Хост торрент-сервера"
 
 msgctxt "#32042"
-msgid "Torrent server port"
-msgstr "Порт торрент-сервера"
+msgid "YATP server port"
+msgstr "Порт сервера YATP"
 
 msgctxt "#32043"
 msgid "Remote mode (local torrent server isn't launched)"
