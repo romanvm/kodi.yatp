@@ -13,11 +13,13 @@ torrent-client.
 - Support for magnet links, local and remote .torrent files.
 - Support for jump/seek to arbitrary parts of the video.
 
-See [project's Wiki](https://github.com/romanvm/kodi.yatp/wiki) for more info.
+Please read [project's Wiki](https://github.com/romanvm/kodi.yatp/wiki) if you want to find out more about YATP.
 
 The plugin is avaliable in [my Kodi addons repository](https://romanvm.github.io/kodi_repo/repo/repository.romanvm/repository.romanvm-2.0.0.zip).
 
 **License:** [GPL v.3](http://www.gnu.org/licenses/gpl-3.0.en.html).
 
 The plugin includes [libtorrent](http://libtorrent.org), [Bottle](http://bottlepy.org/docs/dev/index.html)
-and [hachoir](http://hachoir3.readthedocs.org) modules which are licensed separately by their authors.
+and [hachoir](http://hachoir3.readthedocs.org) Python modules,
+and [JQuery](https://jquery.com)/[JQuery EasyUI](http://www.jeasyui.com) JavaScript libraries
+which are licensed separately by their authors.
