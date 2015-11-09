@@ -35,6 +35,8 @@ class OnScreenLabel(object):
 
     def show(self):
         if not self._is_added:
+            # Controls are added when the label is shown for the 1st time.
+            # This prevents showing a blank label on some systems.
             self._add_controls()
         self._back.setVisible(True)
         self._label.setVisible(True)

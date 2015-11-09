@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 # Module: simpleplugin
-# Author: Roman V.M.
 # Created on: 03.06.2015
-# License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
 """
 SimplePlugin micro-framework for Kodi content plugins
 
-License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
+@author: Roman Miroshnychenko aka Roman V.M.
+@license: GPL v.3 U{https://www.gnu.org/copyleft/gpl.html}
 """
 
 import os
@@ -33,20 +32,22 @@ class Storage(object):
 
     It is designed as a context manager and better be used
     with 'with' statement.
-    Usage:
 
-    with Storage('c:\\storage\\') as storage:
-        storage[key1] = value1
-        value2 = storage[key2]
+    Usage::
 
+        with Storage('c:\\storage\\') as storage
+            storage[key1] = value1
+            value2 = storage[key2]
     """
     def __init__(self, storage_dir, filename='storage.pcl'):
         """
         Class constructor
 
-        :param storage_dir: str - directory for storage
-        :param filename: str - the name of a storage file
-        :return:
+        @param storage_dir: directory for storage
+        @type storage_dir: str
+        @param filename: the name of a storage file (optional)
+        @type filename: str
+        @return:
         """
         self._storage = {}
         filename = os.path.join(storage_dir, filename)
@@ -107,7 +108,7 @@ class Storage(object):
         Flush storage to disk
 
         This method invalidates a Storage instance.
-        :return:
+        @return:
         """
         self._file.seek(0)
         dump(self._storage, self._file)
@@ -124,7 +125,12 @@ class Addon(object):
     Provides access to basic addon parameters
     """
     def __init__(self, id_=''):
-        """Class constructor"""
+        """
+        Class constructor
+
+        @param id_: addon id, e.g. 'plugin.video.foo' (optional)
+        @type id_: str
+        """
         self._addon = xbmcaddon.Addon(id_)
         self._configdir = xbmc.translatePath(self._addon.getAddonInfo('profile')).decode('utf-8')
         if not os.path.exists(self._configdir):
@@ -135,8 +141,9 @@ class Addon(object):
         Get addon setting as an Addon instance attribute
 
         E.g. addon.my_setting is equal to addon.get_setting('my_setting')
-        :param item:
-        :return:
+        @param item:
+        @type item: str
+        @return:
         """
         return self.get_setting(item)
 
@@ -145,7 +152,8 @@ class Addon(object):
         """
         Kodi Addon instance that represents this Addon
 
-        :return: Addon instance
+        @return: Addon instance
+        @rtype: xbmcaddon.Addon
         """
         return self._addon
 
@@ -154,7 +162,7 @@ class Addon(object):
         """
         Addon ID
 
-        :return: str, e.g. 'plugin.video.foo'
+        @return: str, e.g. 'plugin.video.foo'
         """
         return self._addon.getAddonInfo('id')
 
@@ -163,7 +171,8 @@ class Addon(object):
         """
         Addon path
 
-        :return: str
+        @return:
+        @rtype: str
         """
         return self._addon.getAddonInfo('path').decode('utf-8')
 
@@ -172,7 +181,8 @@ class Addon(object):
         """
         Addon icon
 
-        :return: str
+        @return:
+        @rtype: str
         """
         icon = os.path.join(self.path, 'icon.png')
         if os.path.exists(icon):
@@ -185,7 +195,8 @@ class Addon(object):
         """
         Addon fanart
 
-        :return: str
+        @return:
+        @rtype: str
         """
         fanart = os.path.join(self.path, 'fanart.jpg')
         if os.path.exists(fanart):
@@ -198,7 +209,8 @@ class Addon(object):
         """
         Addon config dir
 
-        :return: str
+        @return:
+        @rtype: str
         """
         return self._configdir
 
@@ -206,8 +218,10 @@ class Addon(object):
         """
         Get localized UI string
 
-        :param id_: int - UI string ID
-        :return: str - UI string in current language
+        @param id_: the ID of UI string
+        @type id_: int
+        @return: UI string in current language
+        @rtype: unicode
         """
         return self._addon.getLocalizedString(id_).encode('utf-8')
 
@@ -218,10 +232,12 @@ class Addon(object):
         If convert=True, 'bool' settings are converted to Python bool values,
         and numeric strings to Python long or float depending on their format.
 
-        :param id_: str - setting ID
-        :param convert: bool - try to guess and convert the setting to an appropriate type
+        @param id_: setting ID
+        @type id_: str
+        @param convert: try to guess and convert the setting to an appropriate type
             E.g. '1.0' will be converted to float 1.0 number, 'true' to True and so on.
-        :return: setting value
+        @type convert: bool
+        @return: setting value
         """
         setting = self._addon.getSetting(id_)
         if convert:
@@ -242,9 +258,10 @@ class Addon(object):
         Python bool type are converted to 'true' or 'false'
         Non-string/non-unicode values are converted to strings.
 
-        :param id_: str - setting ID
-        :param value: - setting value
-        :return:
+        @param id_: setting ID
+        @type id_: str
+        @param value: setting value
+        @return:
         """
         if isinstance(value, bool):
             value = 'true' if value else 'false'
@@ -256,9 +273,11 @@ class Addon(object):
         """
         Add message to Kodi log starting with Addon ID
 
-        :param message: str
-        :param level: int - log level
-        :return:
+        @param message: message to be written into Kodi log
+        @type message: str
+        @param level: log level. xbmc module provides the necessary symbolic constants.
+        @type level: int
+        @return:
         """
         xbmc.log('{0}: {1}'.format(self.id, message), level)
 
@@ -267,14 +286,17 @@ class Addon(object):
         Get a persistent Storage instance for storing arbitrary values between addon calls.
 
         A Storage instance can be used as a context manager.
-        Example:
-        =====================================
-        with plugin.get_storage() as storage:
-            storage['param1'] = value1
-            value2 = storage['param2']
-        ...
-        =====================================
+
+        Example::
+
+            with plugin.get_storage() as storage:
+                storage['param1'] = value1
+                value2 = storage['param2']
+
         Note that after exiting 'with' block a Storage instance is invalidated.
+        @param filename: the name of a storage file (optional)
+        @type filename: str
+        @return: L{Storage} object
         """
         return Storage(self.config_dir, filename)
 
@@ -283,15 +305,17 @@ class Addon(object):
         Cached decorator
 
         Used to cache function return data
-        Usage:
 
-        @cached(30)
-        def my_func(*args, **kwargs):
-            ...
-            return value
+        Usage::
 
-        :param duration: int - cache time in min, negative value - cache indefinitely
-        :return:
+            @cached(30)
+            def my_func(*args, **kwargs):
+                # Do some stuff
+                return value
+
+        @param duration: cache time in min, negative value - cache indefinitely
+        @type duration: int
+        @return:
         """
         def outer_wrapper(func):
             def inner_wrapper(*args, **kwargs):
@@ -321,30 +345,31 @@ class Plugin(Addon):
     A Plugin instance must have at least one action for its root section
     mapped to 'root' string.
 
-    Minimal example:
-    ===============================
-    from simpleplugin import Plugin
+    Minimal example::
 
-    plugin = Plugin()
+        from simpleplugin import Plugin
 
-    def root_action(params):
-        return [{'label': 'Foo',
-                'url': plugin.get_url(action='some_action', param='Foo')},
-                {'label': 'Bar',
-                'url': plugin.get_url(action='some_action', param='Bar'}]
+        plugin = Plugin()
 
-    def some_action(params):
-        return [{'label': param['param']}]
+        def root_action(params):
+            return [{'label': 'Foo',
+                    'url': plugin.get_url(action='some_action', param='Foo')},
+                    {'label': 'Bar',
+                    'url': plugin.get_url(action='some_action', param='Bar'}]
 
-    plugin.actions['root'] = root_action  # Mandatory item!
-    plugin.actions['some_action'] = some_action
-    plugin.run()
-    ==============================
+        def some_action(params):
+            return [{'label': param['param']}]
 
-    IMPORTANT: You need to map function or method objects without round brackets!
-    E.g.
-    plugin.actions['some_action'] = some_action  # Correct :)
-    plugin.actions['some_action'] = some_action()  # Wrong! :(
+        plugin.actions['root'] = root_action  # Mandatory item!
+        plugin.actions['some_action'] = some_action
+        plugin.run()
+
+    B{IMPORTANT}: You need to map function or method objects without round brackets!
+
+    E.g.::
+
+        plugin.actions['some_action'] = some_action  # Correct :)
+        plugin.actions['some_action'] = some_action()  # Wrong! :(
 
     An action callable receives 1 parameter - params.
     params is a dict containing plugin call parameters (including action string)
@@ -352,80 +377,99 @@ class Plugin(Addon):
     either a list of dictionaries representing Kodi virtual directory items
     or a resolved playable path (str or unicode) for Kodi to play.
 
-    Examples:
-    ==============================
-    def list_action(params):
-        listing = get_listing(params)  # Some external function to create listing
-        return listing
-    ==============================
-    def play_action(params):
-        path = get_path(params)  # Some external function to get a playable path
-        return path
-    ==============================
+    Example 1::
+
+        def list_action(params):
+            listing = get_listing(params)  # Some external function to create listing
+            return listing
+
+    Example 2::
+
+        def play_action(params):
+            path = get_path(params)  # Some external function to get a playable path
+            return path
+
     listing is a Python list of dict items.
 
     Each dict item can contain the following properties:
+        - label - item's label (default: '').
+        - label2 - item's label2 (default: '').
+        - thumb - item's thumbnail (default: '').
+        - icon - item's icon (default: '').
+        - path - item's path (default: '').
+        - fanart - item's fanart (optional).
+        - art - a dict containing all item's graphic
+            (see U{ListItem.setArt<http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html#setArt>}
+            for more info) - optional.
+        - stream_info - a dictionary of C{{stream_type: {param: value}}} items (see
+            U{ListItem.addStreamInfo
+            <http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html#addStreamInfo>}) - optional.
+        - info -  a dictionary of C{{media: {param: value}}} items
+            (see U{ListItem.setInfo<http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html#setInfo>}) -
+            optional
+        - context_menu - a list or a tuple. A list must contain 2-item tuples C{('Menu label', 'Action')}.
+            If a list is provided then the items from the tuples are added to the item's context menu.
+            Alternatively, context_menu can be a 2-item tuple. The 1-st item is a list as described above,
+            and the 2-nd is a boolean value for replacing items. If C{True}, context menu will contain only
+            the provided items, if False - the items are added to an existing context menu.
+            context_menu param is optional.
+        - url - a callback URL for this list item.
+        - is_playable - if C{True}, then this item is playable and must return a playable path or
+            be resolved via plugin.resolve_url() (default: C{False}).
+        - is_folder - if C{True} then the item will open a lower-level sub-listing. if C{False},
+            the item either is a playable media or a general-purpose script
+            which neither creates a virtual folder nor points to a playable media (default: C{True}).
+            if is_playable is set to C{True}, then is_folder value automatically assumed to be C{False}.
+        - subtitles - the list of paths to subtitle files (optional).
+        - mime - item's mime type (optional).
+        - list_item - an U{xbmcgui.ListItem<http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html>}
+            instance (optional). It is used when you want to set all list item properties by yourself.
+            If C{'list_item'} property is present, all other properties,
+            except for C{'url'} and C{'is_folder'}, are ignored.
 
-    label - item's label (default: '').
-    label2 - item's label2 (default: '').
-    thumb - item's thumbnail (default: '').
-    icon - item's icon (default: '').
-    fanart - item's fanart (optional).
-    art - a dict containing all item's graphic (see ListItem.setArt for more info) - optional.
-    stream_info - a dictionary of {stream_type: {param: value}} items (see ListItem.addStreamInfo) - optional.
-    info -  a dictionary of {media: {param: value}} items (see ListItem.setInfo) - optional
-    context_menu - a list or a tuple. A list must contain 2-item tuples ('Menu label', 'Action').
-        If a list is provided then the items from the tuples are added to the item's context menu.
-        Alternatively, context_menu can be a 2-item tuple. The 1-st item is a list as described above,
-        and the 2-nd is a boolean value for replacing items. If True, context menu will contain only
-        the provided items, if False - the items are added to an existing context menu.
-        context_menu param is optional.
-    url - a callback URL for this list item.
-    is_playable - if True, then this item is playable and must return a playable path or
-        be resolved via plugin.resolve_url() (default: False).
-    is_folder - if True then the item will open a lower-level sub-listing. if False,
-        the item either is a playable media or a general-purpose script
-        which neither creates a virtual folder nor points to a playable media (default: True).
-        if is_playable is set to True, then is_folder value automatically assumed to be False.
-    subtitles - the list of paths to subtitle files (optional).
-    mime - item's mime type (optional).
-    Example:
-    listing = [{    'label': 'Label',
-                    'label2': 'Label 2',
-                    'thumb': 'thumb.png',
-                    'icon': 'icon.png',
-                    'fanart': 'fanart.jpg',
-                    'art': {'clearart': 'clearart.png'},
-                    'stream_info': {'video': {'codec': 'h264', 'duration': 1200},
-                                    'audio': {'codec': 'ac3', 'language': 'en'}},
-                    'info': {'video': {'genre': 'Comedy', 'year': 2005}},
-                    'context_menu': ([('Menu Item', 'Action')], True),
-                    'url': 'plugin:/plugin.video.test/?action=play',
-                    'is_playable': True,
-                    'is_folder': False,
-                    'subtitles': ['/path/to/subtitles.en.srt', '/path/to/subtitles.uk.srt'],
-                    'mime': 'video/mp4'
-                    }]
+    Example::
+
+        listing = [{    'label': 'Label',
+                        'label2': 'Label 2',
+                        'thumb': 'thumb.png',
+                        'icon': 'icon.png',
+                        'fanart': 'fanart.jpg',
+                        'art': {'clearart': 'clearart.png'},
+                        'stream_info': {'video': {'codec': 'h264', 'duration': 1200},
+                                        'audio': {'codec': 'ac3', 'language': 'en'}},
+                        'info': {'video': {'genre': 'Comedy', 'year': 2005}},
+                        'context_menu': ([('Menu Item', 'Action')], True),
+                        'url': 'plugin:/plugin.video.test/?action=play',
+                        'is_playable': True,
+                        'is_folder': False,
+                        'subtitles': ['/path/to/subtitles.en.srt', '/path/to/subtitles.uk.srt'],
+                        'mime': 'video/mp4'
+                        }]
 
     Alternatively, an action callable can use Plugin.create_listing() and Plugin.resolve_url()
     static methods to set additional parameters for Kodi.
 
-    Examples:
-    ==============================
-    def list_action(params):
-        listing = get_listing(params)  # Some external function to create listing
-        return Plugin.create_listing(listing, sort_methods=(2, 10, 17), view_mode=500)
-    ==============================
-    def play_action(params):
-        path = get_path(params)  # Some external function to get a playable path
-        return Plugin.resolve_url(path, succeeded=True)
-    ==============================
+    Example 3::
+
+        def list_action(params):
+            listing = get_listing(params)  # Some external function to create listing
+            return Plugin.create_listing(listing, sort_methods=(2, 10, 17), view_mode=500)
+
+    Example 4::
+
+        def play_action(params):
+            path = get_path(params)  # Some external function to get a playable path
+            return Plugin.resolve_url(path, succeeded=True)
 
     If an action callable performs any actions other than creating a listing or
     resolving a playable URL, it must return None.
     """
     def __init__(self, id_=''):
-        """Class constructor"""
+        """
+        Class constructor
+        @param id_: plugin's id, e.g. 'plugin.video.foo' (optional)
+        @type id_: str
+        """
         super(Plugin, self).__init__(id_)
         self._url = 'plugin://{0}/'.format(self.id)
         self._handle = None
@@ -436,8 +480,10 @@ class Plugin(Addon):
         """
         Convert a URL-encoded paramstring to a Python dict
 
-        :param paramstring: str
-        :return: dict
+        @param paramstring: URL-encoded paramstring
+        @type paramstring: str
+        @return: parsed paramstring
+        @rtype: dict
         """
         params = parse_qs(paramstring)
         for key, value in params.iteritems():
@@ -454,9 +500,11 @@ class Plugin(Addon):
         if 'action' parameter is missing, then the plugin root action is called
         If the action is not added to Plugin actions, PluginError will be raised.
 
-        :param plugin_url: str - a plugin URL with trailing /
-        :param kwargs: pairs if key=value items
-        :return: str - a full plugin callback URL
+        @param plugin_url: plugin URL with trailing / (optional)
+        @type plugin_url: str
+        @param kwargs: pairs if key=value items
+        @return: a full plugin callback URL
+        @rtype: str
         """
         url = plugin_url or self._url
         if kwargs:
@@ -467,9 +515,12 @@ class Plugin(Addon):
         """
         Run plugin
 
-        :param category: str - plugin sub-category, e.g. 'Comedy'.
-            see xbmcplugin.setPluginCategory() for more info
-        :return:
+        @param category: str - plugin sub-category, e.g. 'Comedy'.
+            see U{xbmcplugin.setPluginCategory
+            <http://romanvm.github.io/xbmcstubs/docs/xbmcplugin-module.html#setPluginCategory>}
+            for more info
+        @type category: str
+        @return:
         """
         self._handle = int(sys.argv[1])
         if category:
@@ -498,78 +549,114 @@ class Plugin(Addon):
 
     @staticmethod
     def create_listing(listing, succeeded=True, update_listing=False, cache_to_disk=False, sort_methods=None,
-                       view_mode=50, content=None):
+                       view_mode=None, content=None):
         """
         Create and return a context dict for a virtual folder listing
 
-        :param listing: list - the list of the plugin virtual folder items
-        :param succeeded: bool - if False Kodi won't open a new listing and stays on the current level.
-        :param update_listing: bool - if True, Kodi won't open a sub-listing but refresh the current one.
-        :param cache_to_disk: bool
-        :param sort_methods: tuple - the list of integer constants representing virtual folder sort methods.
-        :param view_mode: int - a numeric code for a skin view mode.
+        @param listing: the list of the plugin virtual folder items
+        @type listing: list
+        @param succeeded: if False Kodi won't open a new listing and stays on the current level.
+        @type succeeded: bool
+        @param update_listing: if True, Kodi won't open a sub-listing but refresh the current one.
+        @type update_listing: bool
+        @param cache_to_disk: cache this view to disk.
+        @type cache_to_disk: bool
+        @param sort_methods: the list of integer constants representing virtual folder sort methods.
+        @type sort_methods: tuple
+        @param view_mode: a numeric code for a skin view mode.
             View mode codes are different in different skins except for 50 (basic listing).
-        :param content: string - current plugin content, e.g. 'movies' or 'episodes'.
-            See xbmcplugin.setContent() for more info.
-        :return: dict - context dictionary containing necessary parameters
+        @type view_mode: int
+        @param content: string - current plugin content, e.g. 'movies' or 'episodes'.
+            See U{xbmcplugin.setContent()
+            <http://romanvm.github.io/xbmcstubs/docs/xbmcplugin-module.html#setContent>}
+            for more info.
+        @type content: str
+        @return: context dictionary containing necessary parameters
             to create virtual folder listing in Kodi UI.
+        @rtype: dict
         """
         return {'listing': listing, 'succeeded': succeeded, 'update_listing': update_listing,
                 'cache_to_disk': cache_to_disk, 'sort_methods': sort_methods, 'view_mode': view_mode,
                 'content': content}
 
     @staticmethod
-    def resolve_url(path, succeeded=True):
+    def resolve_url(path='', play_item=None, succeeded=True):
         """
         Create and return a context dict to resolve a playable URL
 
-        :param path: string or unicode - the path to a playable media.
-        :param succeeded: bool - if False, Kodi won't play anything
-        :return: dict - context dictionary containing necessary parameters
+        @param path: the path to a playable media.
+        @type path: str or unicode
+        @param play_item: a dict of item properties as described in the class docstring.
+            It allows to set additional properties for the item being played, like graphics, metadata etc.
+            if C{play_item} parameter is present, then C{path} value is ignored, and the path must be set via
+            C{'path'} property of a C{play_item} dict.
+        @type play_item: dict
+        @param succeeded: if False, Kodi won't play anything
+        @type succeeded: bool
+        @return: context dictionary containing necessary parameters
             for Kodi to play the selected media.
+        @rtype: dict
         """
-        return {'path': path, 'succeeded': succeeded}
+        return {'path': path, 'play_item': play_item, 'succeeded': succeeded}
+
+    @staticmethod
+    def create_list_item(item):
+        """
+        Create an xbmcgui.ListItem instance from an item dict
+
+        @param item: a dict of ListItem properties
+        @type item: dict
+        @return: U{xbmcgui.ListItem<http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html>} instance
+        @rtype: xbmcgui.ListItem
+        """
+        list_item = xbmcgui.ListItem(label=item.get('label', ''),
+                                     label2=item.get('label2', ''),
+                                     thumbnailImage=item.get('thumb', ''),
+                                     iconImage=item.get('icon', ''),
+                                     path=item.get('path', ''))
+        if item.get('fanart'):
+            list_item.setProperty('fanart_image', item['fanart'])
+        if item.get('art'):
+            list_item.setArt(item['art'])
+        if item.get('stream_info'):
+            for stream, stream_info in item['stream_info'].iteritems():
+                list_item.addStreamInfo(stream, stream_info)
+        if item.get('info'):
+            for media, info in item['info'].iteritems():
+                list_item.setInfo(media, info)
+        if item.get('context_menu') and isinstance(item['context_menu'], list):
+            list_item.addContextMenuItems(item['context_menu'])
+        elif item.get('context_menu') and isinstance(item['context_menu'], tuple):
+            list_item.addContextMenuItems(item['context_menu'][0], item['context_menu'][1])
+        if item.get('subtitles'):
+            list_item.setSubtitles(item['subtitles'])
+        if item.get('mime'):
+            list_item.setMimeType(item['mime'])
+        return list_item
 
     def _create_listing(self, context):
         """
         Create a virtual folder listing
 
-        :param context: dict - context dictionary
-        :return:
-
+        @param context: context dictionary
+        @type context: dict
+        @return:
         """
         self.log('Creating listing from {0}'.format(str(context)), xbmc.LOGDEBUG)
         if context.get('content'):
-            xbmcplugin.setContent(self._handle, context['content'])
+            xbmcplugin.setContent(self._handle, context['content'])  # This must be at the beginning
         listing = []
         for item in context['listing']:
-            list_item = xbmcgui.ListItem(label=item.get('label', ''),
-                                         label2=item.get('label2', ''),
-                                         thumbnailImage=item.get('thumb', ''),
-                                         iconImage=item.get('icon', ''))
-            if item.get('fanart'):
-                list_item.setProperty('fanart_image', item['fanart'])
-            if item.get('art'):
-                list_item.setArt(item['art'])
-            if item.get('stream_info'):
-                for stream, stream_info in item['stream_info'].iteritems():
-                    list_item.addStreamInfo(stream, stream_info)
-            if item.get('info'):
-                for media, info in item['info'].iteritems():
-                    list_item.setInfo(media, info)
-            if item.get('context_menu') and isinstance(item['context_menu'], list):
-                list_item.addContextMenuItems(item['context_menu'])
-            elif item.get('context_menu') and isinstance(item['context_menu'], tuple):
-                list_item.addContextMenuItems(item['context_menu'][0], item['context_menu'][1])
-            if item.get('is_playable'):
-                list_item.setProperty('IsPlayable', 'true')
-                is_folder = False
-            else:
+            if item.get('list_item') is not None:
+                list_item = item['list_item']
                 is_folder = item.get('is_folder', True)
-            if item.get('subtitles'):
-                list_item.setSubtitles(item['subtitles'])
-            if item.get('mime'):
-                list_item.setMimeType(item['mime'])
+            else:
+                list_item = self.create_list_item(item)
+                if item.get('is_playable'):
+                    list_item.setProperty('IsPlayable', 'true')
+                    is_folder = False
+                else:
+                    is_folder = item.get('is_folder', True)
             listing.append((item['url'], list_item, is_folder))
         xbmcplugin.addDirectoryItems(self._handle, listing, len(listing))
         if context['sort_methods'] is not None:
@@ -578,16 +665,20 @@ class Plugin(Addon):
                                   context['succeeded'],
                                   context['update_listing'],
                                   context['cache_to_disk'])
-        if context['view_mode'] != 50:
+        if context['view_mode'] is not None:
             xbmc.executebuiltin('Container.SetViewMode({0})'.format(context['view_mode']))
 
     def _resolve_url(self, context):
         """
         Resolve a playable URL
 
-        :param context: dict
-        :return:
+        @param context: context dictionary
+        @type context: dict
+        @return:
         """
         self.log('Resolving URL from {0}'.format(str(context)), xbmc.LOGDEBUG)
-        list_item = xbmcgui.ListItem(path=context['path'])
+        if context.get('play_item') is None:
+            list_item = xbmcgui.ListItem(path=context['path'])
+        else:
+            list_item = self.create_list_item(context['play_item'])
         xbmcplugin.setResolvedUrl(self._handle, context['succeeded'], list_item)

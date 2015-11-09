@@ -104,9 +104,9 @@ def json_rpc():
     reply = {'jsonrpc': '2.0', 'id': data.get('id', '1')}
     try:
         reply['result'] = getattr(methods, data['method'])(torrent_client, data.get('params'))
-    except Exception, ex:
+    except:
         addon.log(format_exc(), xbmc.LOGERROR)
-        reply['error'] = '{0}: {1}'.format(str(ex.__class__)[7:-2], format_exc())
+        reply['error'] = format_exc()
     addon.log('***** JSON response *****')
     addon.log(str(reply))
     return reply
@@ -121,8 +121,6 @@ def get_torrents():
     """
     response.content_type = 'application/json'
     reply = dumps(torrent_client.get_all_torrents_info())
-    # if DEBUG:
-    #     addon.log(reply)
     return reply
 
 
