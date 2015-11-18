@@ -188,7 +188,7 @@ def stream_file(path):
         headers['Content-Length'] = str(content_length)
         streamed_file = torrent_client.streamed_file_data
         if (str(streamed_file['torr_handle'].status().state) == 'seeding'
-            or content_length < streamed_file['piece_length'] * streamed_file['end_offset']):
+            or content_length < streamed_file['piece_length'] * streamed_file['end_offset'] + 1):
             addon.log('Torrent is being seeded or the end piece requested.')
             # If the file is beeing seeded or Kodi checks the end piece,
             # then serve the file via Bottle.
