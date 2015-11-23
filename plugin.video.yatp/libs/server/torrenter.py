@@ -627,8 +627,12 @@ class Streamer(TorrenterPersistent):
         if torr_handle.status().paused:
             torr_handle.resume()
         torr_handle.piece_priority(start_piece, 7)
-        while not torr_handle.have_piece(start_piece):
+        while not self._abort_buffering.is_set():
             time.sleep(0.2)
+            if torr_handle.have_piece(start_piece):
+                break
+        else:
+            return
         buffer_length, end_offset = self.calculate_buffers(os.path.join(addon.download_dir,
                                                                     self.last_added_torrent['files'][file_index][0]),
                                                            buffer_duration,
@@ -667,6 +671,7 @@ class Streamer(TorrenterPersistent):
             if not self._abort_buffering.is_set():
                 torr_handle.flush_cache()
                 self._buffering_complete.set()
+                return
         else:
             self._buffering_complete.set()
 
@@ -751,7 +756,7 @@ class Streamer(TorrenterPersistent):
         if duration:
             buffer_length = int(ceil(buffer_duration * num_pieces / duration))
             # For AVI files Kodi requests bigger chunks at the end of a file
-            end_offset = int(round(4500000 / piece_length, 0)) if os.path.splitext(filename)[1].lower() == '.avi' else 1
+            end_offset = int(round(5500000 / piece_length, 0)) if os.path.splitext(filename)[1].lower() == '.avi' else 1
         else:
             # Fallback if hachoir cannot parse the file
             end_offset = int(round(4500000 / piece_length, 0))
