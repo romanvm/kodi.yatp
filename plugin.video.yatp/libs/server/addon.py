@@ -8,6 +8,7 @@ Auxiliary module to access Kodi addon parameters
 """
 
 import os
+import sys
 import xbmc
 from libs import simpleplugin
 
@@ -16,8 +17,9 @@ class Addon(simpleplugin.Addon):
     """Helper class to access addon parameters"""
     def __init__(self):
         super(Addon, self).__init__()
-        self._download_dir = (self.get_setting('download_dir').decode('utf-8') or
-                              xbmc.translatePath('special://temp').decode('utf-8'))
+        self._download_dir = self.get_setting('download_dir') or xbmc.translatePath('special://temp')
+        if sys.platform == 'win32':
+            self._download_dir = self._download_dir.decode('utf-8')
         if not os.path.exists(self._download_dir):
             os.mkdir(self._download_dir)
 
