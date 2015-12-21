@@ -94,6 +94,9 @@ class Torrenter(object):
         self._session.add_dht_router('router.utorrent.com', 6881)
         self._session.add_dht_router('router.bitcomet.com', 6881)
         self._session.start_dht()
+        self._session.start_lsd()
+        self._session.start_upnp()
+        self._session.start_natpmp()
 
     def __del__(self):
         """
