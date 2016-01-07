@@ -176,8 +176,7 @@ class Torrenter(object):
         torr_handle = self._add_torrent(torrent, save_path, paused=paused, cookies=cookies)
         info_hash = str(torr_handle.info_hash())
         result = {'name': torr_handle.name().decode('utf-8'), 'info_hash': info_hash}
-        torr_info = torr_handle.get_torrent_info()
-        result['files'] = [[file_.path.decode('utf-8'), file_.size] for file_ in torr_info.files()]
+        result['files'] = self.get_files(info_hash)
         self._last_added_torrent.contents = result
         self._torrent_added.set()
 
@@ -383,6 +382,16 @@ class Torrenter(object):
         torr_handle = self._torrents_pool[info_hash]
         [torr_handle.piece_priority(piece, priority) for piece in xrange(torr_handle.get_torrent_info().num_pieces())]
 
+    def get_files(self, info_hash):
+        """
+        Get the list of videofiles in a torrent
+
+        :param info_hash:
+        :return: a list of tuples (path, size)
+        """
+        torr_info = self._get_torrent_info(info_hash)
+        return [[file_.path.decode('utf-8'), file_.size] for file_ in torr_info.files()]
+
     @property
     def is_torrent_added(self):
         """Torrent added flag"""
@@ -539,10 +548,13 @@ class TorrenterPersistent(Torrenter):
         :param filepath: str
         :return:
         """
-        with open(filepath, mode='rb') as m_file:
-            metadata = pickle.load(m_file)
-        torrent = os.path.join(self._resume_dir, metadata['info_hash'] + '.torrent')
-        self._add_torrent(torrent, metadata['save_path'], metadata['resume_data'])
+        try:
+            with open(filepath, mode='rb') as m_file:
+                metadata = pickle.load(m_file)
+            torrent = os.path.join(self._resume_dir, metadata['info_hash'] + '.torrent')
+            self._add_torrent(torrent, metadata['save_path'], metadata['resume_data'])
+        except (IOError, EOFError, pickle.PickleError):
+            pass
 
     def _load_torrents(self):
         """

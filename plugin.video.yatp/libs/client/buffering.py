@@ -21,15 +21,15 @@ media_url = 'http://127.0.0.1:{0}/stream/'.format(addon.server_port)
 MEDIAFILES = ('.avi', '.mkv', '.mp4', '.ts', '.m2ts', '.mov')
 
 
-def get_videofiles(torrent_data):
+def get_videofiles(files):
     """
-    Get a sorted list of videofiles from a torrent
+    Get a sorted list of videofiles from all files in a torrent
 
-    @param torrent_data:
+    @param files:
     @return: the sorted list of 3-item tuples (file_index, file_name, file_size)
     """
     videofiles = []
-    for file_index, file_ in enumerate(torrent_data['files']):
+    for file_index, file_ in enumerate(files):
         if os.path.splitext(file_[0].lower())[1] in MEDIAFILES:
             videofiles.append((file_index, os.path.basename(file_[0]), file_[1]))
     videofiles = sorted(videofiles, key=lambda i: i[1])
@@ -64,7 +64,7 @@ def select_file(torrent_data, dialog=False):
     @param dialog: show a dialog for selecting a videofile
     @return:
     """
-    videofiles = get_videofiles(torrent_data)
+    videofiles = get_videofiles(torrent_data['files'])
     if videofiles:
         if len(videofiles) > 1 and dialog:
             # Show selection dialog

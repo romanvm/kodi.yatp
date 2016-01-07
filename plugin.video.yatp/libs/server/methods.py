@@ -286,3 +286,14 @@ def restore_downloads(torrent_client, params):
     """
     for info_hash in params['info_hashes']:
         torrent_client.set_piece_priorities(info_hash, 1)
+    return 'OK'
+
+
+def get_files(torrent_client, params):
+    """
+    Get the list of files in a torrent
+
+    params['info_hash']: str - torrent info-hash
+    :return: the list of lists [path, size]
+    """
+    return torrent_client.get_files(params['info_hash'])

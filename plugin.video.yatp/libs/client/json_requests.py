@@ -63,7 +63,7 @@ def remove_torrent(info_hash, delete_files):
 def download_torrent(torrent, download_dir):
     _request({'method': 'add_torrent', 'params': {'torrent': torrent,
                                                   'save_path': download_dir,
-                                                  'zero_priorities': False}})
+                                                  'paused': False}})
 
 
 def get_all_torrent_info():
@@ -88,3 +88,11 @@ def resume_all():
 
 def get_buffer_percent():
     return _request({'method': 'get_buffer_percent'})
+
+
+def get_files(info_hash):
+    return _request({'method': 'get_files', 'params': {'info_hash': info_hash}})
+
+
+def restore_finished(info_hash):
+    _request({'method': 'restore_downloads', 'params': {'info_hashes': [info_hash]}})

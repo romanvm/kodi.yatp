@@ -266,3 +266,11 @@ msgstr ""
 msgctxt "#32064"
 msgid "Enable seeding limits (requires restart)"
 msgstr ""
+
+msgctxt "#32065"
+msgid "Show info"
+msgstr ""
+
+msgctxt "#32066"
+msgid "Restore download"
+msgstr ""
