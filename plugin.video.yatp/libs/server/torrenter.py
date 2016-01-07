@@ -18,8 +18,11 @@ import datetime
 import platform
 import cPickle as pickle
 from math import ceil
+from traceback import format_exc
+from contextlib import closing
 from requests import get
 import xbmc
+import xbmcvfs
 from addon import Addon
 from utilities import get_duration
 
@@ -204,9 +207,11 @@ class Torrenter(object):
             add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(torr_file))
         else:
             try:
-                add_torrent_params['ti'] = libtorrent.torrent_info(os.path.abspath(torrent))
-            except RuntimeError:
-                raise TorrenterError('Invalid path to the .torrent file!')
+                with closing(xbmcvfs.File(torrent)) as file_obj:
+                    add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(file_obj.read()))
+            except:
+                addon.log(format_exc(), xbmc.LOGERROR)
+                raise TorrenterError('Error when adding torrent: {0}!'.format(torrent))
         torr_handle = self._session.add_torrent(add_torrent_params)
         while not torr_handle.has_metadata():  # Wait until torrent metadata are populated
             time.sleep(0.1)
@@ -616,7 +621,8 @@ class Streamer(TorrenterPersistent):
         self.abort_buffering()
         super(Streamer, self).__del__()
 
-    def buffer_file_async(self, file_index, buffer_duration, sliding_window_length, default_buffer_size):
+    def buffer_file_async(self, file_index, buffer_duration, sliding_window_length, default_buffer_size,
+                          info_hash=None):
         """
         Force sequential download of file for video playback.
 
@@ -630,16 +636,18 @@ class Streamer(TorrenterPersistent):
         :param buffer_duration: int - buffer duration in s
         :param sliding_window_length: int - the length of a sliding window in pieces
         :param default_buffer_size: int - fallback buffer size if a video cannot be parsed by hachoir
+        :param info_hash: torrent's info-hash (optional)
         :return:
         """
         self._buffer_file_thread = threading.Thread(target=self._buffer_file, args=(file_index,
                                                                                     buffer_duration,
                                                                                     sliding_window_length,
-                                                                                    default_buffer_size))
+                                                                                    default_buffer_size,
+                                                                                    info_hash))
         self._buffer_file_thread.daemon = True
         self._buffer_file_thread.start()
 
-    def _buffer_file(self, file_index, buffer_duration, sliding_window_length, default_buffer_size):
+    def _buffer_file(self, file_index, buffer_duration, sliding_window_length, default_buffer_size, info_hash=None):
         """
         Force sequential download of file for video playback.
 
@@ -649,15 +657,19 @@ class Streamer(TorrenterPersistent):
         :param buffer_duration: int - buffer duration in s
         :param sliding_window_length: int - the length of a sliding window in pieces
         :param default_buffer_size: int - fallback buffer size if a video cannot be parsed by hachoir
+        :param info_hash: torrent's info-hash (optional)
         :return:
         """
-        if file_index >= len(self.last_added_torrent['files']) or file_index < 0:
+        if info_hash is None:
+            info_hash = self.last_added_torrent['info_hash']
+        files = self.get_files(info_hash)
+        if file_index >= len(files) or file_index < 0:
             raise IndexError('Invalid file index: {0}!'.format(file_index))
         # Clear flags
         self._buffering_complete.clear()
         self._abort_buffering.clear()
         self._buffer_percent.contents = 0
-        torr_handle = self._torrents_pool[self.last_added_torrent['info_hash']]
+        torr_handle = self._torrents_pool[info_hash]
         torr_info = torr_handle.get_torrent_info()
         # Pick the file to be streamed from the torrent files
         file_entry = torr_info.files()[file_index]
@@ -858,6 +870,7 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
     If some piece is not downloaded, the function prioritizes it
     and then waits until it is downloaded.
 
+    :param file_: file object to be server.
     :param byte_position: the start byte
     :param torrent_handle: streamed torrent's handle
     :param start_piece: file's start piece

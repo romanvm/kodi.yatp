@@ -169,12 +169,15 @@ def buffer_file(torrent_client, params):
 
     The torrent must be already added via add_torrent method!
     params['file_index']: int - the index of the file to be buffered
+    params['info_hash']: str - the the torrent info hash (optional).
+    If info_hash is missing, a file from the last added torrent will be buffered.
     @return: 'OK'
     """
     torrent_client.buffer_file_async(params['file_index'],
                                      addon.buffer_duration,
                                      addon.sliding_window_length,
-                                     addon.default_buffer_size)
+                                     addon.default_buffer_size,
+                                     params.get('info_hash'))
     return 'OK'
 
 

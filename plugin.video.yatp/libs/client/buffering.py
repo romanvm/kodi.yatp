@@ -84,21 +84,22 @@ def select_file(torrent_data, dialog=False):
         return None
 
 
-def stream_torrent(file_index):
+def stream_torrent(file_index, info_hash):
     """
     Stream a videofile from torrent
 
-    @param file_index:
-    @return:
+    :param file_index:
+    :param info_hash:
+    :return:
     """
-    torrent_data = jsonrq.get_last_added_torrent()
-    if file_index >= len(torrent_data['files']) or file_index < 0:
+    files = jsonrq.get_files(info_hash)
+    if file_index >= len(files) or file_index < 0:
         raise IndexError('File index {0} is out of range!'.format(file_index))
     progress_dialog = xbmcgui.DialogProgress()
     progress_dialog.create(string(32014))
-    jsonrq.buffer_file(file_index)
+    jsonrq.buffer_file(file_index, info_hash)
     while not (progress_dialog.iscanceled() or jsonrq.check_buffering_complete()):
-        torrent_info = jsonrq.get_torrent_info(torrent_data['info_hash'])
+        torrent_info = jsonrq.get_torrent_info(info_hash)
         progress_dialog.update(jsonrq.get_buffer_percent(),
                                string(32018).format(torrent_info['total_download']),
                                string(32019).format(torrent_info['dl_speed']),
@@ -106,7 +107,7 @@ def stream_torrent(file_index):
         time.sleep(1.0)
     if not progress_dialog.iscanceled():
         progress_dialog.close()
-        return media_url + quote(torrent_data['files'][file_index][0].replace('\\', '/').encode('utf-8'))
+        return media_url + quote(files[file_index][0].replace('\\', '/').encode('utf-8'))
     else:
         jsonrq.abort_buffering()
         return ''

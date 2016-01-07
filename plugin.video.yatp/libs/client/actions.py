@@ -82,11 +82,12 @@ def play_file(params):
     """
     Stream a file from torrent by its index
 
-    The torrent must be already added via JSON-RPC!
+    The torrent must be already added to the session!
+
     @param params:
     @return:
     """
-    return _play(stream_torrent(int(params['file_index'])))
+    return _play(stream_torrent(int(params['file_index']), params['info_hash']))
 
 
 def download_torrent(params):

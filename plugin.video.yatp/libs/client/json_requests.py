@@ -40,8 +40,8 @@ def get_last_added_torrent():
     return _request({'method': 'get_last_added_torrent'})
 
 
-def buffer_file(file_index):
-    _request({'method': 'buffer_file', 'params': {'file_index': file_index}})
+def buffer_file(file_index, info_hash):
+    _request({'method': 'buffer_file', 'params': {'file_index': file_index, 'info_hash': info_hash}})
 
 
 def check_buffering_complete():
