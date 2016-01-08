@@ -7,10 +7,8 @@
 Torrent streamer WSGI server
 """
 
-import sys
 import xbmc
 from libs.server.addon import Addon
-
 
 addon = Addon()
 
