@@ -25,8 +25,8 @@ def get_videofiles(files):
     """
     Get a sorted list of videofiles from all files in a torrent
 
-    @param files:
-    @return: the sorted list of 3-item tuples (file_index, file_name, file_size)
+    :param files:
+    :return: the sorted list of 3-item tuples (file_index, file_name, file_size)
     """
     videofiles = []
     for file_index, file_ in enumerate(files):
@@ -40,8 +40,8 @@ def add_torrent(torrent):
     """
     Add torrent for downloading
 
-    @param torrent:
-    @return:
+    :param torrent:
+    :return:
     """
     jsonrq.add_torrent(torrent)
     progress_dialog = xbmcgui.DialogProgress()
@@ -60,9 +60,9 @@ def select_file(torrent_data, dialog=False):
     """
     Select a videofile from the torrent to play
 
-    @param torrent_data:
-    @param dialog: show a dialog for selecting a videofile
-    @return:
+    :param torrent_data:
+    :param dialog: show a dialog for selecting a videofile
+    :return:
     """
     videofiles = get_videofiles(torrent_data['files'])
     if videofiles:
@@ -117,8 +117,8 @@ def buffer_torrent(torrent, file_index=None):
     """
     Buffer a torrent and resolve a playable path from it
 
-    @param torrent: str - magnet link or .torrent file URL
-    @return:
+    :param torrent: str - magnet link or .torrent file URL
+    :return:
     """
     torrent_data = add_torrent(torrent)
     if torrent_data is not None:

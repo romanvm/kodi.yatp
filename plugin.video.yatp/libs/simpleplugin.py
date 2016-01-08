@@ -3,10 +3,9 @@
 # Created on: 03.06.2015
 """
 SimplePlugin micro-framework for Kodi content plugins
-
-@author: Roman Miroshnychenko aka Roman V.M.
-@license: GPL v.3 U{https://www.gnu.org/copyleft/gpl.html}
 """
+__author__ = 'Roman Miroshnychenko aka Roman V.M.'
+__license__ = 'GPL v.3'
 
 import os
 import sys
@@ -43,11 +42,11 @@ class Storage(object):
         """
         Class constructor
 
-        @param storage_dir: directory for storage
-        @type storage_dir: str
-        @param filename: the name of a storage file (optional)
-        @type filename: str
-        @return:
+        :param storage_dir: directory for storage
+        :type storage_dir: str
+        :param filename: the name of a storage file (optional)
+        :type filename: str
+        :return:
         """
         self._storage = {}
         filename = os.path.join(storage_dir, filename)
@@ -108,7 +107,7 @@ class Storage(object):
         Flush storage to disk
 
         This method invalidates a Storage instance.
-        @return:
+        :return:
         """
         self._file.seek(0)
         dump(self._storage, self._file)
@@ -128,8 +127,8 @@ class Addon(object):
         """
         Class constructor
 
-        @param id_: addon id, e.g. 'plugin.video.foo' (optional)
-        @type id_: str
+        :param id_: addon id, e.g. 'plugin.video.foo' (optional)
+        :type id_: str
         """
         self._addon = xbmcaddon.Addon(id_)
         self._configdir = xbmc.translatePath(self._addon.getAddonInfo('profile')).decode('utf-8')
@@ -141,9 +140,9 @@ class Addon(object):
         Get addon setting as an Addon instance attribute
 
         E.g. addon.my_setting is equal to addon.get_setting('my_setting')
-        @param item:
-        @type item: str
-        @return:
+        :param item:
+        :type item: str
+        :return:
         """
         return self.get_setting(item)
 
@@ -152,8 +151,8 @@ class Addon(object):
         """
         Kodi Addon instance that represents this Addon
 
-        @return: Addon instance
-        @rtype: xbmcaddon.Addon
+        :return: Addon instance
+        :rtype: xbmcaddon.Addon
         """
         return self._addon
 
@@ -162,7 +161,7 @@ class Addon(object):
         """
         Addon ID
 
-        @return: str, e.g. 'plugin.video.foo'
+        :return: str, e.g. 'plugin.video.foo'
         """
         return self._addon.getAddonInfo('id')
 
@@ -171,8 +170,8 @@ class Addon(object):
         """
         Addon path
 
-        @return:
-        @rtype: str
+        :return:
+        :rtype: str
         """
         return self._addon.getAddonInfo('path').decode('utf-8')
 
@@ -181,8 +180,8 @@ class Addon(object):
         """
         Addon icon
 
-        @return:
-        @rtype: str
+        :return:
+        :rtype: str
         """
         icon = os.path.join(self.path, 'icon.png')
         if os.path.exists(icon):
@@ -195,8 +194,8 @@ class Addon(object):
         """
         Addon fanart
 
-        @return:
-        @rtype: str
+        :return:
+        :rtype: str
         """
         fanart = os.path.join(self.path, 'fanart.jpg')
         if os.path.exists(fanart):
@@ -209,8 +208,8 @@ class Addon(object):
         """
         Addon config dir
 
-        @return:
-        @rtype: str
+        :return:
+        :rtype: str
         """
         return self._configdir
 
@@ -218,10 +217,10 @@ class Addon(object):
         """
         Get localized UI string
 
-        @param id_: the ID of UI string
-        @type id_: int
-        @return: UI string in current language
-        @rtype: unicode
+        :param id_: the ID of UI string
+        :type id_: int
+        :return: UI string in current language
+        :rtype: unicode
         """
         return self._addon.getLocalizedString(id_).encode('utf-8')
 
@@ -232,12 +231,12 @@ class Addon(object):
         If convert=True, 'bool' settings are converted to Python bool values,
         and numeric strings to Python long or float depending on their format.
 
-        @param id_: setting ID
-        @type id_: str
-        @param convert: try to guess and convert the setting to an appropriate type
+        :param id_: setting ID
+        :type id_: str
+        :param convert: try to guess and convert the setting to an appropriate type
             E.g. '1.0' will be converted to float 1.0 number, 'true' to True and so on.
-        @type convert: bool
-        @return: setting value
+        :type convert: bool
+        :return: setting value
         """
         setting = self._addon.getSetting(id_)
         if convert:
@@ -258,10 +257,10 @@ class Addon(object):
         Python bool type are converted to 'true' or 'false'
         Non-string/non-unicode values are converted to strings.
 
-        @param id_: setting ID
-        @type id_: str
-        @param value: setting value
-        @return:
+        :param id_: setting ID
+        :type id_: str
+        :param value: setting value
+        :return:
         """
         if isinstance(value, bool):
             value = 'true' if value else 'false'
@@ -273,11 +272,11 @@ class Addon(object):
         """
         Add message to Kodi log starting with Addon ID
 
-        @param message: message to be written into Kodi log
-        @type message: str
-        @param level: log level. xbmc module provides the necessary symbolic constants.
-        @type level: int
-        @return:
+        :param message: message to be written into Kodi log
+        :type message: str
+        :param level: log level. xbmc module provides the necessary symbolic constants.
+        :type level: int
+        :return:
         """
         xbmc.log('{0}: {1}'.format(self.id, message), level)
 
@@ -294,9 +293,9 @@ class Addon(object):
                 value2 = storage['param2']
 
         Note that after exiting 'with' block a Storage instance is invalidated.
-        @param filename: the name of a storage file (optional)
-        @type filename: str
-        @return: L{Storage} object
+        :param filename: the name of a storage file (optional)
+        :type filename: str
+        :return: L{Storage} object
         """
         return Storage(self.config_dir, filename)
 
@@ -313,9 +312,9 @@ class Addon(object):
                 # Do some stuff
                 return value
 
-        @param duration: cache time in min, negative value - cache indefinitely
-        @type duration: int
-        @return:
+        :param duration: cache time in min, negative value - cache indefinitely
+        :type duration: int
+        :return:
         """
         def outer_wrapper(func):
             def inner_wrapper(*args, **kwargs):
@@ -467,8 +466,8 @@ class Plugin(Addon):
     def __init__(self, id_=''):
         """
         Class constructor
-        @param id_: plugin's id, e.g. 'plugin.video.foo' (optional)
-        @type id_: str
+        :param id_: plugin's id, e.g. 'plugin.video.foo' (optional)
+        :type id_: str
         """
         super(Plugin, self).__init__(id_)
         self._url = 'plugin://{0}/'.format(self.id)
@@ -480,10 +479,10 @@ class Plugin(Addon):
         """
         Convert a URL-encoded paramstring to a Python dict
 
-        @param paramstring: URL-encoded paramstring
-        @type paramstring: str
-        @return: parsed paramstring
-        @rtype: dict
+        :param paramstring: URL-encoded paramstring
+        :type paramstring: str
+        :return: parsed paramstring
+        :rtype: dict
         """
         params = parse_qs(paramstring)
         for key, value in params.iteritems():
@@ -500,11 +499,11 @@ class Plugin(Addon):
         if 'action' parameter is missing, then the plugin root action is called
         If the action is not added to Plugin actions, PluginError will be raised.
 
-        @param plugin_url: plugin URL with trailing / (optional)
-        @type plugin_url: str
-        @param kwargs: pairs if key=value items
-        @return: a full plugin callback URL
-        @rtype: str
+        :param plugin_url: plugin URL with trailing / (optional)
+        :type plugin_url: str
+        :param kwargs: pairs if key=value items
+        :return: a full plugin callback URL
+        :rtype: str
         """
         url = plugin_url or self._url
         if kwargs:
@@ -515,12 +514,12 @@ class Plugin(Addon):
         """
         Run plugin
 
-        @param category: str - plugin sub-category, e.g. 'Comedy'.
+        :param category: str - plugin sub-category, e.g. 'Comedy'.
             see U{xbmcplugin.setPluginCategory
             <http://romanvm.github.io/xbmcstubs/docs/xbmcplugin-module.html#setPluginCategory>}
             for more info
-        @type category: str
-        @return:
+        :type category: str
+        :return:
         """
         self._handle = int(sys.argv[1])
         if category:
@@ -553,27 +552,27 @@ class Plugin(Addon):
         """
         Create and return a context dict for a virtual folder listing
 
-        @param listing: the list of the plugin virtual folder items
-        @type listing: list
-        @param succeeded: if False Kodi won't open a new listing and stays on the current level.
-        @type succeeded: bool
-        @param update_listing: if True, Kodi won't open a sub-listing but refresh the current one.
-        @type update_listing: bool
-        @param cache_to_disk: cache this view to disk.
-        @type cache_to_disk: bool
-        @param sort_methods: the list of integer constants representing virtual folder sort methods.
-        @type sort_methods: tuple
-        @param view_mode: a numeric code for a skin view mode.
+        :param listing: the list of the plugin virtual folder items
+        :type listing: list
+        :param succeeded: if False Kodi won't open a new listing and stays on the current level.
+        :type succeeded: bool
+        :param update_listing: if True, Kodi won't open a sub-listing but refresh the current one.
+        :type update_listing: bool
+        :param cache_to_disk: cache this view to disk.
+        :type cache_to_disk: bool
+        :param sort_methods: the list of integer constants representing virtual folder sort methods.
+        :type sort_methods: tuple
+        :param view_mode: a numeric code for a skin view mode.
             View mode codes are different in different skins except for 50 (basic listing).
-        @type view_mode: int
-        @param content: string - current plugin content, e.g. 'movies' or 'episodes'.
+        :type view_mode: int
+        :param content: string - current plugin content, e.g. 'movies' or 'episodes'.
             See U{xbmcplugin.setContent()
             <http://romanvm.github.io/xbmcstubs/docs/xbmcplugin-module.html#setContent>}
             for more info.
-        @type content: str
-        @return: context dictionary containing necessary parameters
+        :type content: str
+        :return: context dictionary containing necessary parameters
             to create virtual folder listing in Kodi UI.
-        @rtype: dict
+        :rtype: dict
         """
         return {'listing': listing, 'succeeded': succeeded, 'update_listing': update_listing,
                 'cache_to_disk': cache_to_disk, 'sort_methods': sort_methods, 'view_mode': view_mode,
@@ -584,18 +583,18 @@ class Plugin(Addon):
         """
         Create and return a context dict to resolve a playable URL
 
-        @param path: the path to a playable media.
-        @type path: str or unicode
-        @param play_item: a dict of item properties as described in the class docstring.
+        :param path: the path to a playable media.
+        :type path: str or unicode
+        :param play_item: a dict of item properties as described in the class docstring.
             It allows to set additional properties for the item being played, like graphics, metadata etc.
             if C{play_item} parameter is present, then C{path} value is ignored, and the path must be set via
             C{'path'} property of a C{play_item} dict.
-        @type play_item: dict
-        @param succeeded: if False, Kodi won't play anything
-        @type succeeded: bool
-        @return: context dictionary containing necessary parameters
+        :type play_item: dict
+        :param succeeded: if False, Kodi won't play anything
+        :type succeeded: bool
+        :return: context dictionary containing necessary parameters
             for Kodi to play the selected media.
-        @rtype: dict
+        :rtype: dict
         """
         return {'path': path, 'play_item': play_item, 'succeeded': succeeded}
 
@@ -604,10 +603,10 @@ class Plugin(Addon):
         """
         Create an xbmcgui.ListItem instance from an item dict
 
-        @param item: a dict of ListItem properties
-        @type item: dict
-        @return: U{xbmcgui.ListItem<http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html>} instance
-        @rtype: xbmcgui.ListItem
+        :param item: a dict of ListItem properties
+        :type item: dict
+        :return: U{xbmcgui.ListItem<http://romanvm.github.io/xbmcstubs/docs/xbmcgui.ListItem-class.html>} instance
+        :rtype: xbmcgui.ListItem
         """
         list_item = xbmcgui.ListItem(label=item.get('label', ''),
                                      label2=item.get('label2', ''),
@@ -638,9 +637,9 @@ class Plugin(Addon):
         """
         Create a virtual folder listing
 
-        @param context: context dictionary
-        @type context: dict
-        @return:
+        :param context: context dictionary
+        :type context: dict
+        :return:
         """
         self.log('Creating listing from {0}'.format(str(context)), xbmc.LOGDEBUG)
         if context.get('content'):
@@ -672,9 +671,9 @@ class Plugin(Addon):
         """
         Resolve a playable URL
 
-        @param context: context dictionary
-        @type context: dict
-        @return:
+        :param context: context dictionary
+        :type context: dict
+        :return:
         """
         self.log('Resolving URL from {0}'.format(str(context)), xbmc.LOGDEBUG)
         if context.get('play_item') is None:

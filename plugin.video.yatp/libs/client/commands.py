@@ -25,8 +25,8 @@ def show_torrent_info(info_hash):
     """
     Display current torrent info
 
-    @param info_hash:
-    @return:
+    :param info_hash:
+    :return:
     """
     torr_info = jsonrq.get_torrent_info(info_hash)
     info_dialog = xbmcgui.DialogProgress()

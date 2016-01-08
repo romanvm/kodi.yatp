@@ -18,8 +18,8 @@ def _request(data):
     """
     Send JSON-RPC request
 
-    @param data: JSON request as dict
-    @return:
+    :param data: JSON request as dict
+    :return:
     """
     reply = post(json_rpc_url, json=data).json()
     try:

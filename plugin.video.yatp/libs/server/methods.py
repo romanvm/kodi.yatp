@@ -25,7 +25,7 @@ def ping(torrent_client, params=None):
     """
     Connection test method
 
-    @return: 'pong'
+    :return: 'pong'
     """
     return 'pong'
 
@@ -43,7 +43,7 @@ def add_torrent(torrent_client, params):
     params['paused']: bool - do not start download immediately (optional, default - True).
     params['cookies']: dict - additional cookies to be sent if a .torrent file is downloaded via http/https.
         This is a dictionary (a JSON object) of {'key': 'value'} pairs. (Optional, default - None.)
-    @return: 'OK'
+    :return: 'OK'
     """
     torrent_client.add_torrent_async(torrent=params['torrent'],
                                      save_path=params.get('save_path') or addon.download_dir,
@@ -57,7 +57,7 @@ def check_torrent_added(torrent_client, params=None):
     Check torrent_added flag
 
     params - None
-    @return: bool - torrent added or not
+    :return: bool - torrent added or not
     """
     return torrent_client.is_torrent_added
 
@@ -67,7 +67,7 @@ def get_last_added_torrent(torrent_client, params=None):
     Get added torrent info
 
     params - None
-    @return: dict - added torrent info
+    :return: dict - added torrent info
     """
     return torrent_client.last_added_torrent
 
@@ -77,7 +77,7 @@ def get_torrent_info(torrent_client, params):
     Get torrent info
 
     params['info_hash']: str - info_hash in lowercase
-    @return: dict - extended torrent info
+    :return: dict - extended torrent info
     """
     return torrent_client.get_torrent_info(params['info_hash'])
 
@@ -88,7 +88,7 @@ def get_all_torrent_info(torrent_client, params=None):
 
     Note: The torrents are listed in random order,
     it us up to a client to sort the list accordingly.
-    @return: list - the list of torrent info dicts
+    :return: list - the list of torrent info dicts
     """
     return torrent_client.get_all_torrents_info()
 
@@ -98,7 +98,7 @@ def pause_torrent(torrent_client, params):
     Pause torrent
 
     params['info_hash']: str - torrent info-hash in lowercase
-    @return: 'OK'
+    :return: 'OK'
     """
     torrent_client.pause_torrent(params['info_hash'])
     return 'OK'
@@ -109,7 +109,7 @@ def pause_group(torrent_client, params):
     Pause several torrents
 
     params['info_hashes']: list of str - the list of info-hashes in lowercase
-    @return: 'OK'
+    :return: 'OK'
     """
     for info_hash in params['info_hashes']:
         torrent_client.pause_torrent(info_hash)
@@ -121,7 +121,7 @@ def resume_torrent(torrent_client, params):
     Resume torrent
 
     params['info_hash']: str - torrent info-hash in lowercase
-    @return: 'OK'
+    :return: 'OK'
     """
     torrent_client.resume_torrent(params['info_hash'])
     return 'OK'
@@ -132,7 +132,7 @@ def resume_group(torrent_client, params):
     Resume several torrents
 
     params['info_hashes']: list of str - the list of info-hashes in lowercase
-    @return:
+    :return:
     """
     for info_hash in params['info_hashes']:
         torrent_client.resume_torrent(info_hash)
@@ -145,7 +145,7 @@ def remove_torrent(torrent_client, params):
 
     params['info_hash']: str - info-hash
     params['delete_files']: bool - also remove files
-    @return: 'OK'
+    :return: 'OK'
     """
     torrent_client.remove_torrent(params['info_hash'], params['delete_files'])
     return 'OK'
@@ -156,7 +156,7 @@ def remove_group(torrent_client, params):
 
     params['info_hashes']: list of str - the list of info-hashes
     params['delete_files']: bool - also remvove files
-    @return:
+    :return:
     """
     for info_hash in params['info_hashes']:
         torrent_client.remove_torrent(info_hash, params['delete_files'])
@@ -171,7 +171,7 @@ def buffer_file(torrent_client, params):
     params['file_index']: int - the index of the file to be buffered
     params['info_hash']: str - the the torrent info hash (optional).
     If info_hash is missing, a file from the last added torrent will be buffered.
-    @return: 'OK'
+    :return: 'OK'
     """
     torrent_client.buffer_file_async(params['file_index'],
                                      addon.buffer_duration,
@@ -185,7 +185,7 @@ def check_buffering_complete(torrent_client, params=None):
     """
     Check if buffering is complete
 
-    @return: bool - buffering status
+    :return: bool - buffering status
     """
     return torrent_client.is_buffering_complete
 
@@ -194,7 +194,7 @@ def abort_buffering(torrent_client, params=None):
     """
     Abort buffering
 
-    @return: 'OK'
+    :return: 'OK'
     """
     torrent_client.abort_buffering()
     return 'OK'
@@ -204,7 +204,7 @@ def pause_all(torrent_client, params=None):
     """
     Pause all torrents
 
-    @return: 'OK'
+    :return: 'OK'
     """
     torrent_client.pause_all()
     return 'OK'
@@ -214,7 +214,7 @@ def resume_all(torrent_client, params=None):
     """
     Resume all torrents
 
-    @return: 'OK'
+    :return: 'OK'
     """
     torrent_client.resume_all()
     return 'OK'
@@ -224,7 +224,7 @@ def get_buffer_percent(torrent_client, params=None):
     """
     Get buffer %
 
-    @return: int - buffer % (can be more than 100%).
+    :return: int - buffer % (can be more than 100%).
     """
     return torrent_client.buffer_percent
 
@@ -234,7 +234,7 @@ def set_encryption_policy(torrent_client, params):
     Set encryption policy for incoming and outgoing connections
 
     params['enc_policy']: int - 0 = forced, 1 = enabled, 2 = disabled
-    @return: 'OK'
+    :return: 'OK'
     """
     torrent_client.set_encryption_policy(params['enc_policy'])
     return 'OK'
@@ -247,7 +247,7 @@ def set_session_settings(torrent_client, params):
     params - session settings key=value pairs.
     More info can be found in
     <a href="http://www.rasterbar.com/products/libtorrent/manual.html#session-customization">libtorrent API docs</a>.
-    @return: 'OK'
+    :return: 'OK'
     """
     torrent_client.set_session_settings(**params)
     return 'OK'
@@ -262,7 +262,7 @@ def prioritize_file(torrent_client, params):
     params['info_hash']: str - torrent info-hash
     params['file_index']: int - the index of a file in the torrent
     params['priority']: int - priority from 0 to 7.
-    @return:
+    :return:
     """
     torrent_client.prioritize_file(params['info_hash'], params['file_index'], params['priority'])
     return 'OK'
@@ -274,7 +274,7 @@ def set_piece_priorities(torrent_client, params):
 
     params['info_hash']: str - torrent info-hash
     params['priority']: int - priority from 0 to 7.
-    @return: 'OK'
+    :return: 'OK'
     """
     torrent_client.set_piece_priorities(params['info_hash'], params['priority'])
     return 'OK'
@@ -285,7 +285,7 @@ def restore_downloads(torrent_client, params):
     Restore partial torrent downloads, i.e. torrents in 'finished' state.
 
     params['info_hashes']: list of str - the list of info-hashes
-    @return: 'OK'
+    :return: 'OK'
     """
     for info_hash in params['info_hashes']:
         torrent_client.set_piece_priorities(info_hash, 1)
