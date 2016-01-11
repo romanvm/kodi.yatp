@@ -20,8 +20,6 @@ When submitting bug reqports via the project's issue tracker [Kodi debug log](ht
 
 The plugin is avaliable in [my Kodi addons repository](https://romanvm.github.io/kodi_repo/repo/repository.romanvm/repository.romanvm-2.0.0.zip).
 
-Please submit bug reports via project's issue tracker and don't forget to indlude [Kodi debug log](http://kodi.wiki/view/Log_file) in your bug report.
-
 **License:** [GPL v.3](http://www.gnu.org/licenses/gpl-3.0.en.html).
 
 The plugin includes [libtorrent](http://libtorrent.org), [Bottle](http://bottlepy.org/docs/dev/index.html)
