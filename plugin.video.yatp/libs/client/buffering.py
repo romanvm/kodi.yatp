@@ -128,7 +128,7 @@ def buffer_torrent(torrent, file_index=None):
             jsonrq.remove_torrent(torrent_data['info_hash'], True)
             xbmcgui.Dialog().notification(addon.id, string(32022), addon.icon, 3000)
         elif file_index >= 0:
-            url = stream_torrent(file_index)
+            url = stream_torrent(file_index, torrent_data['info_hash'])
             if url:
                 return url
         else:
