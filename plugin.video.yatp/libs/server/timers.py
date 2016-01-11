@@ -23,10 +23,10 @@ class Timer(object):
         """
         Class constructor
 
-        @param interval: int - timer interval in seconds
-        @param func: a callable function
-        @param args: function positional args
-        @param kwargs: function kwargs
+        :param interval: int - timer interval in seconds
+        :param func: a callable function
+        :param args: function positional args
+        :param kwargs: function kwargs
         """
         self._interval = interval
         self._func = func
@@ -73,7 +73,7 @@ def check_seeding_limits(torrenter):
     """
     Check seding limits
 
-    @param torrenter:
+    :param torrenter:
     @retrun:
     """
     for torrent in torrenter.get_all_torrents_info():
@@ -100,7 +100,7 @@ def save_resume_data(torrenter):
     """
     Save torrents resume data
 
-    @param torrenter:
+    :param torrenter:
     @retrun:
     """
     torrenter.save_all_resume_data()
@@ -110,8 +110,8 @@ def save_resume_data(torrenter):
 #     """
 #     Log torrents in the torrent session
 #
-#     @param torrenter:
-#     @return:
+#     :param torrenter:
+#     :return:
 #     """
 #     torrents = torrenter.get_all_torrents_info()
 #     _addon.log('Torrents:')

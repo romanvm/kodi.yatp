@@ -18,8 +18,8 @@ def _request(data):
     """
     Send JSON-RPC request
 
-    @param data: JSON request as dict
-    @return:
+    :param data: JSON request as dict
+    :return:
     """
     reply = post(json_rpc_url, json=data).json()
     try:
@@ -40,8 +40,8 @@ def get_last_added_torrent():
     return _request({'method': 'get_last_added_torrent'})
 
 
-def buffer_file(file_index):
-    _request({'method': 'buffer_file', 'params': {'file_index': file_index}})
+def buffer_file(file_index, info_hash):
+    _request({'method': 'buffer_file', 'params': {'file_index': file_index, 'info_hash': info_hash}})
 
 
 def check_buffering_complete():
@@ -63,7 +63,7 @@ def remove_torrent(info_hash, delete_files):
 def download_torrent(torrent, download_dir):
     _request({'method': 'add_torrent', 'params': {'torrent': torrent,
                                                   'save_path': download_dir,
-                                                  'zero_priorities': False}})
+                                                  'paused': False}})
 
 
 def get_all_torrent_info():
@@ -88,3 +88,11 @@ def resume_all():
 
 def get_buffer_percent():
     return _request({'method': 'get_buffer_percent'})
+
+
+def get_files(info_hash):
+    return _request({'method': 'get_files', 'params': {'info_hash': info_hash}})
+
+
+def restore_finished(info_hash):
+    _request({'method': 'restore_downloads', 'params': {'info_hashes': [info_hash]}})

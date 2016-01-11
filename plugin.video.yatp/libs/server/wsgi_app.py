@@ -63,7 +63,7 @@ def root():
     """
     Display a web-UI
 
-    @return:
+    :return:
     """
     login, password = request.auth or (None, None)
     if addon.pass_protect and (login is None or (login, password) != addon.credentials):
@@ -79,7 +79,7 @@ def get_methods():
     """
     Display brief JSON-RPC methods documentation
 
-    @return:
+    :return:
     """
     methods_list = []
     docs_list = []
@@ -96,7 +96,7 @@ def json_rpc():
     """
     Process JSON-RPC requests
 
-    @return:
+    :return:
     """
     addon.log('***** JSON request *****')
     addon.log(request.body.read())
@@ -117,7 +117,7 @@ def get_torrents():
     """
     Get the list of available torrents with their params wrapped in JSON
 
-    @return:
+    :return:
     """
     response.content_type = 'application/json'
     reply = dumps(torrent_client.get_all_torrents_info())
@@ -129,8 +129,8 @@ def get_static(path):
     """
     Serve static files
 
-    @param path: relative path to a static file
-    @return:
+    :param path: relative path to a static file
+    :return:
     """
     return static_file(path, root=static_path)
 
@@ -140,8 +140,8 @@ def add_torrent(source):
     """
     Add .torrent file or torrent link
 
-    @param source: 'file' or 'link'
-    @return:
+    :param source: 'file' or 'link'
+    :return:
     """
     if source == 'file':
         buffer_ = StringIO()
@@ -200,16 +200,14 @@ def stream_file(path):
             addon.log('Streamed file: {0}'.format(str(streamed_file)))
             if start_pos > 0:
                 addon.log('Resetting sliding window start to piece #{0}'.format(start_piece))
-                # Set sliding window start 1 piece before the jump point to minimize (hopefully) image distortion.
-                # Needs to be tested!
                 torrent_client.start_sliding_window_async(streamed_file['torr_handle'],
-                                                          start_piece - 1,
+                                                          start_piece,
                                                           start_piece + addon.sliding_window_length - 1,
                                                           streamed_file['end_piece'] - streamed_file['end_offset'] - 1)
                 # Wait until a specified number of pieces after a jump point are downloaded.
                 end_piece = min(start_piece + streamed_file['buffer_length'], streamed_file['end_piece'])
                 while not torrent_client.check_piece_range(streamed_file['torr_handle'], start_piece, end_piece):
-                    percent = int(100 * float(torrent_client.sliding_window_position - start_piece + 1) /
+                    percent = int(100 * float(torrent_client.sliding_window_position - start_piece) /
                                   (end_piece - start_piece))
                     onscreen_label.text = addon.get_localized_string(32052).format(
                         percent,

@@ -5,10 +5,8 @@
 # Created on:  13.12.2014
 # Licence:     GPL v.3: http://www.gnu.org/copyleft/gpl.html
 """
-Torrent client
-
 The module implements a simple torrent client based on python-libtorrent library
-and with torrent media streaming capability.
+with torrent media streaming capability.
 """
 
 from __future__ import division
@@ -20,8 +18,11 @@ import datetime
 import platform
 import cPickle as pickle
 from math import ceil
+from traceback import format_exc
+from contextlib import closing
 from requests import get
 import xbmc
+import xbmcvfs
 from addon import Addon
 from utilities import get_duration
 
@@ -52,28 +53,35 @@ class Buffer(object):
 
     @property
     def contents(self):
+        """Get buffer contents"""
         with self._lock:
             return self._contents
 
     @contents.setter
     def contents(self, value):
+        """Set buffer contents"""
         with self._lock:
             self._contents = value
 
 
 class Torrenter(object):
     """
+    Torrenter(start_port=6881, end_port=6891)
+
     Torrenter class
 
     Implements a simple torrent client.
+
+    :param start_port: int
+    :param end_port: int
     """
     def __init__(self, start_port=6881, end_port=6891):
         """
         Class constructor
 
-        @param start_port: int
-        @param end_port: int
-        @return:
+        :param start_port: int
+        :param end_port: int
+        :return:
         """
         # torrents_pool is used to map torrent handles to their sha1 hexdigests
         # Item format {hexdigest: torr_handle}
@@ -94,6 +102,9 @@ class Torrenter(object):
         self._session.add_dht_router('router.utorrent.com', 6881)
         self._session.add_dht_router('router.bitcomet.com', 6881)
         self._session.start_dht()
+        self._session.start_lsd()
+        self._session.start_upnp()
+        self._session.start_natpmp()
 
     def __del__(self):
         """
@@ -112,8 +123,8 @@ class Torrenter(object):
         """
         Set encryption policy for the session
 
-        @param enc_policy: int - 0 = forced, 1 = enabled, 2 = disabled
-        @return:
+        :param enc_policy: int - 0 = forced, 1 = enabled, 2 = disabled
+        :return:
         """
         pe_settings = self._session.get_pe_settings()
         pe_settings.in_enc_policy = pe_settings.out_enc_policy = libtorrent.enc_policy(enc_policy)
@@ -123,10 +134,12 @@ class Torrenter(object):
         """
         Set session settings.
 
-        See U{libtorrent API docs<http://www.rasterbar.com/products/libtorrent/manual.html#session-customization>}
-        for more info.
-        @param settings: session settings key=value pairs
-        @return:
+        See `libtorrent API docs`_ for more info.
+
+        :param settings: session settings key=value pairs
+        :return:
+
+        .. _libtorrent API docs: http://www.rasterbar.com/products/libtorrent/manual.html#session-customization
         """
         ses_settings = self._session.get_settings()
         for key, value in settings.iteritems():
@@ -140,11 +153,12 @@ class Torrenter(object):
         This method will add a torrent in a separate thread. After calling the method,
         the caller should periodically check is_torrent_added flag and, when
         the flag is set, retrieve results from last_added_torrent.
-        @param torrent: str - path to a .torrent file or a magnet link
-        @param save_path: str - save path
-        @param paused: bool
-        @param cookies: dict
-        @return:
+
+        :param torrent: str - path to a .torrent file or a magnet link
+        :param save_path: str - save path
+        :param paused: bool
+        :param cookies: dict
+        :return:
         """
         self._add_torrent_thread = threading.Thread(target=self.add_torrent,
                                                     args=(torrent, save_path, paused, cookies))
@@ -155,18 +169,17 @@ class Torrenter(object):
         """
         Add a torrent download
 
-        @param torrent: str
-        @param save_path: str
-        @param paused: bool
-        @param cookies: dict
-        @return:
+        :param torrent: str
+        :param save_path: str
+        :param paused: bool
+        :param cookies: dict
+        :return:
         """
         self._torrent_added.clear()
         torr_handle = self._add_torrent(torrent, save_path, paused=paused, cookies=cookies)
         info_hash = str(torr_handle.info_hash())
         result = {'name': torr_handle.name().decode('utf-8'), 'info_hash': info_hash}
-        torr_info = torr_handle.get_torrent_info()
-        result['files'] = [[file_.path.decode('utf-8'), file_.size] for file_ in torr_info.files()]
+        result['files'] = self.get_files(info_hash)
         self._last_added_torrent.contents = result
         self._torrent_added.set()
 
@@ -174,10 +187,10 @@ class Torrenter(object):
         """
         Add a torrent to the pool.
 
-        @param torrent: str - the path to a .torrent file or a magnet link
-        @param save_path: str - torrent save path
-        @param resume_data: str - bencoded torrent resume data
-        @return: object - torr_handle
+        :param torrent: str - the path to a .torrent file or a magnet link
+        :param save_path: str - torrent save path
+        :param resume_data: str - bencoded torrent resume data
+        :return: object - torr_handle
         """
         add_torrent_params = {'save_path': os.path.abspath(save_path),
                               'storage_mode': libtorrent.storage_mode_t.storage_mode_sparse,
@@ -194,9 +207,11 @@ class Torrenter(object):
             add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(torr_file))
         else:
             try:
-                add_torrent_params['ti'] = libtorrent.torrent_info(os.path.abspath(torrent))
-            except RuntimeError:
-                raise TorrenterError('Invalid path to the .torrent file!')
+                with closing(xbmcvfs.File(torrent)) as file_obj:
+                    add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(file_obj.read()))
+            except:
+                addon.log(format_exc(), xbmc.LOGERROR)
+                raise TorrenterError('Error when adding torrent: {0}!'.format(torrent))
         torr_handle = self._session.add_torrent(add_torrent_params)
         while not torr_handle.has_metadata():  # Wait until torrent metadata are populated
             time.sleep(0.1)
@@ -208,8 +223,8 @@ class Torrenter(object):
         """
         Get torrent status
 
-        @param info_hash: str
-        @return: object status
+        :param info_hash: str
+        :return: object status
         """
         try:
             torr_handle = self._torrents_pool[info_hash]
@@ -223,8 +238,8 @@ class Torrenter(object):
         """
         Get torrent info
 
-        @param info_hash: str
-        @return: object torrent_info
+        :param info_hash: str
+        :return: object torrent_info
         """
         try:
             torr_handle = self._torrents_pool[info_hash]
@@ -238,8 +253,8 @@ class Torrenter(object):
         """
         Remove a torrent from download
 
-        @param info_hash: str
-        @return:
+        :param info_hash: str
+        :return:
         """
         try:
             self._session.remove_torrent(self._torrents_pool[info_hash], delete_files)
@@ -249,8 +264,9 @@ class Torrenter(object):
     def pause_torrent(self, info_hash, graceful_pause=1):
         """
         Pause a torrent
-        @param info_hash: str
-        @return:
+
+        :param info_hash: str
+        :return:
         """
         try:
             self._torrents_pool[info_hash].pause(graceful_pause)
@@ -261,8 +277,8 @@ class Torrenter(object):
         """
         Resume a torrent
 
-        @param info_hash: str
-        @return:
+        :param info_hash: str
+        :return:
         """
         try:
             self._torrents_pool[info_hash].resume()
@@ -273,22 +289,24 @@ class Torrenter(object):
         """
         Get torrent info in a human-readable format
 
-        The following info is returned:
-        name - torrent's name
-        size - MB
-        state - torrent's current state
-        dl_speed - KB/s
-        ul_speed - KB/s
-        total_download - MB
-        total_upload - MB
-        progress - int %
-        num_peers
-        num_seeds
-        added_time - timestamp in 'YYYY-MM-DD HH:MM:SS' format
-        completed_time - see above
-        info_hash - torrent's info_hash hexdigest in lowecase
-        @param info_hash: str
-        @return: dict - torrent info or None for invalid torrent
+        The following info is returned::
+
+            name - torrent's name
+            size - MB
+            state - torrent's current state
+            dl_speed - KB/s
+            ul_speed - KB/s
+            total_download - MB
+            total_upload - MB
+            progress - int %
+            num_peers
+            num_seeds
+            added_time - timestamp in 'YYYY-MM-DD HH:MM:SS' format
+            completed_time - see above
+            info_hash - torrent's info_hash hexdigest in lowecase
+
+        :param info_hash: str
+        :return: dict - torrent info or None for invalid torrent
         """
         torr_info = self._get_torrent_info(info_hash)
         torr_status = self._get_torrent_status(info_hash)
@@ -316,7 +334,8 @@ class Torrenter(object):
 
         Note that the torrents info list will have a random order.
         It is up to the caller to sort the list accordingly.
-        @return: list - the list of torrent info dicts
+
+        :return: list - the list of torrent info dicts
         """
         listing = []
         for info_hash in self._torrents_pool.iterkeys():
@@ -329,7 +348,7 @@ class Torrenter(object):
         """
         Pause all torrents
 
-        @return:
+        :return:
         """
         for info_hash in self._torrents_pool.iterkeys():
             self.pause_torrent(info_hash, graceful_pause)
@@ -338,7 +357,7 @@ class Torrenter(object):
         """
         Resume all torrents
 
-        @return:
+        :return:
         """
         for info_hash in self._torrents_pool.iterkeys():
             self.resume_torrent(info_hash)
@@ -349,10 +368,11 @@ class Torrenter(object):
 
         If all piece priorities in the torrent are set to 0, to enable downloading an individual file
         priority value must be no less than 2.
-        @param info_hash: str - torrent info-hash
-        @param file_index: int - the index of a file in the torrent
-        @param priority: int - priority from 0 to 7.
-        @return:
+
+        :param info_hash: str - torrent info-hash
+        :param file_index: int - the index of a file in the torrent
+        :param priority: int - priority from 0 to 7.
+        :return:
         """
         self._torrents_pool[info_hash].file_priority(file_index, priority)
 
@@ -360,12 +380,22 @@ class Torrenter(object):
         """
         Set priorities for all pieces in a torrent
 
-        @param info_hash: str
-        @param priority: int
-        @return:
+        :param info_hash: str
+        :param priority: int
+        :return:
         """
         torr_handle = self._torrents_pool[info_hash]
         [torr_handle.piece_priority(piece, priority) for piece in xrange(torr_handle.get_torrent_info().num_pieces())]
+
+    def get_files(self, info_hash):
+        """
+        Get the list of videofiles in a torrent
+
+        :param info_hash:
+        :return: a list of tuples (path, size)
+        """
+        torr_info = self._get_torrent_info(info_hash)
+        return [[file_.path.decode('utf-8'), file_.size] for file_ in torr_info.files()]
 
     @property
     def is_torrent_added(self):
@@ -380,19 +410,26 @@ class Torrenter(object):
 
 class TorrenterPersistent(Torrenter):
     """
+    TorrenterPersistent(start_port=6881, end_port=6891, persistent=False, resume_dir='')
+
     A persistent version of Torrenter
 
     It stores the session state and torrents data on disk
+
+    :param start_port: int
+    :param end_port: int
+    :param persistent: bool - store persistent torrent data on disk
+    :param resume_dir: str - the directory to store persistent torrent data
     """
     def __init__(self, start_port=6881, end_port=6891, persistent=False, resume_dir=''):
         """
         Class constructor
 
-        @param start_port: int
-        @param end_port: int
-        @param persistent: bool - store persistent torrent data on disk
-        @param resume_dir: str - the directory to store persistent torrent data
-        @return:
+        :param start_port: int
+        :param end_port: int
+        :param persistent: bool - store persistent torrent data on disk
+        :param resume_dir: str - the directory to store persistent torrent data
+        :return:
         """
         super(TorrenterPersistent, self).__init__(start_port, end_port)
         # Use persistent storage for session and torrents info
@@ -416,11 +453,11 @@ class TorrenterPersistent(Torrenter):
         """
         Add a torrent download
 
-        @param torrent: str
-        @param save_path: str
-        @param paused: bool
-        @param cookies: dict
-        @return:
+        :param torrent: str
+        :param save_path: str
+        :param paused: bool
+        :param cookies: dict
+        :return:
         """
         super(TorrenterPersistent, self).add_torrent(torrent, save_path, paused, cookies)
         if self._persistent:
@@ -430,7 +467,7 @@ class TorrenterPersistent(Torrenter):
         """
         Save session state
 
-        @return:
+        :return:
         """
         if self._persistent:
             with open(os.path.join(self._resume_dir, 'session.state'), mode='wb') as state_file:
@@ -442,7 +479,7 @@ class TorrenterPersistent(Torrenter):
         """
         Load session state
 
-        @return:
+        :return:
         """
         try:
             with open(os.path.join(self._resume_dir, 'session.state'), mode='rb') as state_file:
@@ -454,8 +491,8 @@ class TorrenterPersistent(Torrenter):
         """
         Save fast-resume data for a torrent.
 
-        @param info_hash: str
-        @return:
+        :param info_hash: str
+        :return:
         """
         if self._persistent:
             torrent_handle = self._torrents_pool[info_hash]
@@ -474,7 +511,7 @@ class TorrenterPersistent(Torrenter):
         """
         Save fast-resume data for all torrents
 
-        @return:
+        :return:
         """
         if self._persistent:
             for key in self._torrents_pool.iterkeys():
@@ -487,8 +524,8 @@ class TorrenterPersistent(Torrenter):
         """
         Save torrent metatata and a .torrent file for resume.
 
-        @param torr_handle: object - torrent handle
-        @return:
+        :param torr_handle: object - torrent handle
+        :return:
         """
         if self._persistent:
             info_hash = str(torr_handle.info_hash())
@@ -513,19 +550,22 @@ class TorrenterPersistent(Torrenter):
         """
         Load torrent state from a pickle file and add the torrent to the pool.
 
-        @param filepath: str
-        @return:
+        :param filepath: str
+        :return:
         """
-        with open(filepath, mode='rb') as m_file:
-            metadata = pickle.load(m_file)
-        torrent = os.path.join(self._resume_dir, metadata['info_hash'] + '.torrent')
-        self._add_torrent(torrent, metadata['save_path'], metadata['resume_data'])
+        try:
+            with open(filepath, mode='rb') as m_file:
+                metadata = pickle.load(m_file)
+            torrent = os.path.join(self._resume_dir, metadata['info_hash'] + '.torrent')
+            self._add_torrent(torrent, metadata['save_path'], metadata['resume_data'])
+        except (IOError, EOFError, pickle.PickleError):
+            pass
 
     def _load_torrents(self):
         """
         Load all torrents
 
-        @return:
+        :return:
         """
         dir_listing = os.listdir(self._resume_dir)
         for item in dir_listing:
@@ -536,8 +576,8 @@ class TorrenterPersistent(Torrenter):
         """
         Remove a torrent from download
 
-        @param info_hash: str
-        @return:
+        :param info_hash: str
+        :return:
         """
         super(TorrenterPersistent, self).remove_torrent(info_hash, delete_files)
         if self._persistent:
@@ -550,9 +590,16 @@ class TorrenterPersistent(Torrenter):
 
 class Streamer(TorrenterPersistent):
     """
+    Streamer(start_port=6881, end_port=6891, persistent=False, resume_dir='')
+
     Torrent Streamer class
 
     Implements a torrent client with media streaming capability
+
+    :param start_port: int
+    :param end_port: int
+    :param persistent: bool - store persistent torrent data on disk
+    :param resume_dir: str - the directory to store persistent torrent data
     """
     def __init__(self, *args, **kwargs):
         """Class constructor"""
@@ -574,45 +621,55 @@ class Streamer(TorrenterPersistent):
         self.abort_buffering()
         super(Streamer, self).__del__()
 
-    def buffer_file_async(self, file_index, buffer_duration, sliding_window_length, default_buffer_size):
+    def buffer_file_async(self, file_index, buffer_duration, sliding_window_length, default_buffer_size,
+                          info_hash=None):
         """
         Force sequential download of file for video playback.
 
         This method will stream a torrent in a separate thread. The caller should periodically
         check buffering_complete flag. If buffering needs to be terminated,
         the caller should call abort_buffering method.
-        The torrent must be already added via add_torrent method!
-        @param file_index: int - the numerical index of the file to be streamed.
-        @param buffer_duration: int - buffer duration in s
-        @param sliding_window_length: int - the length of a sliding window in pieces
-        @param default_buffer_size: int - fallback buffer size if a video cannot be parsed by hachoir
-        @return:
+
+        .. warning:: The torrent must be already added via add_torrent method!
+
+        :param file_index: int - the numerical index of the file to be streamed.
+        :param buffer_duration: int - buffer duration in s
+        :param sliding_window_length: int - the length of a sliding window in pieces
+        :param default_buffer_size: int - fallback buffer size if a video cannot be parsed by hachoir
+        :param info_hash: torrent's info-hash (optional)
+        :return:
         """
         self._buffer_file_thread = threading.Thread(target=self._buffer_file, args=(file_index,
                                                                                     buffer_duration,
                                                                                     sliding_window_length,
-                                                                                    default_buffer_size))
+                                                                                    default_buffer_size,
+                                                                                    info_hash))
         self._buffer_file_thread.daemon = True
         self._buffer_file_thread.start()
 
-    def _buffer_file(self, file_index, buffer_duration, sliding_window_length, default_buffer_size):
+    def _buffer_file(self, file_index, buffer_duration, sliding_window_length, default_buffer_size, info_hash=None):
         """
         Force sequential download of file for video playback.
 
-        The torrent must be already added via add_torrent method!
-        @param file_index: int - the numerical index of the file to be streamed.
-        @param buffer_duration: int - buffer duration in s
-        @param sliding_window_length: int - the length of a sliding window in pieces
-        @param default_buffer_size: int - fallback buffer size if a video cannot be parsed by hachoir
-        @return:
+        .. warning:: The torrent must be already added via add_torrent method!
+
+        :param file_index: int - the numerical index of the file to be streamed.
+        :param buffer_duration: int - buffer duration in s
+        :param sliding_window_length: int - the length of a sliding window in pieces
+        :param default_buffer_size: int - fallback buffer size if a video cannot be parsed by hachoir
+        :param info_hash: torrent's info-hash (optional)
+        :return:
         """
-        if file_index >= len(self.last_added_torrent['files']) or file_index < 0:
+        if info_hash is None:
+            info_hash = self.last_added_torrent['info_hash']
+        files = self.get_files(info_hash)
+        if file_index >= len(files) or file_index < 0:
             raise IndexError('Invalid file index: {0}!'.format(file_index))
         # Clear flags
         self._buffering_complete.clear()
         self._abort_buffering.clear()
         self._buffer_percent.contents = 0
-        torr_handle = self._torrents_pool[self.last_added_torrent['info_hash']]
+        torr_handle = self._torrents_pool[info_hash]
         torr_info = torr_handle.get_torrent_info()
         # Pick the file to be streamed from the torrent files
         file_entry = torr_info.files()[file_index]
@@ -626,6 +683,7 @@ class Streamer(TorrenterPersistent):
         self.set_piece_priorities(self.last_added_torrent['info_hash'], 0)
         if torr_handle.status().paused:
             torr_handle.resume()
+        addon.log('Reading the 1st piece...')
         torr_handle.piece_priority(start_piece, 7)
         while not self._abort_buffering.is_set():
             time.sleep(0.2)
@@ -633,6 +691,7 @@ class Streamer(TorrenterPersistent):
                 break
         else:
             return
+        addon.log('Trying to determine the video duration...')
         buffer_length, end_offset = self.calculate_buffers(os.path.join(addon.download_dir,
                                                                     self.last_added_torrent['files'][file_index][0]),
                                                            buffer_duration,
@@ -715,7 +774,7 @@ class Streamer(TorrenterPersistent):
         """
         Abort buffering
 
-        @return:
+        :return:
         """
         self._abort_buffering.set()
         self._abort_sliding.set()
@@ -732,9 +791,9 @@ class Streamer(TorrenterPersistent):
         """
         Remove torrent
 
-        @param info_hash:
-        @param delete_files:
-        @return:
+        :param info_hash:
+        :param delete_files:
+        :return:
         """
         if self.streamed_file_data is not None and info_hash == str(self.streamed_file_data['torr_handle'].info_hash()):
             self.abort_buffering()
@@ -745,11 +804,11 @@ class Streamer(TorrenterPersistent):
         """
         Calculate buffer length in pieces for provided duration
 
-        @param filename:
-        @param buffer_duration:
-        @param num_pieces:
-        @param piece_length:
-        @return:
+        :param filename:
+        :param buffer_duration:
+        :param num_pieces:
+        :param piece_length:
+        :return:
         """
         duration = get_duration(filename)
         addon.log('Video duration: {0}s'.format(duration))
@@ -768,10 +827,10 @@ class Streamer(TorrenterPersistent):
         """
         Check if the range of pieces is downloaded
 
-        @param torr_handle:
-        @param start_piece:
-        @param end_piece:
-        @return:
+        :param torr_handle:
+        :param start_piece:
+        :param end_piece:
+        :return:
         """
         for piece in xrange(start_piece, end_piece + 1):
             if not torr_handle.have_piece(piece):
@@ -798,7 +857,7 @@ class Streamer(TorrenterPersistent):
         """
         Streamed file data
 
-        @return: dict
+        :return: dict
         """
         return self._streamed_file_data.contents
 
@@ -810,11 +869,13 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
     This iterator function serves a video file being downloaded to Kodi piece by piece.
     If some piece is not downloaded, the function prioritizes it
     and then waits until it is downloaded.
-    @param byte_position: the start byte
-    @param torrent_handle: streamed torrent's handle
-    @param start_piece: file's start piece
-    @param piece_length: piece length in bytes
-    @param oncreen_label: on_screen_label instance to show waiting status
+
+    :param file_: file object to be server.
+    :param byte_position: the start byte
+    :param torrent_handle: streamed torrent's handle
+    :param start_piece: file's start piece
+    :param piece_length: piece length in bytes
+    :param oncreen_label: on_screen_label instance to show waiting status
     """
     paused = False  # Needed to prevent unpausing video paused by a user.
     with file_:

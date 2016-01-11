@@ -22,8 +22,8 @@ def _play(path):
     """
     Play a videofile
 
-    @param path:
-    @return:
+    :param path:
+    :return:
     """
     plugin.log('Path to play: {0}'.format(path), LOGNOTICE)
     success = True if path else False
@@ -34,8 +34,8 @@ def root(params):
     """
     Plugin root
 
-    @param params:
-    @return:
+    :param params:
+    :return:
     """
     return [{'label': string(32000),
              'thumb': os.path.join(icons, 'play.png'),
@@ -53,8 +53,8 @@ def select_torrent(params):
     """
     Select .torrent file to play
 
-    @param params:
-    @return:
+    :param params:
+    :return:
     """
     torrent = xbmcgui.Dialog().browse(1, string(32003), 'video', mask='.torrent')
     if torrent:
@@ -69,8 +69,8 @@ def play_torrent(params):
     """
     Play torrent
 
-    @param params:
-    @return:
+    :param params:
+    :return:
     """
     file_index = params.get('file_index')
     if file_index is not None and file_index != 'dialog':
@@ -82,19 +82,20 @@ def play_file(params):
     """
     Stream a file from torrent by its index
 
-    The torrent must be already added via JSON-RPC!
-    @param params:
-    @return:
+    The torrent must be already added to the session!
+
+    :param params:
+    :return:
     """
-    return _play(stream_torrent(int(params['file_index'])))
+    return _play(stream_torrent(int(params['file_index']), params['info_hash']))
 
 
 def download_torrent(params):
     """
     Add torrent for downloading
 
-    @param params:
-    @return:
+    :param params:
+    :return:
     """
     download_dir = params.get('download_dir') or plugin.download_dir
     jsonrq.download_torrent(params['torrent'], download_dir)
@@ -105,8 +106,8 @@ def torrents(params):
     """
     Display the list of torrents in the session
 
-    @param params:
-    @return:
+    :param params:
+    :return:
     """
     listing = []
     torrent_list = sorted(jsonrq.get_all_torrent_info(), key=lambda i: i['added_time'], reverse=True)
@@ -120,8 +121,8 @@ def torrents(params):
         else:
             label = u'[COLOR=blue]{0}[/COLOR]'.format(torrent['name'])
         item = {'label': label,
-                'url': plugin.get_url(action='torrent_info', info_hash=torrent['info_hash']),
-                'is_folder': False}
+                'url': plugin.get_url(action='show_files', info_hash=torrent['info_hash']),
+                'is_folder': True}
         if torrent['state'] == 'downloading':
             item['thumb'] = os.path.join(icons, 'down.png')
         elif torrent['state'] == 'seeding':
@@ -140,7 +141,17 @@ def torrents(params):
                                                                            info_hash=torrent['info_hash'])),
                         (string(32008),
                          'RunScript({commands},delete_with_files,{info_hash})'.format(commands=commands,
-                                                                                      info_hash=torrent['info_hash']))]
+                                                                                      info_hash=torrent['info_hash'])),
+                        (string(32008),
+                         'RunScript({commands},delete_with_files,{info_hash})'.format(commands=commands,
+                                                                                      info_hash=torrent['info_hash'])),
+                        (string(32066),
+                         'RunScript({commands},restore_finished,{info_hash})'.format(commands=commands,
+                                                                                      info_hash=torrent['info_hash'])),
+                        (string(32065),
+                         'RunScript({commands},show_info,{info_hash})'.format(commands=commands,
+                                                                                      info_hash=torrent['info_hash'])),
+                        ]
         if torrent['state'] == 'paused':
             context_menu.insert(0, (string(32009),
                                     'RunScript({commands},resume,{info_hash})'.format(commands=commands,
@@ -157,8 +168,8 @@ def torrent_info(params):
     """
     Display current torrent info
 
-    @param params:
-    @return:
+    :param params:
+    :return:
     """
     torr_info = jsonrq.get_torrent_info(params['info_hash'])
     info_dialog = xbmcgui.DialogProgress()
@@ -178,39 +189,62 @@ def torrent_info(params):
 
 def list_files(params):
     """
-    Display the list of files in a torrent
+    Add a torrent to the sessiona and display the list of files in a torrent
 
-    @param params:
-    @return:
+    :param params:
+    :return:
     """
-    listing = []
     torrent_data = add_torrent(params['torrent'])
     if torrent_data is not None:
-        videofiles = get_videofiles(torrent_data)
-        for file_ in videofiles:
-            ext = os.path.splitext(file_[1].lower())[1]
-            if ext == '.avi':
-                thumb = os.path.join(icons, 'avi.png')
-            elif ext == '.mp4':
-                thumb = os.path.join(icons, 'mp4.png')
-            elif ext == '.mkv':
-                thumb = os.path.join(icons, 'mkv.png')
-            elif ext == '.mov':
-                thumb = os.path.join(icons, 'mov.png')
-            else:
-                thumb = os.path.join(icons, 'play.png')
-            listing.append({'label': file_[1],
-                            'thumb': thumb,
-                            'url': plugin.get_url(action='play_file',
-                                                  # info_hash is used only as a unique torrent ID
-                                                  # for 'in progress'/'watched' marks to work correctly.
-                                                  info_hash=torrent_data['info_hash'],
-                                                  file_index=file_[0]),
-                            'is_playable': True
-                            })
+        return _build_file_list(torrent_data['files'], torrent_data['info_hash'])
     else:
         xbmcgui.Dialog().notification(plugin.id, string(32023), plugin.icon, 3000)
+    return []
+
+
+def show_files(params):
+    """
+    Display the list of videofiles
+
+    :param params:
+    :return:
+    """
+    return _build_file_list(jsonrq.get_files(params['info_hash']), params['info_hash'])
+
+
+def _build_file_list(files, info_hash):
+    """
+    Create the list of videofiles in a torrent
+
+    :param files:
+    :param info_hash:
+    :return:
+    """
+    videofiles = get_videofiles(files)
+    listing = []
+    for file_ in videofiles:
+        ext = os.path.splitext(file_[1].lower())[1]
+        if ext == '.avi':
+            thumb = os.path.join(icons, 'avi.png')
+        elif ext == '.mp4':
+            thumb = os.path.join(icons, 'mp4.png')
+        elif ext == '.mkv':
+            thumb = os.path.join(icons, 'mkv.png')
+        elif ext == '.mov':
+            thumb = os.path.join(icons, 'mov.png')
+        else:
+            thumb = os.path.join(icons, 'play.png')
+        listing.append({'label': file_[1],
+                        'thumb': thumb,
+                        'url': plugin.get_url(action='play_file',
+                                              # info_hash is used only as a unique torrent ID
+                                              # for 'in progress'/'watched' marks to work correctly.
+                                              info_hash=info_hash,
+                                              file_index=file_[0]),
+                        'is_playable': True
+                        })
     return plugin.create_listing(listing, cache_to_disk=True)
+
 
 # Map actions
 plugin.actions['root'] = root
@@ -221,3 +255,4 @@ plugin.actions['download'] = download_torrent
 plugin.actions['torrents'] = torrents
 plugin.actions['torrent_info'] = torrent_info
 plugin.actions['list_files'] = list_files
+plugin.actions['show_files'] = show_files

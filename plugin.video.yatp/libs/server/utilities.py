@@ -36,8 +36,8 @@ def get_duration(filename):
     """
     Get videofile duration in seconds
 
-    @param filename:
-    @return: duration
+    :param filename:
+    :return: duration
     """
     metadata = _parse_file(filename)
     if metadata is not None and metadata.getItem('duration', 0) is not None:
