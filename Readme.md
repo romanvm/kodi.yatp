@@ -15,7 +15,7 @@ The plugin can also be used a simple torrent-client.
 
 Please read [project's Wiki](https://github.com/romanvm/kodi.yatp/wiki) if you want to find out more about YATP.
 
-When submitting bug reqports via the project's issue tracker [Kodi debug log](http://kodi.wiki/view/Log_file/Easy)
+When submitting bug reports via the project's issue tracker [Kodi debug log](http://kodi.wiki/view/Log_file/Easy)
 **is mandatory**. Bug reports without logs will be closed without explanation.
 
 The plugin is avaliable in [my Kodi addons repository](https://romanvm.github.io/kodi_repo/repo/repository.romanvm/repository.romanvm-2.0.0.zip).
