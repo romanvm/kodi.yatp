@@ -25,4 +25,5 @@ The plugin is avaliable in [my Kodi addons repository](https://romanvm.github.io
 The plugin includes [libtorrent](http://libtorrent.org), [Bottle](http://bottlepy.org/docs/dev/index.html)
 and [hachoir](http://hachoir3.readthedocs.org) Python modules,
 and [JQuery](https://jquery.com)/[JQuery EasyUI](http://www.jeasyui.com) JavaScript libraries
-which are licensed separately by their authors.
+which are licensed separately by their authors. All licenses allow at least free non-commercial use,
+but please read the respective licensing terms and conditions if you want to re-distribute YATP.
