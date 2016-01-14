@@ -680,7 +680,7 @@ class Streamer(TorrenterPersistent):
         piece_length = torr_info.piece_length()
         num_pieces = int(ceil(file_entry.size / piece_length))
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
-        self.set_piece_priorities(self.last_added_torrent['info_hash'], 0)
+        self.set_piece_priorities(info_hash, 0)
         if torr_handle.status().paused:
             torr_handle.resume()
         addon.log('Reading the 1st piece...')
@@ -692,8 +692,7 @@ class Streamer(TorrenterPersistent):
         else:
             return
         addon.log('Trying to determine the video duration...')
-        buffer_length, end_offset = self.calculate_buffers(os.path.join(addon.download_dir,
-                                                                    self.last_added_torrent['files'][file_index][0]),
+        buffer_length, end_offset = self.calculate_buffers(os.path.join(addon.download_dir, files[file_index][0]),
                                                            buffer_duration,
                                                            default_buffer_size,
                                                            num_pieces, piece_length)
