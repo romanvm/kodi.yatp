@@ -104,9 +104,10 @@ class Storage(object):
 
     def flush(self):
         """
-        Flush storage to disk
+        Flush storage contents to disk
 
-        This method invalidates a :class:`Storage` instance.
+        This method saves all :class:`Storage` contents to disk
+        and invalidates the Storage instance.
         """
         self._file.seek(0)
         dump(self._storage, self._file)
@@ -615,6 +616,7 @@ class Plugin(Addon):
             art['thumb'] = item.get('thumb', '')
             art['icon'] = item.get('icon', '')
             art['fanart'] = item.get('fanart', '')
+            item['art'] = art
         else:
             list_item.setThumbnailImage(item.get('thumb', ''))
             list_item.setIconImage(iconImage=item.get('icon', ''))
