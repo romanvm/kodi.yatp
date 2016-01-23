@@ -53,13 +53,13 @@ class Buffer(object):
 
     @property
     def contents(self):
-        """Buffer contents"""
+        """Get buffer contents"""
         with self._lock:
             return self._contents
 
     @contents.setter
     def contents(self, value):
-        """Buffer contents"""
+        """Set buffer contents"""
         with self._lock:
             self._contents = value
 
@@ -619,7 +619,7 @@ class Streamer(TorrenterPersistent):
 
     def __del__(self):
         """Class destructor"""
-        self.abort_streaming()
+        self.abort_buffering()
         super(Streamer, self).__del__()
 
     def buffer_file_async(self, file_index, buffer_duration, sliding_window_length, default_buffer_size,
