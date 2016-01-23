@@ -234,8 +234,6 @@ def _build_file_list(files, info_hash):
         listing.append({'label': file_[1],
                         'thumb': thumb,
                         'url': plugin.get_url(action='play_file',
-                                              # info_hash is used only as a unique torrent ID
-                                              # for 'in progress'/'watched' marks to work correctly.
                                               info_hash=info_hash,
                                               file_index=file_[0]),
                         'is_playable': True
