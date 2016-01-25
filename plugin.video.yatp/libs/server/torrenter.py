@@ -83,8 +83,8 @@ class Torrenter(object):
         :param end_port: int
         :return:
         """
-        # torrents_pool is used to map torrent handles to their sha1 hexdigests
-        # Item format {hexdigest: torr_handle}
+        # torrents_pool is used to map torrent handles to their sha1 info_hashes (string hex digests)
+        # Item format {info_hashes: torr_handle}
         self._torrents_pool = {}
         # Worker threads
         self._add_torrent_thread = None
