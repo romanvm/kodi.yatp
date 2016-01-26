@@ -66,7 +66,8 @@ def root():
     :return:
     """
     login, password = request.auth or (None, None)
-    if addon.pass_protect and (login is None or (login, password) != addon.credentials):
+    if (addon.pass_protect and
+            (login is None or (login, password) != (addon.credentials.login, addon.credentials.password))):
         error = HTTPError(401, 'Access denied')
         error.add_header('WWW-Authenticate', 'Basic realm="private"')
         return error
