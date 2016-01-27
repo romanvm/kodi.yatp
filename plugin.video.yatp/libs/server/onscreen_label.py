@@ -35,7 +35,7 @@ class OnScreenLabel(object):
     @property
     def text(self):
         """
-        Get or sets label text
+        Gets or sets label text
 
         :rtype: str
         """
@@ -68,5 +68,6 @@ class OnScreenLabel(object):
         """
         Hide the label
         """
-        self._back.setVisible(False)
-        self._label.setVisible(False)
+        if self._is_added:
+            self._back.setVisible(False)
+            self._label.setVisible(False)
