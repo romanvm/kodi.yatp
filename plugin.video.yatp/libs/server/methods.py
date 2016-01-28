@@ -17,7 +17,6 @@ For those methods "params" key can be equal null or omitted.
 """
 
 from addon import Addon
-from xbmc import LOGWARNING
 
 addon = Addon()
 
@@ -193,26 +192,11 @@ def check_buffering_complete(torrent_client, params=None):
 
 def abort_buffering(torrent_client, params=None):
     """
-    Abort buffering or the sliding window
-
-    Warning: this method will be depreciated. Use 'abort_streaming' instead
-
-    :return: 'Will be depreciated!'
-    """
-    addon.log('"abort_buffering" JSON-RPC method will be depreciated! Use "abort_streaming" instead.', LOGWARNING)
-    torrent_client.abort_streaming()
-    return 'Warning: this method will be depreciated!'
-
-
-def abort_streaming(torrent_client, params=None):
-    """
-    Abort buffering or the sliding window
-
-    Replaces 'abort_buffering'.
+    Abort buffering
 
     :return: 'OK'
     """
-    torrent_client.abort_streaming()
+    torrent_client.abort_buffering()
     return 'OK'
 
 

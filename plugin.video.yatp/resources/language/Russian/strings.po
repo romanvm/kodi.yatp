@@ -52,12 +52,12 @@ msgid "Pause torrent"
 msgstr "Приостановить"
 
 msgctxt "#32011"
-msgid "size: {0}MB; state: {1}; seeds: {2}; peers: {3}"
-msgstr "размер: {0} МБ; статус: {1}; сидов: {2}; пиров: {3}"
+msgid "state: {1}; seeds: {2}; peers: {3}"
+msgstr "статус: {1}; сидов: {2}; пиров: {3}"
 
 msgctxt "#32012"
-msgid "DL speed: {0}KB/s; UL speed: {1}KB/s"
-msgstr "загрузка: {0} КБ/с; отдача: {1} КБ/с"
+msgid "size: {0}MB; DL speed: {0}KB/s; UL speed: {1}KB/s"
+msgstr "размер: {0} МБ; загрузка: {0} КБ/с; отдача: {1} КБ/с"
 
 msgctxt "#32013"
 msgid "total DL: {0}MB; total UL: {1}MB"

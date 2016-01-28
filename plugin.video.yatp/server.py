@@ -34,7 +34,7 @@ while not xbmc.abortRequested:
         xbmcgui.Dialog().notification('YATP', addon.get_localized_string(32028), addon.icon, 3000, False)
         start_trigger = False
 addon.log('***** Torrent Server stopped *****', xbmc.LOGNOTICE)
-wsgi_app.torrent_client.abort_streaming()
+wsgi_app.torrent_client.abort_buffering()
 if addon.enable_limits:
     wsgi_app.limits_timer.abort()
 if addon.persistent:

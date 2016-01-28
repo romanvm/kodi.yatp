@@ -53,13 +53,13 @@ class Buffer(object):
 
     @property
     def contents(self):
-        """Buffer contents"""
+        """Get buffer contents"""
         with self._lock:
             return self._contents
 
     @contents.setter
     def contents(self, value):
-        """Buffer contents"""
+        """Set buffer contents"""
         with self._lock:
             self._contents = value
 
@@ -609,7 +609,8 @@ class Streamer(TorrenterPersistent):
         self._sliding_window_thread = None
         # Signal events
         self._buffering_complete = threading.Event()
-        self._abort_streaming = threading.Event()
+        self._abort_buffering = threading.Event()
+        self._abort_sliding = threading.Event()
         # Inter-thread data buffers
         self._buffer_percent = Buffer(0)
         self._streamed_file_data = Buffer()
@@ -618,7 +619,7 @@ class Streamer(TorrenterPersistent):
 
     def __del__(self):
         """Class destructor"""
-        self.abort_streaming()
+        self.abort_buffering()
         super(Streamer, self).__del__()
 
     def buffer_file_async(self, file_index, buffer_duration, sliding_window_length, default_buffer_size,
@@ -667,7 +668,7 @@ class Streamer(TorrenterPersistent):
             raise IndexError('Invalid file index: {0}!'.format(file_index))
         # Clear flags
         self._buffering_complete.clear()
-        self._abort_streaming.clear()
+        self._abort_buffering.clear()
         self._buffer_percent.contents = 0
         torr_handle = self._torrents_pool[info_hash]
         torr_info = torr_handle.get_torrent_info()
@@ -685,7 +686,7 @@ class Streamer(TorrenterPersistent):
             torr_handle.resume()
         addon.log('Reading the 1st piece...')
         torr_handle.piece_priority(start_piece, 7)
-        while not self._abort_streaming.is_set():
+        while not self._abort_buffering.is_set():
             time.sleep(0.2)
             if torr_handle.have_piece(start_piece):
                 break
@@ -718,7 +719,7 @@ class Streamer(TorrenterPersistent):
                                             start_piece + 1,
                                             start_piece + sliding_window_length,
                                             end_piece - end_offset - 1)
-            while len(buffer_pool) > 0 and not self._abort_streaming.is_set():
+            while len(buffer_pool) > 0 and not self._abort_buffering.is_set():
                 addon.log('Buffer pool: {0}'.format(str(buffer_pool)))
                 time.sleep(0.2)
                 for index, piece_ in enumerate(buffer_pool):
@@ -726,7 +727,7 @@ class Streamer(TorrenterPersistent):
                         del buffer_pool[index]
                 self._buffer_percent.contents = int(100.0 * (buffer_pool_length - len(buffer_pool)) /
                                                     buffer_pool_length)
-            if not self._abort_streaming.is_set():
+            if not self._abort_buffering.is_set():
                 torr_handle.flush_cache()
                 self._buffering_complete.set()
                 return
@@ -737,7 +738,7 @@ class Streamer(TorrenterPersistent):
         """
         Start a sliding window in a separate thread
         """
-        self._abort_streaming.set()
+        self._abort_sliding.set()
         try:
             self._sliding_window_thread.join()
         except (RuntimeError, AttributeError):
@@ -754,10 +755,10 @@ class Streamer(TorrenterPersistent):
         This method implements a sliding window algorithm for sequential download
         of a media file for streaming purposes.
         """
-        self._abort_streaming.clear()
+        self._abort_sliding.clear()
         window_end = min(window_end, last_piece)
         [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start, window_end + 1)]
-        while window_start <= last_piece and not self._abort_streaming.is_set():
+        while window_start <= last_piece and not self._abort_sliding.is_set():
             addon.log('Sliding window position: {0}'.format(window_start))
             self._sliding_window_position.contents = window_start
             torr_handle.piece_priority(window_start, 7)
@@ -769,13 +770,14 @@ class Streamer(TorrenterPersistent):
             time.sleep(0.1)
         self._sliding_window_position.contents = -1
 
-    def abort_streaming(self):
+    def abort_buffering(self):
         """
         Abort buffering
 
         :return:
         """
-        self._abort_streaming.set()
+        self._abort_buffering.set()
+        self._abort_sliding.set()
         try:
             self._buffer_file_thread.join()
         except (RuntimeError, AttributeError):
@@ -794,7 +796,7 @@ class Streamer(TorrenterPersistent):
         :return:
         """
         if self.streamed_file_data is not None and info_hash == str(self.streamed_file_data['torr_handle'].info_hash()):
-            self.abort_streaming()
+            self.abort_buffering()
         super(Streamer, self).remove_torrent(info_hash, delete_files)
 
     @staticmethod
