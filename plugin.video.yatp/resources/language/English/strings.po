@@ -52,11 +52,11 @@ msgid "Pause torrent"
 msgstr ""
 
 msgctxt "#32011"
-msgid "state: {1}; seeds: {2}; peers: {3}"
+msgid "state: {0}; seeds: {1}; peers: {2}"
 msgstr ""
 
 msgctxt "#32012"
-msgid "size: {0}MB; DL speed: {0}KB/s; UL speed: {1}KB/s"
+msgid "size: {0}MB; DL speed: {1}KB/s; UL speed: {2}KB/s"
 msgstr ""
 
 msgctxt "#32013"
