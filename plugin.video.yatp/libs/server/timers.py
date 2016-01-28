@@ -37,8 +37,6 @@ class Timer(object):
     def _runner(self, *args, **kwargs):
         """
         Timed function runner
-
-        @retrun:
         """
         timestamp = time.time()
         while not self._abort_flag.is_set():
@@ -50,17 +48,13 @@ class Timer(object):
     def start(self):
         """
         Timer start
-
-        @retrun:
         """
         self._abort_flag.clear()
         self._thread.start()
 
     def abort(self):
         """
-        Abort timer
-
-        @retrun:
+        Abort timer thread
         """
         self._abort_flag.set()
         try:
@@ -74,7 +68,6 @@ def check_seeding_limits(torrenter):
     Check seding limits
 
     :param torrenter:
-    @retrun:
     """
     for torrent in torrenter.get_all_torrents_info():
         if _addon.ratio_limit:
@@ -82,13 +75,13 @@ def check_seeding_limits(torrenter):
                 ratio = torrent['total_upload'] / torrent['total_download']
             except ZeroDivisionError:
                 ratio = 0
-            if _addon.ratio_limit and torrent['state'] == 'seeding' and ratio >= _addon.ratio_limit:
+            if torrent['state'] in ('seeding', 'finished') and ratio >= _addon.ratio_limit:
                 torrenter.pause_torrent(torrent['info_hash'])
         try:
             if (_addon.time_limit and
                     (datetime.now() - datetime.strptime(torrent['completed_time'], '%Y-%m-%d %H:%M:%S') >=
                          timedelta(hours=_addon.time_limit))):
-                if _addon.expired_action == 'pause' and torrent['state'] == 'seeding':
+                if _addon.expired_action == 0 and torrent['state'] == 'seeding':
                     torrenter.pause_torrent(torrent['info_hash'])
                 elif _addon.expired_action == 1 and torrent['state'] in ('seeding', 'paused'):
                     torrenter.remove_torrent(torrent['info_hash'], _addon.delete_expired_files)
@@ -101,7 +94,6 @@ def save_resume_data(torrenter):
     Save torrents resume data
 
     :param torrenter:
-    @retrun:
     """
     torrenter.save_all_resume_data()
 

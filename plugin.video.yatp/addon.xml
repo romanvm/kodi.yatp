@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.yatp"
-  version="3.1.9"
+  version="3.1.11"
   name="Yet Another Torrent Player"
   provider-name="Roman V. M.">
 <requires>
@@ -13,7 +13,8 @@
 <extension point="xbmc.service" library="server.py" start="[login|startup]"/>
 <extension point="xbmc.addon.metadata">
   <summary lang="en">Yet Another Torrent Player</summary>
-  <description lang="en">A torrent client that allows to play video torrents without fully downloading them.</description>
+  <description lang="en">A torrent client that allows to play video torrents
+    while downloading them in the background.</description>
   <platform>all</platform>
 </extension>
 </addon>
