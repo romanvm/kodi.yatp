@@ -36,6 +36,8 @@ if args.repo:
     os.chdir(kodi_repo_dir)
     os.system('git checkout gh-pages')
     os.system('git pull')
+    os.system('git config user.name "Roman Miroshnychenko"')
+    os.system('git config user.email "romanvm@yandex.ua"')
     shutil.copy(os.path.join(root_dir, addon, 'addon.xml'),
                 os.path.join(kodi_repo_dir, 'repo', addon))
     shutil.copy(os.path.join(root_dir, '{0}-{1}.zip'.format(addon, version)),
