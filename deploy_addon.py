@@ -61,6 +61,6 @@ if args.docs:
     os.system('git add --all .')
     os.system('git commit -m "Updates {addon} docs to v.{version}"'.format(addon=addon,
                                                                            version=version))
-    os.system('git push -f -q "{gh_repo_url}" HEAD:gh-pages'.format(gh_repo_url=gh_repo_url))
+    os.system('git push --force --quiet "{gh_repo_url}" HEAD:gh-pages'.format(gh_repo_url=gh_repo_url))
     print('{addon} docs v.{version} published to GitHub Pages.'.format(addon=addon,
                                                                        version=version))
