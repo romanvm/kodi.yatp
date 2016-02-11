@@ -5,7 +5,6 @@
 # Licence: GPL v.3: http://www.gnu.org/copyleft/gpl.html
 
 import os
-import time
 import xbmcgui
 from xbmc import LOGNOTICE
 from libs.simpleplugin import Plugin
@@ -161,29 +160,6 @@ def torrents(params):
     return listing
 
 
-def torrent_info(params):
-    """
-    Display current torrent info
-
-    :param params:
-    :return:
-    """
-    torr_info = jsonrq.get_torrent_info(params['info_hash'])
-    info_dialog = xbmcgui.DialogProgress()
-    info_dialog.create(torr_info['name'])
-    while not info_dialog.iscanceled():
-        info_dialog.update(torr_info['progress'],
-                           string(32011).format(torr_info['size'],
-                                           torr_info['state'],
-                                           torr_info['num_seeds'],
-                                           torr_info['num_peers']),
-                           string(32012).format(torr_info['dl_speed'], torr_info['ul_speed']),
-                           string(32013).format(torr_info['total_download'],
-                                                                     torr_info['total_upload']))
-        time.sleep(1.0)
-        torr_info = jsonrq.get_torrent_info(params['info_hash'])
-
-
 def list_files(params):
     """
     Add a torrent to the sessiona and display the list of files in a torrent
@@ -248,6 +224,5 @@ plugin.actions['play'] = play_torrent
 plugin.actions['play_file'] = play_file
 plugin.actions['download'] = download_torrent
 plugin.actions['torrents'] = torrents
-plugin.actions['torrent_info'] = torrent_info
 plugin.actions['list_files'] = list_files
 plugin.actions['show_files'] = show_files
