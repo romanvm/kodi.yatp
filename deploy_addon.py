@@ -33,11 +33,12 @@ parser.add_argument('-d', '--docs', help='publish docs to GH pages', action='sto
 args = parser.parse_args()
 
 addon = os.environ['ADDON']
+repo_slug= os.environ['TRAVIS_REPO_SLUG']
 root_dir = os.path.dirname(os.path.abspath(__file__))
 docs_dir = os.path.join(root_dir, 'docs')
 html_dir = os.path.join(docs_dir, '_build', 'html')
 gh_repo_url = 'https://{gh_token}@github.com/{repo_slug}.git'.format(gh_token=gh_token,
-                                                                     repo_slug=os.environ['TRAVIS_REPO_SLUG'])
+                                                                     repo_slug=repo_slug)
 kodi_repo_dir = os.path.join(root_dir, 'kodi_repo')
 kodi_repo_url = 'https://{gh_token}@github.com/romanvm/kodi_repo.git'.format(gh_token=gh_token)
 os.chdir(root_dir)
@@ -62,9 +63,11 @@ if args.repo:
     execute(['python', '@generate.py'])
     os.chdir(kodi_repo_dir)
     execute(['git', 'add', '--all', '.'])
-    execute(['git', 'commit', '-m', '"Updates {addon} to v.{version}"'.format(addon=addon, version=version)])
+    execute(['git', 'commit', '-m', '"Updates {addon} to v.{version}"'.format(addon=addon,
+                                                                              version=version)])
     execute(['git', 'push', '--quiet'], silent=True)
-    print('Addon {0} v{1} deployed to my Kodi repo'.format(addon, version))
+    print('Addon {addon} v{version} deployed to my Kodi repo'.format(addon=addon,
+                                                                     version=version))
 if args.docs:
     os.chdir(docs_dir)
     execute(['make', 'html'])
@@ -74,7 +77,8 @@ if args.docs:
     execute(['git', 'config', 'user.email', '"romanvm@yandex.ua"'])
     open('.nojekyll', 'w').close()
     execute(['git', 'add', '--all', '.'])
-    execute(['git', 'commit', '-m' '"Updates {addon} docs to v.{version}"'.format(addon=addon, version=version)])
+    execute(['git', 'commit', '-m' '"Updates {addon} docs to v.{version}"'.format(addon=addon,
+                                                                                  version=version)])
     execute(['git', 'push', '--force', '--quiet', gh_repo_url, 'HEAD:gh-pages'], silent=True)
     print('{addon} docs v.{version} published to GitHub Pages.'.format(addon=addon,
                                                                        version=version))
