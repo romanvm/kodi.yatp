@@ -14,7 +14,7 @@ from buffering import buffer_torrent, stream_torrent, add_torrent, get_videofile
 plugin = Plugin()
 string = plugin.get_localized_string
 icons = os.path.join(plugin.path, 'resources', 'icons')
-commands = os.path.join(os.path.dirname(__file__), 'commands.py')
+commands = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'commands.py')
 
 
 def _play(path):
