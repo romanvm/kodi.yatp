@@ -48,7 +48,7 @@ if args.repo:
     shutil.make_archive('{0}-{1}'.format(addon, version),
                         'zip',
                         root_dir=root_dir,
-                        base_dir=os.path.join(root_dir, addon))
+                        base_dir=addon)
     print('ZIP created successfully.')
     execute(['git', 'clone', kodi_repo_url], silent=True)
     os.chdir(kodi_repo_dir)
