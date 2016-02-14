@@ -93,7 +93,7 @@ def stream_torrent(file_index, info_hash):
     :return:
     """
     files = jsonrq.get_files(info_hash)
-    if file_index >= len(files) or file_index < 0:
+    if file_index not in xrange(0, len(files) + 1):
         raise IndexError('File index {0} is out of range!'.format(file_index))
     progress_dialog = xbmcgui.DialogProgress()
     progress_dialog.create(string(32014))

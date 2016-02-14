@@ -664,7 +664,7 @@ class Streamer(TorrenterPersistent):
         if info_hash is None:
             info_hash = self.last_added_torrent['info_hash']
         files = self.get_files(info_hash)
-        if file_index >= len(files) or file_index < 0:
+        if file_index not in xrange(0, len(files) + 1):
             raise IndexError('Invalid file index: {0}!'.format(file_index))
         # Clear flags
         self._buffering_complete.clear()
