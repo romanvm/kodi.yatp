@@ -7,7 +7,9 @@
 import os
 import sys
 from mimetypes import guess_type
+from contextlib import closing
 from cStringIO import StringIO
+from xbmcvfs import File
 from addon import Addon
 
 addon = Addon()
@@ -26,10 +28,18 @@ MIME = {'.mkv': 'video/x-matroska',
 
 def _parse_file(filename):
     """Extract metatata from file"""
-    with open(filename, 'rb') as f:
+    # Workaround to fix unicode path problem on different OSs
+    if sys.platform == 'win32':
+        f = open(filename, 'rb')
+    else:
+        f = File(filename)
+    try:
         s = StringIO(f.read(1024 * 64))
-    p = guessParser(InputIOStream(s, filename=unicode(filename), tags=[]))
-    return extractMetadata(p)
+        p = guessParser(InputIOStream(s, filename=unicode(filename), tags=[]))
+        metadata = extractMetadata(p)
+    finally:
+        f.close()
+    return metadata
 
 
 def get_duration(filename):

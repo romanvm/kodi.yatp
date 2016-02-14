@@ -256,7 +256,11 @@ def stream_file(path):
     if sys.platform == 'win32':
         path = path.decode('utf-8')
     file_path = os.path.normpath(os.path.join(download_dir, path))
-    addon.log('File path: {0}'.format(file_path.encode('utf-8')))
+    # Workaround to fix unicode path problem on different OSs
+    try:
+        addon.log('File path: {0}'.format(file_path.encode('utf-8')))
+    except UnicodeDecodeError:
+        addon.log('File path: {0}'.format(file_path))
     size = os.path.getsize(file_path)
     addon.log('File size: {0}'.format(size))
     mime = get_mime(file_path)
