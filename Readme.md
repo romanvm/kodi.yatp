@@ -1,5 +1,7 @@
 # Yet Anoter Torrent Player
 
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/a642f4e6f43549eeac8d5e7ec2051dd1/badge.svg)](https://www.quantifiedcode.com/app/project/a642f4e6f43549eeac8d5e7ec2051dd1)
+
 Yet Anoter Torrent Player (YATP) is a torrent streaming video plugin for [Kodi](http://kodi.tv) mediacenter.
 It allows to watch video torrents in Kodi while downloading them in the background.
 The plugin can also be used a simple torrent-client.
