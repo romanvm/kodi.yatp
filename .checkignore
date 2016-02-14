@@ -1,0 +1,4 @@
+plugin.video.yatp/site-packages/*
+tests/*
+test.py
+deploy_addon.py
