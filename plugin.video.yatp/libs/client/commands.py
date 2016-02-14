@@ -45,12 +45,10 @@ if __name__ == '__main__':
         jsonrq.pause_torrent(sys.argv[2])
     elif sys.argv[1] == 'resume':
         jsonrq.resume_torrent(sys.argv[2])
-    elif sys.argv[1] == 'delete':
-        if xbmcgui.Dialog().yesno(string(32024), string(32025)):
-            jsonrq.remove_torrent(sys.argv[2], False)
-    elif sys.argv[1] == 'delete_with_files':
-        if xbmcgui.Dialog().yesno(string(32024), string(32026), string(32027)):
-            jsonrq.remove_torrent(sys.argv[2], True)
+    elif sys.argv[1] == 'delete' and xbmcgui.Dialog().yesno(string(32024), string(32025)):
+        jsonrq.remove_torrent(sys.argv[2], False)
+    elif sys.argv[1] == 'delete_with_files'and xbmcgui.Dialog().yesno(string(32024), string(32026), string(32027)):
+        jsonrq.remove_torrent(sys.argv[2], True)
     elif sys.argv[1] == 'pause_all':
         jsonrq.pause_all()
     elif sys.argv[1] == 'resume_all':
