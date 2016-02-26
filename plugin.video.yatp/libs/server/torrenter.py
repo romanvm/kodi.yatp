@@ -556,7 +556,7 @@ class TorrenterPersistent(Torrenter):
         try:
             with open(filepath, mode='rb') as m_file:
                 metadata = pickle.load(m_file)
-        except (IOError, EOFError, pickle.PickleError):
+        except (IOError, EOFError, ValueError, pickle.PickleError):
             addon.log('Resume file "{0}" is missing or corrupted!'.format(filepath), xbmc.LOGERROR)
         else:
             torrent = os.path.join(self._resume_dir, metadata['info_hash'] + '.torrent')
