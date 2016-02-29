@@ -6,7 +6,8 @@ When doing this please follow the simple rules described below.
 
 ## Bug Reports
 
-Before submitting a bug report read carefully the project's Wiki to check if this is a known issue/feature.
+Before submitting a bug report read carefully the [project's Wiki](https://github.com/romanvm/kodi.yatp/wiki)
+to check if this is a known issue/feature.
 When submitting bug reports you need to provide the following information:
 
 1. Your system description and Kodi version.
