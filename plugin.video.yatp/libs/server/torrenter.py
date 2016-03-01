@@ -93,7 +93,7 @@ class Torrenter(object):
         # Inter-thread data buffer.
         self._last_added_torrent = Buffer()
         # Initialize session
-        self._session = libtorrent.session()
+        self._session = libtorrent.session(fingerprint=libtorrent.fingerprint('UT', 2, 2, 0, 0))
         self._session.listen_on(start_port, end_port)
         self.set_session_settings(cache_size=256,  # 4MB
                                   ignore_limits_on_local_network=False,
