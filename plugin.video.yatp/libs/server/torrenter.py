@@ -96,7 +96,7 @@ class Torrenter(object):
         self._session = libtorrent.session(fingerprint=libtorrent.fingerprint('UT', 2, 2, 0, 0))
         self._session.listen_on(start_port, end_port)
         self.set_session_settings(cache_size=256,  # 4MB
-                                  ignore_limits_on_local_network=False,
+                                  ignore_limits_on_local_network=True,
                                   user_agent='uTorrent/2200(24683)')
         self._session.add_dht_router('router.bittorrent.com', 6881)
         self._session.add_dht_router('router.utorrent.com', 6881)
