@@ -18,6 +18,6 @@ os.system('git push --all')
 if '-t' in sys.argv:
     with open(os.path.join(basedir, ADDON, 'addon.xml'), 'rb') as addon_xml:
         version = re.search(r'(?<!xml )version="(.+?)"', addon_xml.read()).group(1)
-    os.system('git tag v{0}'.format(version))
+    os.system('git tag v.{0}'.format(version))
     os.system('git push --tags')
 os.system('git checkout develop')
