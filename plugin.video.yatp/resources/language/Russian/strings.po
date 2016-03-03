@@ -274,3 +274,7 @@ msgstr "Показать сведения"
 msgctxt "#32066"
 msgid "Restore download"
 msgstr "Восстановить загрузку"
+
+msgctxt "#32067"
+msgid "MB"
+msgstr "МБ"

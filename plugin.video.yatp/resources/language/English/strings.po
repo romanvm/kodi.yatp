@@ -274,3 +274,7 @@ msgstr ""
 msgctxt "#32066"
 msgid "Restore download"
 msgstr ""
+
+msgctxt "#32067"
+msgid "MB"
+msgstr ""
