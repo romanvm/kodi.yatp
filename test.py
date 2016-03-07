@@ -3,10 +3,14 @@
 # Created on: 26.01.2016
 # Author: Roman Miroshnychenko aka Roman V.M. (romanvm@yandex.ua)
 
+import os
+import sys
 import unittest
 
-from tests.server.tests_timers import *
+base_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(base_dir, 'tests', 'server'))
 
+from tests_timers import *
 
 if __name__ == '__main__':
     unittest.main()
