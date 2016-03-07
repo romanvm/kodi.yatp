@@ -93,11 +93,11 @@ class Torrenter(object):
         # Inter-thread data buffer.
         self._last_added_torrent = Buffer()
         # Initialize session
-        self._session = libtorrent.session()
+        self._session = libtorrent.session(fingerprint=libtorrent.fingerprint('UT', 3, 4, 5, 41865))
         self._session.listen_on(start_port, end_port)
         self.set_session_settings(cache_size=256,  # 4MB
-                                  ignore_limits_on_local_network=False,
-                                  user_agent='uTorrent/2200(24683)')
+                                  ignore_limits_on_local_network=True,
+                                  user_agent='uTorrent/3.4.5(41865)')
         self._session.add_dht_router('router.bittorrent.com', 6881)
         self._session.add_dht_router('router.utorrent.com', 6881)
         self._session.add_dht_router('router.bitcomet.com', 6881)

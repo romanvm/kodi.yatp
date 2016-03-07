@@ -6,6 +6,7 @@
 
 import os
 import xbmcgui
+import xbmcplugin
 from xbmc import LOGNOTICE
 from libs.simpleplugin import Plugin
 import json_requests as jsonrq
@@ -207,14 +208,18 @@ def _build_file_list(files, info_hash):
             thumb = os.path.join(icons, 'mov.png')
         else:
             thumb = os.path.join(icons, 'play.png')
-        listing.append({'label': file_[1],
+        listing.append({'label': '{name} [{size}{unit}]'.format(name=file_[1].encode('utf-8'),
+                                                                size=file_[2] / 1048576,
+                                                                unit=string(32067)),
                         'thumb': thumb,
                         'url': plugin.get_url(action='play_file',
                                               info_hash=info_hash,
                                               file_index=file_[0]),
-                        'is_playable': True
+                        'is_playable': True,
+                        'info': {'video': {'size': file_[2]}},
                         })
-    return plugin.create_listing(listing, cache_to_disk=True)
+    return plugin.create_listing(listing, cache_to_disk=True, sort_methods=(xbmcplugin.SORT_METHOD_LABEL,
+                                                                            xbmcplugin.SORT_METHOD_SIZE))
 
 
 # Map actions

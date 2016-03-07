@@ -1,5 +1,12 @@
 branches:
-  only: /^v\d+\.\d+\.\d+$/
+  only: /^v\.\d+\.\d+\.\d+$/
 language: python
 python: "2.7"
-script: python deploy_addon.py -r
+script: echo "Skipping build..."
+before_deploy: wget https://raw.githubusercontent.com/romanvm/travis_scripts/master/deploy_addon.py
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: python deploy_addon.py -r
+  on:
+    tags: true
