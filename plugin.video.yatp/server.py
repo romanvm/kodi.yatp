@@ -8,16 +8,12 @@ Torrent streamer WSGI server
 """
 
 import xbmc
-from libs.server.addon import Addon
-
-addon = Addon()
-
-import xbmc
 import xbmcgui
 from libs.server import wsgi_app
 from libs.server.wsgi_server import create_server
+from libs.server.addon import Addon
 
-
+addon = Addon()
 xbmc.sleep(2000)
 addon.log('***** Starting Torrent Server... *****')
 if addon.enable_limits:
