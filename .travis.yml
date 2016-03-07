@@ -10,3 +10,5 @@ deploy:
   script: python deploy_addon.py -r
   on:
     tags: true
+notifications:
+  email: false
