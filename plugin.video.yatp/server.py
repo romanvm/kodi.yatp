@@ -12,13 +12,13 @@ from libs.server.addon import Addon
 
 addon = Addon()
 
-import time
+import xbmc
 import xbmcgui
 from libs.server import wsgi_app
 from libs.server.wsgi_server import create_server
 
 
-time.sleep(2.0)
+xbmc.sleep(2000)
 addon.log('***** Starting Torrent Server... *****')
 if addon.enable_limits:
     wsgi_app.limits_timer.start()
