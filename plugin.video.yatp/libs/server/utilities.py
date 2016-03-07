@@ -7,7 +7,6 @@
 import os
 import sys
 from mimetypes import guess_type
-from contextlib import closing
 from cStringIO import StringIO
 from xbmcvfs import File
 from addon import Addon

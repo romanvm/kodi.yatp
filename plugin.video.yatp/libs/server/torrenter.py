@@ -214,7 +214,7 @@ class Torrenter(object):
                 raise TorrenterError('Error when adding torrent: {0}!'.format(torrent))
         torr_handle = self._session.add_torrent(add_torrent_params)
         while not torr_handle.has_metadata():  # Wait until torrent metadata are populated
-            time.sleep(0.1)
+            xbmc.sleep(100)
         torr_handle.auto_managed(False)
         self._torrents_pool[str(torr_handle.info_hash())] = torr_handle
         return torr_handle
@@ -687,7 +687,7 @@ class Streamer(TorrenterPersistent):
         addon.log('Reading the 1st piece...')
         torr_handle.piece_priority(start_piece, 7)
         while not self._abort_buffering.is_set():
-            time.sleep(0.2)
+            xbmc.sleep(200)
             if torr_handle.have_piece(start_piece):
                 break
         else:
@@ -721,7 +721,7 @@ class Streamer(TorrenterPersistent):
                                             end_piece - end_offset - 1)
             while len(buffer_pool) > 0 and not self._abort_buffering.is_set():
                 addon.log('Buffer pool: {0}'.format(str(buffer_pool)))
-                time.sleep(0.2)
+                xbmc.sleep(200)
                 for index, piece_ in enumerate(buffer_pool):
                     if torr_handle.have_piece(piece_):
                         del buffer_pool[index]
@@ -767,7 +767,7 @@ class Streamer(TorrenterPersistent):
                 if window_end < last_piece:
                     window_end += 1
                     torr_handle.piece_priority(window_end, 1)
-            time.sleep(0.1)
+            xbmc.sleep(100)
         self._sliding_window_position.contents = -1
 
     def abort_buffering(self):

@@ -8,8 +8,8 @@ Buffering torrent
 """
 
 import os
-import time
 from urllib import quote
+import xbmc
 import xbmcgui
 import json_requests as jsonrq
 from libs.simpleplugin import Addon
@@ -48,7 +48,7 @@ def add_torrent(torrent):
     progress_dialog.create(string(32015))
     progress_dialog.update(0, string(32016))
     while not (progress_dialog.iscanceled() or jsonrq.check_torrent_added()):
-        time.sleep(1.0)
+        xbmc.sleep(1000)
     if not progress_dialog.iscanceled():
         progress_dialog.close()
         return jsonrq.get_last_added_torrent()
@@ -104,7 +104,7 @@ def stream_torrent(file_index, info_hash):
                                string(32018).format(torrent_info['total_download']),
                                string(32019).format(torrent_info['dl_speed']),
                                string(32020).format(torrent_info['num_seeds']))
-        time.sleep(1.0)
+        xbmc.sleep(1000)
     if not progress_dialog.iscanceled():
         progress_dialog.close()
         return media_url + quote(files[file_index][0].replace('\\', '/').encode('utf-8'))
