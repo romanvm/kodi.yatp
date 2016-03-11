@@ -8,6 +8,7 @@ from __future__ import division
 import threading
 import time
 from datetime import datetime, timedelta
+import xbmc
 from addon import Addon
 
 _addon = Addon()
@@ -43,7 +44,7 @@ class Timer(object):
             if time.time() - timestamp >= self._interval:
                 self._func(*args, **kwargs)
                 timestamp = time.time()
-            time.sleep(0.2)
+            xbmc.sleep(200)
 
     def start(self):
         """
@@ -96,3 +97,4 @@ def save_resume_data(torrenter):
     :param torrenter:
     """
     torrenter.save_all_resume_data()
+

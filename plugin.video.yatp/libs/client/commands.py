@@ -8,7 +8,6 @@ Context menu commands
 """
 
 import sys
-import time
 import xbmc
 import xbmcgui
 import json_requests as jsonrq
@@ -36,7 +35,7 @@ def show_torrent_info(info_hash):
                            string(32011).format(torr_info['state'], torr_info['num_seeds'], torr_info['num_peers']),
                            string(32012).format(torr_info['size'], torr_info['dl_speed'], torr_info['ul_speed']),
                            string(32013).format(torr_info['total_download'], torr_info['total_upload']))
-        time.sleep(1.0)
+        xbmc.sleep(1000)
         torr_info = jsonrq.get_torrent_info(info_hash)
 
 
