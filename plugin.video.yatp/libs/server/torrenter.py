@@ -12,7 +12,6 @@ with torrent media streaming capability.
 from __future__ import division
 import os
 import sys
-import time
 import threading
 import datetime
 import platform

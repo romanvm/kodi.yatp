@@ -11,7 +11,7 @@ import os
 import sys
 import xbmc
 from collections import namedtuple
-from libs import simpleplugin
+import simpleplugin
 
 Credentials = namedtuple('Credentials', ['login', 'password'])
 

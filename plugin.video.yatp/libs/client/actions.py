@@ -8,7 +8,7 @@ import os
 import xbmcgui
 import xbmcplugin
 from xbmc import LOGNOTICE
-from libs.simpleplugin import Plugin
+from simpleplugin import Plugin
 import json_requests as jsonrq
 from buffering import buffer_torrent, stream_torrent, add_torrent, get_videofiles
 

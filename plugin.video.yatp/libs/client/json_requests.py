@@ -8,10 +8,10 @@ JSON-RPC requests to the Torrent Server
 """
 
 from requests import post
-from xbmcaddon import Addon
+from simpleplugin import Addon
 
-addon = Addon('plugin.video.yatp')
-json_rpc_url = 'http://127.0.0.1:{0}/json-rpc'.format(addon.getSetting('server_port'))
+addon = Addon()
+json_rpc_url = 'http://127.0.0.1:{0}/json-rpc'.format(addon.server_port)
 
 
 def _request(data):

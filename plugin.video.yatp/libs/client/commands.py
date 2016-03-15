@@ -11,14 +11,13 @@ import sys
 import xbmc
 import xbmcgui
 import json_requests as jsonrq
-from xbmcaddon import Addon
+from simpleplugin import Addon
 
-ID = 'plugin.video.yatp'
-addon = Addon(ID)
+addon = Addon('plugin.video.yatp')
 
 
 def string(id_):
-    return addon.getLocalizedString(id_).encode('utf-8')
+    return addon.get_localized_string(id_)
 
 
 def show_torrent_info(info_hash):
@@ -58,5 +57,5 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'restore_finished':
         jsonrq.restore_finished(sys.argv[2])
     else:
-        xbmc.log('{0}: Command cancelled or invalid command: {1}'.format(ID, sys.argv[1]))
+        addon.log('{Command cancelled or invalid command: {1}'.format(sys.argv[1]))
     xbmc.executebuiltin('Container.Refresh')

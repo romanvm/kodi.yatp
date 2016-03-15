@@ -12,7 +12,7 @@ from urllib import quote
 import xbmc
 import xbmcgui
 import json_requests as jsonrq
-from libs.simpleplugin import Addon
+from simpleplugin import Addon
 
 
 addon = Addon()
