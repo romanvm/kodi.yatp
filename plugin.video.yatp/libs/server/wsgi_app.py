@@ -186,7 +186,7 @@ def json_rpc():
     """
     Process JSON-RPC requests
 
-    :return:
+    :return: JSON-RPC reply
     """
     addon.log('***** JSON request *****')
     addon.log(request.body.read())
@@ -194,9 +194,12 @@ def json_rpc():
     reply = {'jsonrpc': '2.0', 'id': data.get('id', '1')}
     try:
         reply['result'] = getattr(methods, data['method'])(torrent_client, data.get('params'))
+    except AttributeError:
+        addon.log(format_exc(), xbmc.LOGERROR)
+        reply['error'] = {'code': -32601, 'message': 'Method not found: "{0}"'.format(data['method'])}
     except:
         addon.log(format_exc(), xbmc.LOGERROR)
-        reply['error'] = format_exc()
+        reply['error'] = {'code': -32000, 'message': 'Internal error!', 'data': format_exc()}
     addon.log('***** JSON response *****')
     addon.log(str(reply))
     return reply
