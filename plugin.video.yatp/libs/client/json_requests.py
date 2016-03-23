@@ -10,7 +10,7 @@ JSON-RPC requests to the Torrent Server
 from requests import post
 from simpleplugin import Addon
 
-addon = Addon()
+addon = Addon('plugin.video.yatp')
 json_rpc_url = 'http://127.0.0.1:{0}/json-rpc'.format(addon.server_port)
 
 
