@@ -13,7 +13,8 @@ import xbmcgui
 import json_requests as jsonrq
 from simpleplugin import Addon
 
-addon = Addon('plugin.video.yatp')
+ID = 'plugin.video.yatp'
+addon = Addon(ID)
 
 
 def string(id_):
@@ -57,5 +58,5 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'restore_finished':
         jsonrq.restore_finished(sys.argv[2])
     else:
-        addon.log('{Command cancelled or invalid command: {1}'.format(sys.argv[1]))
+        addon.log('{0}: Command cancelled or invalid command: {1}'.format(ID, sys.argv[1]))
     xbmc.executebuiltin('Container.Refresh')
