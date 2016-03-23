@@ -36,3 +36,13 @@
     border-right:1px solid #fff;
     vertical-align:middle;
     }
+.dlg {
+  padding:10px;
+}
+.path-input {
+  margin-bottom:20px;
+}
+.warning {
+  color:red;
+  font-weight:bold;
+}
