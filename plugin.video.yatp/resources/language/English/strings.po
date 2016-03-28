@@ -278,3 +278,7 @@ msgstr ""
 msgctxt "#32067"
 msgid "MB"
 msgstr ""
+
+msgctxt "#32068"
+msgid "libtorrent version"
+msgstr ""

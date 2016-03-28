@@ -9,13 +9,27 @@ Torrent streamer WSGI server
 
 import xbmc
 import xbmcgui
-from libs.server import wsgi_app
 from libs.server.wsgi_server import create_server
-from libs.server.addon import Addon
+from simpleplugin import Addon
 
 addon = Addon()
+# A monkey-patch to set the necessary librorrent version
+librorrent_addon = Addon('script.module.libtorrent')
+orig_custom_version = librorrent_addon.get_setting('custom_version', False)
+orig_set_version = librorrent_addon.get_setting('set_version', False)
+librorrent_addon.set_setting('custom_version', 'true')
+if addon.get_setting('libtorrent_version') == '1.0.9':
+    librorrent_addon.set_setting('set_version', '4')
+else:
+    librorrent_addon.set_setting('set_version', '0')
+
+from libs.server import wsgi_app
+
+librorrent_addon.set_setting('custom_version', orig_custom_version)
+librorrent_addon.set_setting('set_version', orig_set_version)
+# ===
 xbmc.sleep(2000)
-addon.log('***** Starting Torrent Server... *****')
+addon.log('Starting Torrent Server...')
 if addon.enable_limits:
     wsgi_app.limits_timer.start()
 if addon.persistent:
@@ -26,13 +40,13 @@ start_trigger = True
 while not xbmc.abortRequested:
     httpd.handle_request()
     if start_trigger:
-        addon.log('***** Torrent Server started *****', xbmc.LOGNOTICE)
+        addon.log('Torrent Server started', xbmc.LOGNOTICE)
         xbmcgui.Dialog().notification('YATP', addon.get_localized_string(32028), addon.icon, 3000, False)
         start_trigger = False
-addon.log('***** Torrent Server stopped *****', xbmc.LOGNOTICE)
 wsgi_app.torrent_client.abort_buffering()
 if addon.enable_limits:
     wsgi_app.limits_timer.abort()
 if addon.persistent:
     wsgi_app.save_resume_timer.abort()
 del wsgi_app.torrent_client
+addon.log('Torrent Server stopped', xbmc.LOGNOTICE)

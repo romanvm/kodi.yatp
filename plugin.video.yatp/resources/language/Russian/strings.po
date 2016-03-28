@@ -278,3 +278,7 @@ msgstr "Восстановить загрузку"
 msgctxt "#32067"
 msgid "MB"
 msgstr "МБ"
+
+msgctxt "#32068"
+msgid "libtorrent version"
+msgstr "Версия libtorrent"

@@ -18,8 +18,8 @@ Credentials = namedtuple('Credentials', ['login', 'password'])
 
 class Addon(simpleplugin.Addon):
     """Helper class to access addon parameters"""
-    def __init__(self):
-        super(Addon, self).__init__()
+    def __init__(self, id_=''):
+        super(Addon, self).__init__(id_)
         self._download_dir = self.get_setting('download_dir') or xbmc.translatePath('special://temp')
         if sys.platform == 'win32':
             self._download_dir = self._download_dir.decode('utf-8')

@@ -39,6 +39,8 @@
                  label="32042" default="8668"/>
         <setting id="torrent_port" type="number"
                  label="32044" default="25335" />
+        <setting id="libtorrent_version" type="labelenum"
+                 label="32068" values="0.16.19|1.0.9" default="1.0.9" />
         <setting id="persistent" type="bool"
                  label="32063" default="true" />
         <setting id="enable_encryption" type="bool"
