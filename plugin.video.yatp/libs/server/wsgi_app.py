@@ -51,7 +51,7 @@ if not addon.enable_encryption:
 if addon.enable_limits:
     limits_timer = Timer(10, check_seeding_limits, torrent_client)
 if addon.persistent:
-    save_resume_timer = Timer(30, save_resume_data, torrent_client)
+    save_resume_timer = Timer(60, save_resume_data, torrent_client)
 # Bottle WSGI application
 static_path = os.path.join(addon.path, 'resources', 'web')
 TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))
