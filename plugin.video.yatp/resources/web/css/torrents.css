@@ -36,13 +36,11 @@
     border-right:1px solid #fff;
     vertical-align:middle;
     }
-.dlg {
-  padding:10px;
+.yatp-dialog {
+  padding:5px;
 }
-.path-input {
-  margin-bottom:20px;
-}
-.warning {
+.yatp-warning {
   color:red;
   font-weight:bold;
+  text-transform:uppercase;
 }
