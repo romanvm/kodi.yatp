@@ -729,10 +729,7 @@ class Streamer(TorrenterPersistent):
                                                     buffer_pool_length)
             if not self._abort_buffering.is_set():
                 torr_handle.flush_cache()
-                self._buffering_complete.set()
-                return
-        else:
-            self._buffering_complete.set()
+        self._buffering_complete.set()
 
     def start_sliding_window_async(self, torr_handle, window_start, window_end, last_piece):
         """
