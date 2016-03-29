@@ -202,7 +202,7 @@ class Torrenter(object):
             add_torrent_params['url'] = str(torrent)  # libtorrent doesn't like unicode objects here
         elif torrent[:7] in ('http://', 'https:/'):
             # Here external http/https client is used in case if libtorrent module is compiled without OpenSSL
-            torr_file = get(torrent, cookies=cookies).content
+            torr_file = get(torrent, cookies=cookies, veryfy=False).content
             add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(torr_file))
         else:
             try:
