@@ -98,7 +98,7 @@ def download_torrent(params):
     :return:
     """
     download_dir = params.get('download_dir') or plugin.download_dir
-    jsonrq.add_torrent(params['torrent'], download_dir)
+    jsonrq.download_torrent(params['torrent'], download_dir)
     xbmcgui.Dialog().notification('YATP', string(32004), plugin.icon, 3000)
 
 
