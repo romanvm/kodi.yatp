@@ -60,12 +60,6 @@ def remove_torrent(info_hash, delete_files):
     _request({'method': 'remove_torrent', 'params': {'info_hash': info_hash, 'delete_files': delete_files}})
 
 
-def download_torrent(torrent, download_dir):
-    _request({'method': 'add_torrent', 'params': {'torrent': torrent,
-                                                  'save_path': download_dir,
-                                                  'paused': False}})
-
-
 def get_all_torrent_info():
     return _request({'method': 'get_all_torrent_info'})
 
