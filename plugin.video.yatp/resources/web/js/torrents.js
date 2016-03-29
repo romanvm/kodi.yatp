@@ -209,10 +209,7 @@ $(function()
         buttons: [{
             text: 'Add',
             iconCls: 'icon-ok',
-            handler: function()
-                {
-                    add_torrent_file();
-                } // end function
+            handler: add_torrent_file
             }, // end button
             {
             text: 'Cancel',
@@ -238,10 +235,7 @@ $(function()
         buttons: [{
             text: 'Add',
             iconCls: 'icon-ok',
-            handler: function()
-                {
-                    add_torrent_link();
-                } // end function
+            handler: add_torrent_link
             }, // end button
             {
             text: 'Cancel',
@@ -266,10 +260,7 @@ $(function()
         buttons: [{
             text: 'Delete',
             iconCls: 'icon-ok',
-            handler: function()
-                {
-                    remove_torrents();
-                } // end function
+            handler: remove_torrents
             }, // end button
             {
             text: 'Cancel',
