@@ -75,7 +75,7 @@ def play_torrent(params):
     file_index = params.get('file_index')
     if file_index is not None and file_index != 'dialog':
         file_index = int(file_index)
-    return _play(buffer_torrent(params['torrent'], file_index))
+    return _play(buffer_torrent(params['torrent'], file_index, params.get('save_path')))
 
 
 def play_file(params):

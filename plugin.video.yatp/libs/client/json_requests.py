@@ -28,8 +28,8 @@ def _request(data):
         raise RuntimeError('JSON-RPC returned error:\n{0}'.format(reply['error']))
 
 
-def add_torrent(torrent):
-    _request({'method': 'add_torrent', 'params': {'torrent': torrent}})
+def add_torrent(torrent, save_path):
+    _request({'method': 'add_torrent', 'params': {'torrent': torrent, 'save_path': save_path}})
 
 
 def check_torrent_added():
