@@ -247,7 +247,9 @@ def add_torrent(source):
         path = os.path.join(download_dir, request.forms.get('sub_path'))
     else:
         path = download_dir
-    torrent_client.add_torrent_async(torrent, path)
+    addon.log('***** Paused: {0}'.format(request.forms.get('paused')))
+    paused = request.forms.get('paused') == 'true'
+    torrent_client.add_torrent_async(torrent, path, paused=paused)
 
 
 @route('/stream/<path:path>')

@@ -175,14 +175,16 @@ class Torrenter(object):
         :return:
         """
         self._torrent_added.clear()
-        torr_handle = self._add_torrent(torrent, save_path, paused=paused, cookies=cookies)
+        torr_handle = self._add_torrent(torrent, save_path, cookies=cookies)
         info_hash = str(torr_handle.info_hash())
         result = {'name': torr_handle.name().decode('utf-8'), 'info_hash': info_hash}
         result['files'] = self.get_files(info_hash)
         self._last_added_torrent.contents = result
+        if paused:
+            self.pause_torrent(info_hash)  # Tested variant. Other variants don't work with 1.x.x
         self._torrent_added.set()
 
-    def _add_torrent(self, torrent, save_path, resume_data=None, paused=False, cookies=None):
+    def _add_torrent(self, torrent, save_path, resume_data=None, cookies=None):
         """
         Add a torrent to the pool.
 
@@ -192,8 +194,7 @@ class Torrenter(object):
         :return: object - torr_handle
         """
         add_torrent_params = {'save_path': os.path.abspath(save_path),
-                              'storage_mode': libtorrent.storage_mode_t.storage_mode_sparse,
-                              'paused': paused}
+                              'storage_mode': libtorrent.storage_mode_t.storage_mode_sparse}
         if resume_data is not None:
             add_torrent_params['resume_data'] = resume_data
         if isinstance(torrent, dict):
@@ -202,7 +203,7 @@ class Torrenter(object):
             add_torrent_params['url'] = str(torrent)  # libtorrent doesn't like unicode objects here
         elif torrent[:7] in ('http://', 'https:/'):
             # Here external http/https client is used in case if libtorrent module is compiled without OpenSSL
-            torr_file = get(torrent, cookies=cookies, veryfy=False).content
+            torr_file = get(torrent, cookies=cookies, verify=False).content
             add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(torr_file))
         else:
             try:

@@ -198,13 +198,14 @@ $(function()
         title: 'Add .torrent file',
         iconCls: 'icon-torrent-add',
         width: 450,
-        height: 170,
+        height: 200,
         closed: true,
         modal: true,
         onClose:function()
         {
             $('#torr_path').filebox('clear');
             $('#file_sub_path').textbox('clear');
+            $('#file_paused').prop('checked',false);
         },
         buttons: [{
             text: 'Add',
@@ -224,13 +225,14 @@ $(function()
         title: 'Add torrent link',
         iconCls: 'icon-link-add',
         width: 450,
-        height: 170,
+        height: 200,
         closed: true,
         modal: true,
         onClose:function()
         {
             $('#torrent_link').textbox('clear');
             $('#link_sub_path').textbox('clear');
+            $('#link_paused').prop('checked',false);
         },
         buttons: [{
             text: 'Add',
