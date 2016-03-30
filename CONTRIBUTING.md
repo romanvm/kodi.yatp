@@ -23,9 +23,10 @@ YATP has a rich API and additional features can be implemented in other plugins 
 
 Also I will never add the following features:
 
-- Support for specific torrent sites. This is better be implemented in separate addons for Kodi.
-- Features that facilitate torrent "hit-and-runnign", that is downloading a torrent without proper seeding.
-  An example of such feature is deleting vileofiles immediately after watching them.
+- Support for specific torrent sites. This is better be implemented in separate addons for Kodi
+  that may use YATP as a torrent streaming engine.
+- Features that facilitate torrent "hit-and-running", that is, downloading torrents without proper seeding.
+  For example, deleting vileofiles immediately after watching them will never be added to YATP.
   Please seed your torrents for other users.
 
 ## Pull Requests
