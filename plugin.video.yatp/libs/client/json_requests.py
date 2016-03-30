@@ -28,8 +28,8 @@ def _request(data):
         raise RuntimeError('JSON-RPC returned error:\n{0}'.format(reply['error']))
 
 
-def add_torrent(torrent, save_path):
-    _request({'method': 'add_torrent', 'params': {'torrent': torrent, 'save_path': save_path}})
+def add_torrent(torrent, paused=True):
+    _request({'method': 'add_torrent', 'params': {'torrent': torrent, 'paused': paused}})
 
 
 def check_torrent_added():
@@ -58,12 +58,6 @@ def abort_buffering():
 
 def remove_torrent(info_hash, delete_files):
     _request({'method': 'remove_torrent', 'params': {'info_hash': info_hash, 'delete_files': delete_files}})
-
-
-def download_torrent(torrent, download_dir):
-    _request({'method': 'add_torrent', 'params': {'torrent': torrent,
-                                                  'save_path': download_dir,
-                                                  'paused': False}})
 
 
 def get_all_torrent_info():

@@ -36,14 +36,14 @@ def get_videofiles(files):
     return videofiles
 
 
-def add_torrent(torrent, save_path):
+def add_torrent(torrent):
     """
     Add torrent for downloading
 
     :param torrent:
     :return:
     """
-    jsonrq.add_torrent(torrent, save_path)
+    jsonrq.add_torrent(torrent)
     progress_dialog = xbmcgui.DialogProgress()
     progress_dialog.create(string(32015))
     progress_dialog.update(0, string(32016))
@@ -113,14 +113,14 @@ def stream_torrent(file_index, info_hash):
         return ''
 
 
-def buffer_torrent(torrent, file_index=None, save_path=None):
+def buffer_torrent(torrent, file_index=None):
     """
     Buffer a torrent and resolve a playable path from it
 
     :param torrent: str - magnet link or .torrent file URL
     :return:
     """
-    torrent_data = add_torrent(torrent, save_path)
+    torrent_data = add_torrent(torrent)
     if torrent_data is not None:
         if file_index is None or file_index == 'dialog':
             file_index = select_file(torrent_data, file_index == 'dialog')

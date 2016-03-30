@@ -75,7 +75,7 @@ def play_torrent(params):
     file_index = params.get('file_index')
     if file_index is not None and file_index != 'dialog':
         file_index = int(file_index)
-    return _play(buffer_torrent(params['torrent'], file_index, params.get('save_path')))
+    return _play(buffer_torrent(params['torrent'], file_index))
 
 
 def play_file(params):
@@ -97,8 +97,7 @@ def download_torrent(params):
     :param params:
     :return:
     """
-    download_dir = params.get('download_dir') or plugin.download_dir
-    jsonrq.download_torrent(params['torrent'], download_dir)
+    jsonrq.add_torrent(params['torrent'], False)
     xbmcgui.Dialog().notification('YATP', string(32004), plugin.icon, 3000)
 
 
@@ -163,7 +162,7 @@ def torrents(params):
 
 def list_files(params):
     """
-    Add a torrent to the sessiona and display the list of files in a torrent
+    Add a torrent to the session and display the list of files in a torrent
 
     :param params:
     :return:
