@@ -16,6 +16,7 @@ sys.path.append(os.path.join(addon.path, 'site-packages'))
 from hachoir_metadata import extractMetadata
 from hachoir_parser import guessParser
 from hachoir_core.stream.input import InputIOStream
+from hachoir_core.error import HachoirError
 
 MIME = {'.mkv': 'video/x-matroska',
         '.mp4': 'video/mp4',
@@ -47,13 +48,14 @@ def get_duration(filename):
 
     :param filename:
     :return: duration
+    :raises: HachoirError if video duration cannot be determined
     """
     metadata = _parse_file(filename)
     if metadata is not None and metadata.getItem('duration', 0) is not None:
         duration = metadata.getItem('duration', 0).value
         return duration.seconds + 0.000001 * duration.microseconds
     else:
-        return 0.0
+        raise HachoirError
 
 
 def get_mime(filename):

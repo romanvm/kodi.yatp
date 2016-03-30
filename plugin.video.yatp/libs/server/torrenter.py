@@ -23,7 +23,7 @@ from requests import get
 import xbmc
 import xbmcvfs
 from addon import Addon
-from utilities import get_duration
+from utilities import get_duration, HachoirError
 
 addon = Addon()
 # This is for potential statistic and debugging purposes
@@ -809,16 +809,18 @@ class Streamer(TorrenterPersistent):
         :param piece_length:
         :return:
         """
-        duration = get_duration(filename)
-        addon.log('Video duration: {0}s'.format(duration))
-        if duration:
-            buffer_length = int(ceil(buffer_duration * num_pieces / duration))
-            # For AVI files Kodi requests bigger chunks at the end of a file
-            end_offset = int(round(5750000 / piece_length, 0)) if os.path.splitext(filename)[1].lower() == '.avi' else 1
-        else:
+        try:
+            duration = get_duration(filename)
+        except HachoirError:
+            addon.log('Unable to determine video duration.')
             # Fallback if hachoir cannot parse the file
             end_offset = int(round(4500000 / piece_length, 0))
             buffer_length = int(ceil(1048576 * default_buffer_size / piece_length)) - end_offset
+        else:
+            addon.log('Video duration: {0}s'.format(duration))
+            buffer_length = int(ceil(buffer_duration * num_pieces / duration))
+            # For AVI files Kodi requests bigger chunks at the end of a file
+            end_offset = int(round(5750000 / piece_length, 0)) if os.path.splitext(filename)[1].lower() == '.avi' else 1
         return buffer_length, end_offset
 
     @staticmethod
