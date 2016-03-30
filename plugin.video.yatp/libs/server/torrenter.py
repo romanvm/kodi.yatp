@@ -177,9 +177,11 @@ class Torrenter(object):
         self._torrent_added.clear()
         torr_handle = self._add_torrent(torrent, save_path, cookies=cookies)
         info_hash = str(torr_handle.info_hash())
-        result = {'name': torr_handle.name().decode('utf-8'), 'info_hash': info_hash}
-        result['files'] = self.get_files(info_hash)
-        self._last_added_torrent.contents = result
+        self._last_added_torrent.contents = {
+            'name': torr_handle.name().decode('utf-8'),
+            'info_hash': info_hash,
+            'files': self.get_files(info_hash)
+        }
         if paused:
             self.pause_torrent(info_hash)  # Tested variant. Other variants don't work with 1.x.x
         self._torrent_added.set()
