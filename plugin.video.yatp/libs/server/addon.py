@@ -10,10 +10,7 @@ Auxiliary module to access Kodi addon parameters
 import os
 import sys
 import xbmc
-from collections import namedtuple
 import simpleplugin
-
-Credentials = namedtuple('Credentials', ['login', 'password'])
 
 
 class Addon(simpleplugin.Addon):
@@ -28,7 +25,7 @@ class Addon(simpleplugin.Addon):
 
     @property
     def credentials(self):
-        return Credentials(self.get_setting('web_login'), self.get_setting('web_pass'))
+        return self.get_setting('web_login'), self.get_setting('web_pass')
 
     @property
     def download_dir(self):
