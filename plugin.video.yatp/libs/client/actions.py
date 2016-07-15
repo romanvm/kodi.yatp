@@ -130,7 +130,6 @@ def torrents(params):
             item['thumb'] = os.path.join(icons, 'pause.png')
         else:
             item['thumb'] = os.path.join(icons, 'question.png')
-        listing.append(item)
         context_menu = [(string(32005),
                          'RunScript({commands},pause_all)'.format(commands=commands)),
                         (string(32006),
@@ -156,7 +155,8 @@ def torrents(params):
             context_menu.insert(0, (string(32010),
                                     'RunScript({commands},pause,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash'])))
-        item['context_menu'] = (context_menu, True)
+        item['context_menu'] = context_menu
+        listing.append(item)
     return listing
 
 
