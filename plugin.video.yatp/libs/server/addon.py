@@ -25,7 +25,7 @@ class Addon(simpleplugin.Addon):
 
     @property
     def credentials(self):
-        return self.get_setting('web_login'), self.get_setting('web_pass')
+        return self.get_setting('web_login', False), self.get_setting('web_pass', False)
 
     @property
     def download_dir(self):
