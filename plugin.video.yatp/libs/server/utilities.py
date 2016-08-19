@@ -48,14 +48,14 @@ def get_duration(filename):
 
     :param filename:
     :return: duration
-    :raises: HachoirError if video duration cannot be determined
+    :raises HachoirError: if video duration cannot be determined
     """
     metadata = _parse_file(filename)
     if metadata is not None and metadata.getItem('duration', 0) is not None:
         duration = metadata.getItem('duration', 0).value
         return duration.seconds + 0.000001 * duration.microseconds
     else:
-        raise HachoirError
+        raise HachoirError('')  # The exception takes 1 parameter
 
 
 def get_mime(filename):
