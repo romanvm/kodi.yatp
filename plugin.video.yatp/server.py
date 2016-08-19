@@ -20,6 +20,8 @@ orig_set_version = librorrent_addon.get_setting('set_version', False)
 librorrent_addon.set_setting('custom_version', 'true')
 if addon.get_setting('libtorrent_version') == '1.0.9':
     librorrent_addon.set_setting('set_version', '4')
+elif addon.get_setting('libtorrent_version') == '1.1.0':
+    librorrent_addon.set_setting('set_version', '5')
 else:
     librorrent_addon.set_setting('set_version', '0')
 
