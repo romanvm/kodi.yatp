@@ -30,6 +30,7 @@ def _play(path):
     return plugin.resolve_url(path, succeeded=success)
 
 
+@plugin.action()
 def root(params):
     """
     Plugin root
@@ -49,6 +50,7 @@ def root(params):
              'url': plugin.get_url(action='torrents')}]
 
 
+@plugin.action()
 def select_torrent(params):
     """
     Select .torrent file to play
@@ -65,6 +67,7 @@ def select_torrent(params):
             download_torrent({'torrent': torrent})
 
 
+@plugin.action('play')
 def play_torrent(params):
     """
     Play torrent
@@ -78,6 +81,7 @@ def play_torrent(params):
     return _play(buffer_torrent(params['torrent'], file_index))
 
 
+@plugin.action()
 def play_file(params):
     """
     Stream a file from torrent by its index
@@ -90,6 +94,7 @@ def play_file(params):
     return _play(stream_torrent(int(params['file_index']), params['info_hash']))
 
 
+@plugin.action('download')
 def download_torrent(params):
     """
     Add torrent for downloading
@@ -101,6 +106,7 @@ def download_torrent(params):
     xbmcgui.Dialog().notification('YATP', string(32004), plugin.icon, 3000)
 
 
+@plugin.action()
 def torrents(params):
     """
     Display the list of torrents in the session
@@ -160,6 +166,7 @@ def torrents(params):
     return listing
 
 
+@plugin.action()
 def list_files(params):
     """
     Add a torrent to the session and display the list of files in a torrent
@@ -175,6 +182,7 @@ def list_files(params):
     return []
 
 
+@plugin.action()
 def show_files(params):
     """
     Display the list of videofiles
@@ -219,14 +227,3 @@ def _build_file_list(files, info_hash):
                         })
     return plugin.create_listing(listing, cache_to_disk=True, sort_methods=(xbmcplugin.SORT_METHOD_LABEL,
                                                                             xbmcplugin.SORT_METHOD_SIZE))
-
-
-# Map actions
-plugin.actions['root'] = root
-plugin.actions['select_torrent'] = select_torrent
-plugin.actions['play'] = play_torrent
-plugin.actions['play_file'] = play_file
-plugin.actions['download'] = download_torrent
-plugin.actions['torrents'] = torrents
-plugin.actions['list_files'] = list_files
-plugin.actions['show_files'] = show_files
