@@ -15,13 +15,6 @@ import simpleplugin
 
 class Addon(simpleplugin.Addon):
     """Helper class to access addon parameters"""
-    def __init__(self, id_=''):
-        super(Addon, self).__init__(id_)
-        self._download_dir = self.get_setting('download_dir') or xbmc.translatePath('special://temp')
-        if sys.platform == 'win32':
-            self._download_dir = self._download_dir.decode('utf-8')
-        if not os.path.exists(self._download_dir):
-            os.mkdir(self._download_dir)
 
     @property
     def credentials(self):
@@ -29,4 +22,9 @@ class Addon(simpleplugin.Addon):
 
     @property
     def download_dir(self):
-        return self._download_dir
+        d_dir = self.get_setting('download_dir') or xbmc.translatePath('special://temp')
+        if sys.platform == 'win32':
+            d_dir = d_dir.decode('utf-8')
+        if not os.path.exists(d_dir):
+            os.mkdir(d_dir)
+        return d_dir
