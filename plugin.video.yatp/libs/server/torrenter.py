@@ -47,7 +47,7 @@ class TorrenterError(Exception):
 class Buffer(object):
     """Thread-safe data buffer"""
     def __init__(self, contents=None):
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
         self._contents = contents
 
     @property
