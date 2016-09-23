@@ -29,7 +29,6 @@ from bottle import (route, default_app, request, template, response, debug,
                     static_file, TEMPLATE_PATH, HTTPError, HTTPResponse)
 
 # Torrent client parameters
-download_dir = addon.download_dir
 resume_dir = os.path.join(addon.config_dir, 'torrents')
 if not os.path.exists(resume_dir):
     os.mkdir(resume_dir)
@@ -243,9 +242,9 @@ def add_torrent(source):
     else:
         torrent = request.forms.get('torrent_link')
     if request.forms.get('sub_path'):
-        path = os.path.join(download_dir, request.forms.get('sub_path'))
+        path = os.path.join(addon.download_dir, request.forms.get('sub_path'))
     else:
-        path = download_dir
+        path = addon.download_dir
     addon.log('***** Paused: {0}'.format(request.forms.get('paused')))
     paused = request.forms.get('paused') == 'true'
     torrent_client.add_torrent_async(torrent, path, paused=paused)
@@ -259,7 +258,7 @@ def stream_file(path):
     addon.log('Headers: ' + str(request.headers.items()))
     if sys.platform == 'win32':
         path = path.decode('utf-8')
-    file_path = os.path.normpath(os.path.join(download_dir, path))
+    file_path = os.path.normpath(os.path.join(addon.download_dir, path))
     # Workaround to fix unicode path problem on different OSs
     try:
         addon.log('File path: {0}'.format(file_path.encode('utf-8')))
@@ -289,7 +288,7 @@ def stream_file(path):
             addon.log('Torrent is being seeded or the end piece requested.')
             # If the file is beeing seeded or Kodi checks the end piece,
             # then serve the file via Bottle.
-            return static_file(path, root=download_dir, mimetype=mime)
+            return static_file(path, root=addon.download_dir, mimetype=mime)
         else:
             body = reset_sliding_window(streamed_file, file_path, start_pos)
     else:
