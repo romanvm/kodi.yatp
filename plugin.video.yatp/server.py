@@ -14,6 +14,7 @@ import xbmcgui
 from libs.server.wsgi_server import create_server
 from simpleplugin import Addon
 
+kodi_monitor = xbmc.Monitor()
 addon = Addon()
 addon.log_notice('Starting Torrent Server...')
 # A monkey-patch to set the necessary librorrent version
@@ -40,7 +41,7 @@ if addon.persistent:
 httpd = create_server(wsgi_app.app, port=addon.server_port)
 httpd.timeout = 0.2
 start_trigger = True
-while not xbmc.abortRequested:
+while not kodi_monitor.abortRequested():
     httpd.handle_request()
     if start_trigger:
         addon.log_notice('Torrent Server started')

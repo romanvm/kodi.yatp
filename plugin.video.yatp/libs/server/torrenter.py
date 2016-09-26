@@ -25,6 +25,7 @@ import xbmcvfs
 from addon import Addon
 from utilities import get_duration, HachoirError
 
+kodi_monitor = xbmc.Monitor()
 addon = Addon()
 # This is for potential statistic and debugging purposes
 addon.log('sys.platform: "{0}". platform.uname: "{1}"'.format(sys.platform, str(platform.uname())), xbmc.LOGNOTICE)
@@ -688,7 +689,7 @@ class Streamer(TorrenterPersistent):
             torr_handle.resume()
         addon.log('Reading the 1st piece...')
         torr_handle.piece_priority(start_piece, 7)
-        while not self._abort_buffering.is_set():
+        while not (self._abort_buffering.is_set() or kodi_monitor.abortRequested()):
             xbmc.sleep(200)
             if torr_handle.have_piece(start_piece):
                 break
@@ -721,7 +722,7 @@ class Streamer(TorrenterPersistent):
                                             start_piece + 1,
                                             start_piece + sliding_window_length,
                                             end_piece - end_offset - 1)
-            while len(buffer_pool) > 0 and not self._abort_buffering.is_set():
+            while len(buffer_pool) > 0 and not self._abort_buffering.is_set() and not kodi_monitor.abortRequested():
                 addon.log('Buffer pool: {0}'.format(str(buffer_pool)))
                 xbmc.sleep(200)
                 for index, piece_ in enumerate(buffer_pool):
@@ -757,7 +758,7 @@ class Streamer(TorrenterPersistent):
         self._abort_sliding.clear()
         window_end = min(window_end, last_piece)
         [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start, window_end + 1)]
-        while window_start <= last_piece and not self._abort_sliding.is_set():
+        while window_start <= last_piece and not self._abort_sliding.is_set() and not kodi_monitor.abortRequested():
             addon.log('Sliding window position: {0}'.format(window_start))
             self._sliding_window_position.contents = window_start
             torr_handle.piece_priority(window_start, 7)
