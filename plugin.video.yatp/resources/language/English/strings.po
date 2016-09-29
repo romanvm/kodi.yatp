@@ -272,7 +272,7 @@ msgid "Show info"
 msgstr ""
 
 msgctxt "#32066"
-msgid "Restore download"
+msgid "Complete download"
 msgstr ""
 
 msgctxt "#32067"

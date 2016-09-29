@@ -313,12 +313,17 @@ class Torrenter(object):
         """
         torr_info = self._get_torrent_info(info_hash)
         torr_status = self._get_torrent_status(info_hash)
+        state = str(torr_status.state)
+        if torr_status.paused:
+            state = 'paused'
+        elif state == 'finished':
+            state = 'incomplete'
         if torr_info is None or torr_status is None:
             return None
         completed_time = str(datetime.datetime.fromtimestamp(int(torr_status.completed_time)))
         return {'name': torr_info.name().decode('utf-8'),
                 'size': int(torr_info.total_size() / 1048576),
-                'state': str(torr_status.state) if not torr_status.paused else 'paused',
+                'state': state,
                 'progress': int(torr_status.progress * 100),
                 'dl_speed': int(torr_status.download_payload_rate / 1024),
                 'ul_speed': int(torr_status.upload_payload_rate / 1024),

@@ -139,24 +139,23 @@ function restore_downloads()
   var torrents = $('#torrents').datagrid('getSelections');
   if (torrents.length > 0)
   {
-    var hashes = '[';
-    if (torrents[0].state == 'finished')
-    {
-      hashes += '"' + torrents[0].info_hash + '"';
-    }
+    var hashes = [];
     var i;
-    for (i=1; i<torrents.length; i++)
+    for (i=0; i<torrents.length; i++)
     {
-      if (torrents[i].state == 'finished')
+      if (torrents[i].state == 'incomplete')
       {
-        hashes += ',"' + torrents[i].info_hash + '"';
+        hashes.push(torrents[i].info_hash);
       }
     }
-    hashes += ']';
-    $.ajax({type:'POST',
-      url:'/json-rpc',
-      data:'{"method":"restore_downloads","params":{"info_hashes":' + hashes + '}}',
-      contentType:'application/json',
+    $.ajax({
+      type:'POST',
+      url:'json-rpc',
+      data:JSON.stringify({
+        method:'restore_downloads',
+        params:{info_hashes:hashes}
+      }),
+      contentType:'application/json; UTF-8',
       dataType:'json'
     }); // end ajax
     } // end if

@@ -272,8 +272,8 @@ msgid "Show info"
 msgstr "Показать сведения"
 
 msgctxt "#32066"
-msgid "Restore download"
-msgstr "Восстановить загрузку"
+msgid "Complete download"
+msgstr "Завершить загрузку"
 
 msgctxt "#32067"
 msgid "MB"
