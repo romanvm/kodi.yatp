@@ -186,20 +186,19 @@ def json_rpc():
 
     :return: JSON-RPC reply
     """
-    addon.log('***** JSON request *****')
-    addon.log(request.body.read())
     data = request.json
+    addon.log('JSON request: {0}'.format(data))
     reply = {'jsonrpc': '2.0', 'id': data.get('id', '1')}
     try:
         reply['result'] = getattr(methods, data['method'])(torrent_client, data.get('params'))
     except AttributeError:
-        addon.log(format_exc(), xbmc.LOGERROR)
-        reply['error'] = {'code': -32601, 'message': 'Method not found: "{0}"'.format(data['method'])}
+        message = 'Method not found: "{0}"'.format(data['method'])
+        addon.log(message, xbmc.LOGERROR)
+        reply['error'] = {'code': -32601, 'message': message}
     except:
-        addon.log(format_exc(), xbmc.LOGERROR)
+        addon.log('Error while processing JSON request:\n{0}'.format(format_exc()), xbmc.LOGERROR)
         reply['error'] = {'code': -32000, 'message': 'Internal error!', 'data': format_exc()}
-    addon.log('***** JSON response *****')
-    addon.log(str(reply))
+    addon.log('JSON response: {0}'.format(reply))
     return reply
 
 
@@ -210,7 +209,7 @@ def get_torrents():
 
     :return:
     """
-    response.content_type = 'application/json'
+    response.content_type = 'application/json; UTF-8'
     reply = dumps(torrent_client.get_all_torrents_info())
     return reply
 
@@ -245,7 +244,6 @@ def add_torrent(source):
         path = os.path.join(addon.download_dir, request.forms.get('sub_path'))
     else:
         path = addon.download_dir
-    addon.log('***** Paused: {0}'.format(request.forms.get('paused')))
     paused = request.forms.get('paused') == 'true'
     torrent_client.add_torrent_async(torrent, path, paused=paused)
 
@@ -294,7 +292,7 @@ def stream_file(path):
     else:
         response_status = 200
         body = ''
-    addon.log('Reply headers: {0}'.format(str(headers)))
+    addon.log('Reply headers: {0}'.format(headers))
     return HTTPResponse(body, status=response_status, **headers)
 
 
