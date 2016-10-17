@@ -260,7 +260,9 @@ class Torrenter(object):
         :return:
         """
         try:
-            self._session.remove_torrent(self._torrents_pool[info_hash], delete_files)
+            torr_handle = self._torrents_pool[info_hash]
+            del self._torrents_pool[info_hash]
+            self._session.remove_torrent(torr_handle, delete_files)
         except KeyError:
             raise TorrenterError('Invalid torrent hash!')
 
@@ -313,13 +315,13 @@ class Torrenter(object):
         """
         torr_info = self._get_torrent_info(info_hash)
         torr_status = self._get_torrent_status(info_hash)
+        if torr_info is None or torr_status is None:
+            return None
         state = str(torr_status.state)
         if torr_status.paused:
             state = 'paused'
         elif state == 'finished':
             state = 'incomplete'
-        if torr_info is None or torr_status is None:
-            return None
         completed_time = str(datetime.datetime.fromtimestamp(int(torr_status.completed_time)))
         return {'name': torr_info.name().decode('utf-8'),
                 'size': int(torr_info.total_size() / 1048576),
