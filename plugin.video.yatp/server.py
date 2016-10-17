@@ -26,6 +26,8 @@ if addon.get_setting('libtorrent_version') == '1.0.9':
     librorrent_addon.set_setting('set_version', '4')
 elif addon.get_setting('libtorrent_version') == '1.1.0':
     librorrent_addon.set_setting('set_version', '5')
+elif addon.get_setting('libtorrent_version') == '1.1.1':
+    librorrent_addon.set_setting('set_version', '6')
 else:
     librorrent_addon.set_setting('set_version', '0')
 
