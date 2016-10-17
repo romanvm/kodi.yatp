@@ -402,8 +402,12 @@ class Torrenter(object):
         :param info_hash:
         :return: a list of tuples (path, size)
         """
-        torr_info = self._get_torrent_info(info_hash)
-        return [[file_.path.decode('utf-8'), file_.size] for file_ in torr_info.files()]
+        file_storage = self._get_torrent_info(info_hash).files()
+        if libtorrent.version < '1.1.0':
+            return [(file_.path.decode('utf-8'), file_.size) for file_ in file_storage]
+        else:
+            return [(file_storage.file_path(i), file_storage.file_size(i))
+                    for i in xrange(file_storage.num_files())]
 
     @property
     def is_torrent_added(self):
@@ -672,7 +676,7 @@ class Streamer(TorrenterPersistent):
         if info_hash is None:
             info_hash = self.last_added_torrent['info_hash']
         files = self.get_files(info_hash)
-        if file_index not in xrange(0, len(files) + 1):
+        if file_index not in range(len(files)):
             raise IndexError('Invalid file index: {0}!'.format(file_index))
         # Clear flags
         self._buffering_complete.clear()
@@ -680,14 +684,12 @@ class Streamer(TorrenterPersistent):
         self._buffer_percent.contents = 0
         torr_handle = self._torrents_pool[info_hash]
         torr_info = torr_handle.get_torrent_info()
-        # Pick the file to be streamed from the torrent files
-        file_entry = torr_info.files()[file_index]
         peer_req = torr_info.map_file(file_index, 0, 1048576)  # 1048576 (1MB) is a dummy value to avoid C int overflow
         # Start piece of the file
         start_piece = peer_req.piece
         # The number of pieces in the file
         piece_length = torr_info.piece_length()
-        num_pieces = int(ceil(file_entry.size / piece_length))
+        num_pieces = int(ceil(files[file_index][1] / piece_length))
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
         self.set_piece_priorities(info_hash, 0)
         if torr_handle.status().paused:
