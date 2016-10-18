@@ -12,7 +12,7 @@ When submitting bug reports you need to provide the following information:
 1. Your system description and Kodi version.
 2. Detailed description of the bug (not just "something does not work").
 3. [Kodi debug log](http://kodi.wiki/view/Log_file/Easy) as a link to some pastebin site
-  (for example, [XBMC Logs](http://xbmclogs.com/)).
+  (for example, https://paste.ubuntu.com or ).
   A Kodi debug log is mandatory, unless you are reporting a cosmetic bug in YATP UI.
 
 ## Feature Requests
@@ -24,7 +24,7 @@ YATP has a rich API and additional features can be implemented in other plugins 
 Also I will never add the following features:
 
 - Support for specific torrent sites. This is better be implemented in separate addons for Kodi
-  that may use YATP as a torrent streaming engine.
+  that can use YATP as a torrent streaming engine.
 - Features that facilitate torrent "hit-and-running", that is, downloading torrents without proper seeding.
   For example, deleting vileofiles immediately after watching them will never be added to YATP.
   Please seed your torrents for other users.
@@ -42,4 +42,4 @@ A pull request should comply with simple rules:
 - Python code must follow [PEP-8](https://www.python.org/dev/peps/pep-0008/) except for line length
   that can be increased to 120 characters.
 - The code should be reasonably commented in docstrings and inline comments.
-  If possible, use Sphinx-compatible docstrings with reStructuredText markup.
+  If possible, use [Sphinx](http://www.sphinx-doc.org)-compatible docstrings with reStructuredText markup.

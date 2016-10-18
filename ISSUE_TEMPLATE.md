@@ -1,7 +1,9 @@
-If you are submiting a bug report, please provide the following information:
+<!--- If you are submiting a bug report, please provide the following information.
+All items are mandatory! -->
+- [ ] System description and Kodi version:
 
-1. Your system description and Kodi version.
+- [ ] Detailed description of the bug:
+<!--- (not just "something does not work") -->
 
-2. Detailed description of the bug (not just "something does not work").
-
-3. Kodi debug log as a link to some pastebin site, for example, http://paste.ubuntu.com or http://dpaste.com.
+- [ ] A link to a Kodi debug log or a screenshot if this is a cosmetic but in the user interface:
+<!--- For logs please use a pastebin site, for example, http://paste.ubuntu.com or http://dpaste.com -->
