@@ -14,8 +14,6 @@ from traceback import format_exc
 from cStringIO import StringIO
 from json import dumps
 from inspect import getmembers, isfunction
-from bottle import (route, default_app, request, template, response, debug,
-                    static_file, TEMPLATE_PATH, HTTPError, HTTPResponse)
 import xbmc
 import methods
 from addon import Addon
@@ -25,6 +23,10 @@ from onscreen_label import OnScreenLabel
 from utilities import get_mime
 
 addon = Addon()
+
+sys.path.append(os.path.join(addon.path, 'site-packages'))
+from bottle import (route, default_app, request, template, response, debug,
+                    static_file, TEMPLATE_PATH, HTTPError, HTTPResponse)
 
 # Torrent client parameters
 resume_dir = os.path.join(addon.config_dir, 'torrents')
