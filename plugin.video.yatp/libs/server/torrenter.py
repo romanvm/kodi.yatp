@@ -693,9 +693,9 @@ class Streamer(TorrenterPersistent):
         piece_length = torr_info.piece_length()
         num_pieces = int(ceil(files[file_index][1] / piece_length))
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
-        self.set_piece_priorities(info_hash, 0)
         if torr_handle.status().paused:
             torr_handle.resume()
+        self.set_piece_priorities(info_hash, 0)
         addon.log('Reading the 1st piece...')
         torr_handle.piece_priority(start_piece, 7)
         while not (self._abort_buffering.is_set() or kodi_monitor.abortRequested()):
