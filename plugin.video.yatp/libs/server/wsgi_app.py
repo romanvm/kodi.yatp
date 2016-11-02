@@ -48,13 +48,13 @@ if not addon.enable_encryption:
     torrent_client.set_encryption_policy(2)
 # Timers
 if addon.enable_limits:
-    limits_timer = Timer(10, check_seeding_limits, torrent_client)
+    limits_timer = Timer(15, check_seeding_limits, torrent_client)
 if addon.persistent:
-    save_resume_timer = Timer(60, save_resume_data, torrent_client)
+    save_resume_timer = Timer(180, save_resume_data, torrent_client)
 # Bottle WSGI application
 static_path = os.path.join(addon.path, 'resources', 'web')
 TEMPLATE_PATH.insert(0, os.path.join(static_path, 'templates'))
-debug(False)
+# debug(True)
 
 
 def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, piece_length, oncreen_label):
