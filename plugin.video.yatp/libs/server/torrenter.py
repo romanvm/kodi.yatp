@@ -693,6 +693,14 @@ class Streamer(TorrenterPersistent):
         piece_length = torr_info.piece_length()
         num_pieces = int(ceil(files[file_index][1] / piece_length))
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
+        # If the torrent was downloaded earlier but was deleted,
+        # wait until re-check is completed.
+        while not (self._abort_buffering.is_set() or kodi_monitor.abortRequested()):
+            if self.get_torrent_info(info_hash)['state'] != 'checking_files':
+                break
+            xbmc.sleep(200)
+        else:
+            return
         if torr_handle.status().paused:
             torr_handle.resume()
         self.set_piece_priorities(info_hash, 0)
