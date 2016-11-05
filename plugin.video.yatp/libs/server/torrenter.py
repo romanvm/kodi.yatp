@@ -256,6 +256,7 @@ class Torrenter(object):
         Remove a torrent from download
 
         :param info_hash: str
+        :param delete_files: bool
         :return:
         """
         try:
@@ -822,6 +823,7 @@ class Streamer(TorrenterPersistent):
 
         :param filename:
         :param buffer_duration:
+        :param default_buffer_size:
         :param num_pieces:
         :param piece_length:
         :return:
