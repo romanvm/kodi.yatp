@@ -271,6 +271,7 @@ class Torrenter(object):
         Pause a torrent
 
         :param info_hash: str
+        :param graceful_pause: int
         :return:
         """
         try:
@@ -336,7 +337,8 @@ class Torrenter(object):
                  # Timestamp in 'YYYY-MM-DD HH:MM:SS' format
                 'added_time': str(datetime.datetime.fromtimestamp(int(torr_status.added_time))),
                 'completed_time': completed_time if completed_time[:10] != '1970-01-01' else '-',
-                'info_hash': info_hash}
+                'info_hash': info_hash,
+                }
 
     def get_all_torrents_info(self):
         """
@@ -592,6 +594,7 @@ class TorrenterPersistent(Torrenter):
         Remove a torrent from download
 
         :param info_hash: str
+        :param delete_files: bool
         :return:
         """
         super(TorrenterPersistent, self).remove_torrent(info_hash, delete_files)
@@ -685,7 +688,18 @@ class Streamer(TorrenterPersistent):
         self._abort_buffering.clear()
         self._buffer_percent.contents = 0
         torr_handle = self._torrents_pool[info_hash]
+        # If the torrent was downloaded earlier but was deleted,
+        # wait until re-check is completed.
+        while not (self._abort_buffering.is_set() or kodi_monitor.abortRequested()):
+            if str(torr_handle.status().state) != 'checking_files':
+                break
+            xbmc.sleep(200)
+        else:
+            return
+        if torr_handle.status().paused:
+            torr_handle.resume()
         torr_info = torr_handle.get_torrent_info()
+        self.set_piece_priorities(info_hash, 0)
         peer_req = torr_info.map_file(file_index, 0, 1048576)  # 1048576 (1MB) is a dummy value to avoid C int overflow
         # Start piece of the file
         start_piece = peer_req.piece
@@ -693,17 +707,6 @@ class Streamer(TorrenterPersistent):
         piece_length = torr_info.piece_length()
         num_pieces = int(ceil(files[file_index][1] / piece_length))
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
-        # If the torrent was downloaded earlier but was deleted,
-        # wait until re-check is completed.
-        while not (self._abort_buffering.is_set() or kodi_monitor.abortRequested()):
-            if self.get_torrent_info(info_hash)['state'] != 'checking_files':
-                break
-            xbmc.sleep(200)
-        else:
-            return
-        if torr_handle.status().paused:
-            torr_handle.resume()
-        self.set_piece_priorities(info_hash, 0)
         addon.log('Reading the 1st piece...')
         torr_handle.piece_priority(start_piece, 7)
         while not (self._abort_buffering.is_set() or kodi_monitor.abortRequested()):
@@ -739,7 +742,7 @@ class Streamer(TorrenterPersistent):
                                             start_piece + 1,
                                             start_piece + sliding_window_length,
                                             end_piece - end_offset - 1)
-            while len(buffer_pool) > 0 and not self._abort_buffering.is_set() and not kodi_monitor.abortRequested():
+            while len(buffer_pool) > 0 and not (self._abort_buffering.is_set() or kodi_monitor.abortRequested()):
                 addon.log('Buffer pool: {0}'.format(str(buffer_pool)))
                 xbmc.sleep(200)
                 for index, piece_ in enumerate(buffer_pool):
@@ -747,7 +750,7 @@ class Streamer(TorrenterPersistent):
                         del buffer_pool[index]
                 self._buffer_percent.contents = int(100.0 * (buffer_pool_length - len(buffer_pool)) /
                                                     buffer_pool_length)
-            if not self._abort_buffering.is_set():
+            if not (self._abort_buffering.is_set() or kodi_monitor.abortRequested()):
                 torr_handle.flush_cache()
         self._buffering_complete.set()
 
@@ -775,7 +778,7 @@ class Streamer(TorrenterPersistent):
         self._abort_sliding.clear()
         window_end = min(window_end, last_piece)
         [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start, window_end + 1)]
-        while window_start <= last_piece and not self._abort_sliding.is_set() and not kodi_monitor.abortRequested():
+        while window_start <= last_piece and not (self._abort_sliding.is_set() or kodi_monitor.abortRequested()):
             addon.log('Sliding window position: {0}'.format(window_start))
             self._sliding_window_position.contents = window_start
             torr_handle.piece_priority(window_start, 7)
