@@ -28,7 +28,7 @@ from utilities import get_duration, HachoirError
 kodi_monitor = xbmc.Monitor()
 addon = Addon()
 # This is for potential statistic and debugging purposes
-addon.log('sys.platform: "{0}". platform.uname: "{1}"'.format(sys.platform, str(platform.uname())), xbmc.LOGNOTICE)
+addon.log_notice('sys.platform: "{0}". platform.uname: "{1}"'.format(sys.platform, str(platform.uname())))
 
 try:
     import libtorrent  # Try to import global module
@@ -37,7 +37,7 @@ except ImportError:
     from python_libtorrent import get_libtorrent
     libtorrent = get_libtorrent()
 
-addon.log('libtorrent version: {0}'.format(libtorrent.version))
+addon.log_debug('libtorrent version: {0}'.format(libtorrent.version))
 
 
 class TorrenterError(Exception):
@@ -214,7 +214,7 @@ class Torrenter(object):
                 with closing(xbmcvfs.File(torrent)) as file_obj:
                     add_torrent_params['ti'] = libtorrent.torrent_info(libtorrent.bdecode(file_obj.read()))
             except:
-                addon.log(format_exc(), xbmc.LOGERROR)
+                addon.log_error(format_exc())
                 raise TorrenterError('Error when adding torrent: {0}!'.format(torrent))
         torr_handle = self._session.add_torrent(add_torrent_params)
         while not torr_handle.has_metadata():  # Wait until torrent metadata are populated
@@ -575,7 +575,7 @@ class TorrenterPersistent(Torrenter):
             with open(filepath, mode='rb') as m_file:
                 metadata = pickle.load(m_file)
         except (IOError, EOFError, ValueError, pickle.PickleError):
-            addon.log('Resume file "{0}" is missing or corrupted!'.format(filepath), xbmc.LOGERROR)
+            addon.log_error('Resume file "{0}" is missing or corrupted!'.format(filepath))
         else:
             torrent = os.path.join(self._resume_dir, metadata['info_hash'] + '.torrent')
             self._add_torrent(torrent, metadata['save_path'], metadata['resume_data'])
@@ -709,7 +709,7 @@ class Streamer(TorrenterPersistent):
         piece_length = torr_info.piece_length()
         num_pieces = int(ceil(files[file_index][1] / piece_length))
         end_piece = min(start_piece + num_pieces, torr_info.num_pieces() - 1)
-        addon.log('Reading the 1st piece...')
+        addon.log_debug('Reading the 1st piece...')
         torr_handle.piece_priority(start_piece, 7)
         while not (self._abort_buffering.is_set() or kodi_monitor.abortRequested()):
             xbmc.sleep(200)
@@ -717,13 +717,13 @@ class Streamer(TorrenterPersistent):
                 break
         else:
             return
-        addon.log('Trying to determine the video duration...')
+        addon.log_debug('Trying to determine the video duration...')
         buffer_length, end_offset = self.calculate_buffers(os.path.join(addon.download_dir, files[file_index][0]),
                                                            buffer_duration,
                                                            default_buffer_size,
                                                            num_pieces, piece_length)
-        addon.log('buffer_length={0}, end_offset={1}'.format(buffer_length, end_offset))
-        addon.log('start_piece={0}, end_piece={1}, piece_length={2}'.format(start_piece,
+        addon.log_debug('buffer_length={0}, end_offset={1}'.format(buffer_length, end_offset))
+        addon.log_debug('start_piece={0}, end_piece={1}, piece_length={2}'.format(start_piece,
                                                                             end_piece,
                                                                             piece_length))
         self._streamed_file_data.contents = {'torr_handle': torr_handle,
@@ -745,7 +745,7 @@ class Streamer(TorrenterPersistent):
                                             start_piece + sliding_window_length,
                                             end_piece - end_offset - 1)
             while len(buffer_pool) > 0 and not (self._abort_buffering.is_set() or kodi_monitor.abortRequested()):
-                addon.log('Buffer pool: {0}'.format(str(buffer_pool)))
+                addon.log_debug('Buffer pool: {0}'.format(str(buffer_pool)))
                 xbmc.sleep(200)
                 for index, piece_ in enumerate(buffer_pool):
                     if torr_handle.have_piece(piece_):
@@ -781,7 +781,7 @@ class Streamer(TorrenterPersistent):
         window_end = min(window_end, last_piece)
         [torr_handle.piece_priority(piece, 1) for piece in xrange(window_start, window_end + 1)]
         while window_start <= last_piece and not (self._abort_sliding.is_set() or kodi_monitor.abortRequested()):
-            addon.log('Sliding window position: {0}'.format(window_start))
+            addon.log_debug('Sliding window position: {0}'.format(window_start))
             self._sliding_window_position.contents = window_start
             torr_handle.piece_priority(window_start, 7)
             if torr_handle.have_piece(window_start):
@@ -836,12 +836,12 @@ class Streamer(TorrenterPersistent):
         try:
             duration = get_duration(filename)
         except HachoirError:
-            addon.log('Unable to determine video duration.')
+            addon.log_debug('Unable to determine video duration.')
             # Fallback if hachoir cannot parse the file
             end_offset = int(round(4500000 / piece_length, 0))
             buffer_length = int(ceil(1048576 * default_buffer_size / piece_length)) - end_offset
         else:
-            addon.log('Video duration: {0}s'.format(duration))
+            addon.log_debug('Video duration: {0}s'.format(duration))
             buffer_length = int(ceil(buffer_duration * num_pieces / duration))
             # For AVI files Kodi requests bigger chunks at the end of a file
             end_offset = int(round(5750000 / piece_length, 0)) if os.path.splitext(filename)[1].lower() == '.avi' else 1
