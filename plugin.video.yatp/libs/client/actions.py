@@ -7,13 +7,12 @@
 import os
 import xbmcgui
 import xbmcplugin
-from xbmc import LOGNOTICE
 from simpleplugin import Plugin
 import json_requests as jsonrq
 from buffering import buffer_torrent, stream_torrent, add_torrent, get_videofiles
 
 plugin = Plugin()
-string = plugin.get_localized_string
+_ = plugin.initialize_gettext()
 icons = os.path.join(plugin.path, 'resources', 'icons')
 commands = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'commands.py')
 
@@ -25,7 +24,7 @@ def _play(path):
     :param path:
     :return:
     """
-    plugin.log('Path to play: {0}'.format(path), LOGNOTICE)
+    plugin.log_notice('Path to play: {0}'.format(path))
     success = True if path else False
     return plugin.resolve_url(path, succeeded=success)
 
@@ -38,14 +37,14 @@ def root(params):
     :param params:
     :return:
     """
-    return [{'label': string(32000),
+    return [{'label': _('Play .torrent file...'),
              'thumb': os.path.join(icons, 'play.png'),
              'url': plugin.get_url(action='select_torrent', target='play')},
-            {'label': string(32001),
+            {'label': _('Download torrent from .torrent file...'),
              'thumb': os.path.join(icons, 'down.png'),
              'url': plugin.get_url(action='select_torrent', target='download'),
              'is_folder': False},
-            {'label': string(32002),
+            {'label': _('Torrents'),
              'thumb': plugin.icon,
              'url': plugin.get_url(action='torrents')}]
 
@@ -58,9 +57,9 @@ def select_torrent(params):
     :param params:
     :return:
     """
-    torrent = xbmcgui.Dialog().browse(1, string(32003), 'video', mask='.torrent')
+    torrent = xbmcgui.Dialog().browse(1, _('Select .torrent file'), 'video', mask='.torrent')
     if torrent:
-        plugin.log('Torrent selected: {0}'.format(torrent), LOGNOTICE)
+        plugin.log_notice('Torrent selected: {0}'.format(torrent))
         if params['target'] == 'play':
             return list_files({'torrent': torrent})
         else:
@@ -103,7 +102,7 @@ def download_torrent(params):
     :return:
     """
     jsonrq.add_torrent(params['torrent'], False)
-    xbmcgui.Dialog().notification('YATP', string(32004), plugin.icon, 3000)
+    xbmcgui.Dialog().notification('YATP', _('Torrent added for downloading'), plugin.icon, 3000)
 
 
 @plugin.action()
@@ -136,29 +135,29 @@ def torrents(params):
             item['thumb'] = os.path.join(icons, 'pause.png')
         else:
             item['thumb'] = os.path.join(icons, 'question.png')
-        context_menu = [(string(32005),
+        context_menu = [(_('Pause all torrents'),
                          'RunScript({commands},pause_all)'.format(commands=commands)),
-                        (string(32006),
+                        (_('Resume all torrents'),
                         'RunScript({commands},resume_all)'.format(commands=commands)),
-                        (string(32007),
+                        (_('Delete torrent'),
                          'RunScript({commands},delete,{info_hash})'.format(commands=commands,
                                                                            info_hash=torrent['info_hash'])),
-                        (string(32008),
+                        (_('Delete torrent and files'),
                          'RunScript({commands},delete_with_files,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash'])),
-                        (string(32066),
+                        (_('Resume torrent'),
                          'RunScript({commands},restore_finished,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash'])),
-                        (string(32065),
+                        (_('Show info'),
                          'RunScript({commands},show_info,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash'])),
                         ]
         if torrent['state'] == 'paused':
-            context_menu.insert(0, (string(32009),
+            context_menu.insert(0, (_('Resume torrent'),
                                     'RunScript({commands},resume,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash'])))
         else:
-            context_menu.insert(0, (string(32010),
+            context_menu.insert(0, (_('Pause torrent'),
                                     'RunScript({commands},pause,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash'])))
         item['context_menu'] = context_menu
@@ -178,7 +177,7 @@ def list_files(params):
     if torrent_data is not None:
         return _build_file_list(torrent_data['files'], torrent_data['info_hash'])
     else:
-        xbmcgui.Dialog().notification(plugin.id, string(32023), plugin.icon, 3000)
+        xbmcgui.Dialog().notification(plugin.id, _('Playback cancelled.'), plugin.icon, 3000)
     return []
 
 
@@ -217,7 +216,7 @@ def _build_file_list(files, info_hash):
             thumb = os.path.join(icons, 'play.png')
         listing.append({'label': '{name} [{size}{unit}]'.format(name=file_[1].encode('utf-8'),
                                                                 size=file_[2] / 1048576,
-                                                                unit=string(32067)),
+                                                                unit=_('MB')),
                         'thumb': thumb,
                         'url': plugin.get_url(action='play_file',
                                               info_hash=info_hash,
