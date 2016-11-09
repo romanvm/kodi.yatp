@@ -101,9 +101,11 @@ def stream_torrent(file_index, info_hash):
     while not (progress_dialog.iscanceled() or jsonrq.check_buffering_complete()):
         torrent_info = jsonrq.get_torrent_info(info_hash)
         progress_dialog.update(jsonrq.get_buffer_percent(),
-                               _('Downloaded: {0}MB').format(torrent_info['total_download']),
-                               _('Download speed: {0}KB/s').format(torrent_info['dl_speed']),
-                               _('Seeds: {0}').format(torrent_info['num_seeds']))
+                               _('Downloaded: {0}MB. Seeds: {1}.').format(
+                                   torrent_info['total_download'],
+                                   torrent_info['num_seeds']
+                               ),
+                               _('Download speed: {0}KB/s.').format(torrent_info['dl_speed']))
         xbmc.sleep(1000)
     if not progress_dialog.iscanceled():
         progress_dialog.close()

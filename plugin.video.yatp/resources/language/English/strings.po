@@ -80,11 +80,11 @@ msgid "Select a videofile to play"
 msgstr ""
 
 msgctxt "#32018"
-msgid "Downloaded: {0}MB"
+msgid "Downloaded: {0}MB. Seeds: {1}."
 msgstr ""
 
 msgctxt "#32019"
-msgid "Download speed: {0}KB/s"
+msgid "Download speed: {0}KB/s."
 msgstr ""
 
 msgctxt "#32020"
