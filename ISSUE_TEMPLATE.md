@@ -5,5 +5,5 @@ All items are mandatory! -->
 - [ ] Detailed description of the bug:
 <!--- (not just "something does not work") -->
 
-- [ ] A link to a Kodi debug log or a screenshot if this is a cosmetic but in the user interface:
+- [ ] A link to a Kodi debug log or a screenshot if this is a cosmetic bug in the user interface:
 <!--- For logs please use a pastebin site, for example, http://paste.ubuntu.com or http://dpaste.com -->
