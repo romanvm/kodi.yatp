@@ -113,17 +113,16 @@ def torrents(params):
     :param params:
     :return:
     """
-    listing = []
     torrent_list = sorted(jsonrq.get_all_torrent_info(), key=lambda i: i['added_time'], reverse=True)
     for torrent in torrent_list:
         if torrent['state'] == 'downloading':
-            label = u'[COLOR=red]{0}[/COLOR]'.format(torrent['name'])
+            label = '[COLOR=red]{0}[/COLOR]'.format(torrent['name'].encode('utf-8'))
         elif torrent['state'] == 'seeding':
-            label = u'[COLOR=green]{0}[/COLOR]'.format(torrent['name'])
+            label = '[COLOR=green]{0}[/COLOR]'.format(torrent['name'].encode('utf-8'))
         elif torrent['state'] == 'paused':
-            label = u'[COLOR=gray]{0}[/COLOR]'.format(torrent['name'])
+            label = '[COLOR=gray]{0}[/COLOR]'.format(torrent['name'].encode('utf-8'))
         else:
-            label = u'[COLOR=blue]{0}[/COLOR]'.format(torrent['name'])
+            label = '[COLOR=blue]{0}[/COLOR]'.format(torrent['name'].encode('utf-8'))
         item = {'label': label,
                 'url': plugin.get_url(action='show_files', info_hash=torrent['info_hash']),
                 'is_folder': True}
@@ -145,9 +144,6 @@ def torrents(params):
                         (_('Delete torrent and files'),
                          'RunScript({commands},delete_with_files,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash'])),
-                        (_('Complete download'),
-                         'RunScript({commands},restore_finished,{info_hash})'.format(commands=commands,
-                                                                                      info_hash=torrent['info_hash'])),
                         (_('Torrent info'),
                          'RunScript({commands},show_info,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash'])),
@@ -160,36 +156,13 @@ def torrents(params):
             context_menu.insert(0, (_('Pause torrent'),
                                     'RunScript({commands},pause,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash'])))
+        if torrent['state'] == 'incomplete':
+            context_menu.append((_('Complete download'),
+                                 'RunScript({commands},restore_finished,{info_hash})'.format(
+                                     commands=commands,
+                                     info_hash=torrent['info_hash'])))
         item['context_menu'] = context_menu
-        listing.append(item)
-    return listing
-
-
-@plugin.action()
-def list_files(params):
-    """
-    Add a torrent to the session and display the list of files in a torrent
-
-    :param params:
-    :return:
-    """
-    torrent_data = add_torrent(params['torrent'])
-    if torrent_data is not None:
-        return _build_file_list(torrent_data['files'], torrent_data['info_hash'])
-    else:
-        xbmcgui.Dialog().notification(plugin.id, _('Playback cancelled.'), plugin.icon, 3000)
-    return []
-
-
-@plugin.action()
-def show_files(params):
-    """
-    Display the list of videofiles
-
-    :param params:
-    :return:
-    """
-    return _build_file_list(jsonrq.get_files(params['info_hash']), params['info_hash'])
+        yield item
 
 
 def _build_file_list(files, info_hash):
@@ -201,7 +174,6 @@ def _build_file_list(files, info_hash):
     :return:
     """
     videofiles = get_videofiles(files)
-    listing = []
     for file_ in videofiles:
         ext = os.path.splitext(file_[1].lower())[1]
         if ext == '.avi':
@@ -214,15 +186,43 @@ def _build_file_list(files, info_hash):
             thumb = os.path.join(icons, 'mov.png')
         else:
             thumb = os.path.join(icons, 'play.png')
-        listing.append({'label': '{name} [{size}{unit}]'.format(name=file_[1].encode('utf-8'),
-                                                                size=file_[2] / 1048576,
-                                                                unit=_('MB')),
-                        'thumb': thumb,
-                        'url': plugin.get_url(action='play_file',
-                                              info_hash=info_hash,
-                                              file_index=file_[0]),
-                        'is_playable': True,
-                        'info': {'video': {'size': file_[2]}},
-                        })
-    return plugin.create_listing(listing, cache_to_disk=True, sort_methods=(xbmcplugin.SORT_METHOD_LABEL,
-                                                                            xbmcplugin.SORT_METHOD_SIZE))
+        yield {'label': '{name} [{size}{unit}]'.format(name=file_[1].encode('utf-8'),
+                                                       size=file_[2] / 1048576,
+                                                       unit=_('MB')),
+               'thumb': thumb,
+               'url': plugin.get_url(action='play_file',
+                                     info_hash=info_hash,
+                                     file_index=file_[0]),
+               'is_playable': True,
+               'info': {'video': {'size': file_[2]}},
+               }
+
+
+@plugin.action()
+def list_files(params):
+    """
+    Add a torrent to the session and display the list of files in a torrent
+
+    :param params:
+    :return:
+    """
+    torrent_data = add_torrent(params['torrent'])
+    if torrent_data is not None:
+        return plugin.create_listing(_build_file_list(torrent_data['files'], torrent_data['info_hash']),
+                                     cache_to_disk=True,
+                                     sort_methods=(xbmcplugin.SORT_METHOD_LABEL, xbmcplugin.SORT_METHOD_SIZE))
+    xbmcgui.Dialog().notification(plugin.id, _('Playback cancelled.'), plugin.icon, 3000)
+    return []
+
+
+@plugin.action()
+def show_files(params):
+    """
+    Display the list of videofiles
+
+    :param params:
+    :return:
+    """
+    return plugin.create_listing(_build_file_list(jsonrq.get_files(params['info_hash']), params['info_hash']),
+                                 cache_to_disk=True,
+                                 sort_methods=(xbmcplugin.SORT_METHOD_LABEL, xbmcplugin.SORT_METHOD_SIZE))
