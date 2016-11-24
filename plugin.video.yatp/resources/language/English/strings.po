@@ -268,7 +268,7 @@ msgid "Enable seeding limits (requires restart)"
 msgstr ""
 
 msgctxt "#32065"
-msgid "Show info"
+msgid "Torrent info"
 msgstr ""
 
 msgctxt "#32066"

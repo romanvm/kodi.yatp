@@ -268,8 +268,8 @@ msgid "Enable seeding limits (requires restart)"
 msgstr "Включить лимиты сидирования (требуется перезапуск)"
 
 msgctxt "#32065"
-msgid "Show info"
-msgstr "Показать сведения"
+msgid "Torrent info"
+msgstr "Сведения о торренте"
 
 msgctxt "#32066"
 msgid "Complete download"

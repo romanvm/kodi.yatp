@@ -145,10 +145,10 @@ def torrents(params):
                         (_('Delete torrent and files'),
                          'RunScript({commands},delete_with_files,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash'])),
-                        (_('Resume torrent'),
+                        (_('Complete download'),
                          'RunScript({commands},restore_finished,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash'])),
-                        (_('Show info'),
+                        (_('Torrent info'),
                          'RunScript({commands},show_info,{info_hash})'.format(commands=commands,
                                                                                       info_hash=torrent['info_hash'])),
                         ]
