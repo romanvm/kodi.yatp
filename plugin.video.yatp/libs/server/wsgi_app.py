@@ -26,7 +26,7 @@ addon = Addon()
 _ = addon.initialize_gettext()
 
 sys.path.append(os.path.join(addon.path, 'site-packages'))
-from bottle import (route, default_app, request, template, response, debug,
+from bottle import (route, default_app, request, template, response,
                     static_file, TEMPLATE_PATH, HTTPError, HTTPResponse)
 
 app = default_app()
