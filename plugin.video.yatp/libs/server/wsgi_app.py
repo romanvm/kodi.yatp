@@ -10,6 +10,7 @@ Torrent streamer WSGI application for Web/JSON interface
 import os
 import sys
 import re
+import time
 from traceback import format_exc
 from cStringIO import StringIO
 from json import dumps
@@ -76,6 +77,7 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
     :param oncreen_label: on_screen_label instance to show waiting status
     """
     paused = False  # Needed to prevent unpausing video paused by a user.
+    start_time = -1
     with file_:
         while True:
             current_piece = start_piece + int(float(byte_position) / piece_length)
@@ -84,7 +86,11 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
             while not torrent_handle.have_piece(current_piece):
                 if torrent_handle.piece_priority(current_piece) < 7:
                     torrent_handle.piece_priority(current_piece, 7)
-                if not xbmc.getCondVisibility('Player.Paused'):
+                if start_time == -1:
+                    start_time = time.time()
+                # If a piece is missing, wait for 5 sec. before pausing video
+                # This prevents frequent pausing in case of missing pieces
+                if time.time() - start_time > 5 and not xbmc.getCondVisibility('Player.Paused'):
                     xbmc.executebuiltin('Action(Pause)')
                     paused = True
                     addon.log_debug('Paused to wait for piece #{0}.'.format(current_piece))
@@ -95,10 +101,13 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
                     oncreen_label.show()
                 addon.log_debug('Waiting for piece #{0}...'.format(current_piece))
                 xbmc.sleep(1000)  # xbmc.sleep works better here
+            if start_time != -1:
+                addon.log_debug('Piece #{0} downloaded.'.format(current_piece))
+                start_time = -1
             if paused:
                 xbmc.executebuiltin('Action(Play)')
                 paused = False
-                addon.log_debug('Piece #{0} downloaded. Continue playback.'.format(current_piece))
+                addon.log_debug('Continue playback.')
                 oncreen_label.hide()
             file_.seek(byte_position)
             chunk = file_.read(piece_length)
