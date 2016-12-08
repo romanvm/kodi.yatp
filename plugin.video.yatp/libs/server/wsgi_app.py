@@ -221,7 +221,7 @@ def get_torrents():
 
     :return:
     """
-    response.content_type = 'application/json; UTF-8'
+    response.content_type = 'application/json; charset=UTF-8'
     reply = dumps(torrent_client.get_all_torrents_info())
     return reply
 
