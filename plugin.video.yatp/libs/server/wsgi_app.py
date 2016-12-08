@@ -204,7 +204,7 @@ def json_rpc():
     try:
         reply['result'] = getattr(methods, data['method'])(torrent_client, data.get('params'))
     except AttributeError:
-        message = 'Method not found: "{0}"'.format(data['method'])
+        message = 'Method "{0}" not found'.format(data['method'])
         addon.log_error(message)
         reply['error'] = {'code': -32601, 'message': message}
     except:
