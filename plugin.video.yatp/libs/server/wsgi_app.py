@@ -100,7 +100,7 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
                         torrent_handle.status().download_payload_rate / 1024)
                     oncreen_label.show()
                 addon.log_debug('Waiting for piece #{0}...'.format(current_piece))
-                xbmc.sleep(1000)  # xbmc.sleep works better here
+                xbmc.sleep(500)  # xbmc.sleep works better here
             if start_time != -1:
                 addon.log_debug('Piece #{0} downloaded.'.format(current_piece))
                 start_time = -1
