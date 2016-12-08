@@ -282,3 +282,7 @@ msgstr ""
 msgctxt "#32068"
 msgid "libtorrent version"
 msgstr ""
+
+msgctxt "#32069"
+msgid "Timeout before pausing on a missing piece (s)"
+msgstr ""

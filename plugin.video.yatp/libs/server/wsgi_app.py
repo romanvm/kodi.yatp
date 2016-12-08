@@ -90,7 +90,7 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
                     start_time = time.time()
                 # If a piece is missing, wait for 5 sec. before pausing video
                 # This prevents frequent pausing in case of missing pieces
-                if time.time() - start_time > 5 and not xbmc.getCondVisibility('Player.Paused'):
+                if time.time() - start_time > addon.pause_timeout and not xbmc.getCondVisibility('Player.Paused'):
                     xbmc.executebuiltin('Action(Pause)')
                     paused = True
                     addon.log_debug('Paused to wait for piece #{0}.'.format(current_piece))

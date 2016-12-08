@@ -20,9 +20,9 @@
     </category>
     <category label="32061">
         <setting id="buffer_duration" type="slider"
-                 label="32031" default="20" range="5,60"/>
+                 label="32031" option="int" range="5,60" default="20" />
         <setting id="default_buffer_size" type="slider"
-                 label="32059" default="20" range="5,100"/>
+                 label="32059" option="int" range="5,100" default="20" />
         <setting id="sliding_window_length" type="number"
                  label="32060" default="50"/>
     </category>
@@ -55,5 +55,7 @@
                  label="32058" default="6"/>
         <setting id="file_pool_size" type="number"
                  label="32062" default="40"/>
+        <setting id="pause_timout" type="slider"
+                 label="32069" option="int" range="0,10" default="5"/>
     </category>
 </settings>

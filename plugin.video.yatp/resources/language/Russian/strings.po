@@ -282,3 +282,7 @@ msgstr "МБ"
 msgctxt "#32068"
 msgid "libtorrent version"
 msgstr "Версия libtorrent"
+
+msgctxt "#32069"
+msgid "Timeout before pausing on a missing piece (s)"
+msgstr "Задержка паузы при ожидании фрагмента (с)"
