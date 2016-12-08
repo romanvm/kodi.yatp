@@ -76,7 +76,7 @@ def check_seeding_limits(torrenter):
                 ratio = torrent['total_upload'] / torrent['total_download']
             except ZeroDivisionError:
                 ratio = 0
-            if torrent['state'] in ('seeding', 'finished') and ratio >= _addon.ratio_limit:
+            if torrent['state'] in ('seeding', 'incomplete') and ratio >= _addon.ratio_limit:
                 torrenter.pause_torrent(torrent['info_hash'])
         try:
             if (_addon.time_limit and
@@ -97,4 +97,3 @@ def save_resume_data(torrenter):
     :param torrenter:
     """
     torrenter.save_all_resume_data()
-
