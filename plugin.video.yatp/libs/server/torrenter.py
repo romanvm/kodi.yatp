@@ -108,16 +108,8 @@ class Torrenter(object):
         self._session.start_natpmp()
 
     def __del__(self):
-        """
-        Class destructor
-
-        Always delete the Torrenter instance when
-        exiting the main program.
-        """
-        try:
+        if self._add_torrent_thread.is_alive():
             self._add_torrent_thread.join()
-        except (RuntimeError, AttributeError):
-            pass
         self._session.pause()
 
     def set_encryption_policy(self, enc_policy=1):
@@ -464,7 +456,6 @@ class TorrenterPersistent(Torrenter):
             self._load_torrents()
 
     def __del__(self):
-        """Class destructor"""
         if self._persistent:
             self.save_all_resume_data()
         super(TorrenterPersistent, self).__del__()
@@ -624,7 +615,6 @@ class Streamer(TorrenterPersistent):
     :param resume_dir: str - the directory to store persistent torrent data
     """
     def __init__(self, *args, **kwargs):
-        """Class constructor"""
         # Worker threads
         self._buffer_file_thread = None
         self._sliding_window_thread = None
@@ -639,7 +629,6 @@ class Streamer(TorrenterPersistent):
         super(Streamer, self).__init__(*args, **kwargs)
 
     def __del__(self):
-        """Class destructor"""
         self.abort_buffering()
         super(Streamer, self).__del__()
 
@@ -802,14 +791,10 @@ class Streamer(TorrenterPersistent):
         """
         self._abort_buffering.set()
         self._abort_sliding.set()
-        try:
+        if self._buffer_file_thread.is_alive():
             self._buffer_file_thread.join()
-        except (RuntimeError, AttributeError):
-            pass
-        try:
+        if self._sliding_window_thread.is_alive():
             self._sliding_window_thread.join()
-        except (RuntimeError, AttributeError):
-            pass
 
     def remove_torrent(self, info_hash, delete_files=False):
         """
