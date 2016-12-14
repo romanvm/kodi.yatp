@@ -7,12 +7,12 @@
 Custom WSGI Server and RequestHandler
 """
 
-from wsgiref.simple_server import WSGIServer, WSGIRequestHandler
+from wsgiref.simple_server import WSGIServer, WSGIRequestHandler, make_server
 from SocketServer import ThreadingMixIn
 
 
-class CustomWSGIRequestHandler(WSGIRequestHandler):
-    """Custom WSGI Request Handler"""
+class SilentWSGIRequestHandler(WSGIRequestHandler):
+    """Custom WSGI Request Handler with logging disabled"""
     protocol_version = 'HTTP/1.1'
 
     def log_message(self, *args, **kwargs):
@@ -30,6 +30,6 @@ def create_server(app, host='', port=8668):
     """
     Create a new WSGI server listening on 'host' and 'port' for WSGI app
     """
-    httpd = ThreadedWSGIServer((host, port), CustomWSGIRequestHandler)
-    httpd.set_app(app)
-    return httpd
+    return make_server(host, port, app,
+                       server_class=ThreadedWSGIServer,
+                       handler_class=SilentWSGIRequestHandler)
