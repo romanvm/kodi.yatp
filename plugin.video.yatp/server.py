@@ -42,7 +42,7 @@ if addon.enable_limits:
 if addon.persistent:
     wsgi_app.save_resume_timer.start()
 httpd = create_server(wsgi_app.app, port=addon.server_port)
-httpd.timeout = 0.2
+httpd.timeout = 0.1
 start_trigger = True
 while not kodi_monitor.abortRequested():
     httpd.handle_request()
