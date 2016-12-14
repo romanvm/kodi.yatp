@@ -95,7 +95,9 @@ class Torrenter(object):
         # Initialize session
         self._session = libtorrent.session(fingerprint=libtorrent.fingerprint('UT', 3, 4, 5, 41865))
         self._session.listen_on(start_port, end_port)
-        # Lower cache size is needed for libtorrent to dump data on disk more often
+        # Lower cache size is needed for libtorrent to dump data on disk more often,
+        # otherwise have_piece may give false positives for pieces
+        # that are in the memory cache but not saved to disk yet.
         self.set_session_settings(cache_size=256,  # 4MB
                                   ignore_limits_on_local_network=True,
                                   user_agent='uTorrent/3.4.5(41865)')
