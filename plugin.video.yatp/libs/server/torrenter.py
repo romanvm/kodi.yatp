@@ -204,7 +204,9 @@ class Torrenter(object):
         if isinstance(torrent, dict):
             add_torrent_params['ti'] = libtorrent.torrent_info(torrent)
         elif torrent[:7] == 'magnet:':
-            add_torrent_params['url'] = str(torrent)  # libtorrent doesn't like unicode objects here
+            if isinstance(torrent, unicode):
+                torrent = torrent.encode('utf-8') # libtorrent doesn't like unicode objects here
+            add_torrent_params['url'] = torrent
         elif torrent[:7] in ('http://', 'https:/'):
             # Here external http/https client is used in case if libtorrent module is compiled without OpenSSL
             torr_file = get(torrent, cookies=cookies, verify=False).content
