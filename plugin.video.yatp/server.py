@@ -50,6 +50,7 @@ while not kodi_monitor.abortRequested():
         xbmcgui.Dialog().notification('YATP', addon.get_localized_string(32028), addon.icon, 3000, False)
         start_trigger = False
 wsgi_app.torrent_client.abort_buffering()
+httpd.socket.close()
 if addon.enable_limits:
     wsgi_app.limits_timer.abort()
 if addon.persistent:
