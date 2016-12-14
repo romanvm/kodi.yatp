@@ -16,6 +16,7 @@ from simpleplugin import Addon
 
 kodi_monitor = xbmc.Monitor()
 addon = Addon()
+_ = addon.initialize_gettext()
 addon.log_notice('Starting Torrent Server...')
 # A monkey-patch to set the necessary librorrent version
 librorrent_addon = Addon('script.module.libtorrent')
@@ -47,7 +48,7 @@ while not kodi_monitor.abortRequested():
     httpd.handle_request()
     if start_trigger:
         addon.log_notice('Torrent Server started')
-        xbmcgui.Dialog().notification('YATP', addon.get_localized_string(32028), addon.icon, 3000, False)
+        xbmcgui.Dialog().notification('YATP', _('Torrent server started.'), addon.icon, 3000, False)
         start_trigger = False
 wsgi_app.torrent_client.abort_buffering()
 httpd.socket.close()
