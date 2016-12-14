@@ -118,7 +118,7 @@ class Torrenter(object):
             self._add_torrent_thread.join()
         except (RuntimeError, AttributeError):
             pass
-        del self._session
+        self._session.pause()
 
     def set_encryption_policy(self, enc_policy=1):
         """
