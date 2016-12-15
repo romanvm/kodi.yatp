@@ -15,6 +15,10 @@ The plugin can also be used a simple torrent-client.
 
 Please read [project's Wiki](https://github.com/romanvm/kodi.yatp/wiki) if you want to find out more about YATP.
 
+**Important notice**: YATP is a content-neutral solution. It is not tied to any specific site or content-type.
+This is by design and will remain so. It is not my business where you get your torrents. If you want support
+for a specific site or content, you can implement it yourself using YATP API, but that's entirely up to you.
+
 When submitting bug reports via the project's issue tracker [Kodi debug log](http://kodi.wiki/view/Log_file/Easy)
 **is mandatory**. Bug reports without logs will be closed without explanation.
 
