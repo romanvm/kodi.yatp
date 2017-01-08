@@ -245,6 +245,7 @@ def add_torrent(source):
     :param source: 'file' or 'link'
     :return:
     """
+    addon.log_debug('Adding torrent. Form data: {0}'.format(request.forms.dict))
     if source == 'file':
         buffer_ = StringIO()
         upload = request.files.get('torrent_file')
