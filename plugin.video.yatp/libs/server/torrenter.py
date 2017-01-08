@@ -178,8 +178,12 @@ class Torrenter(object):
             'info_hash': info_hash,
             'files': self.get_files(info_hash)
         }
+        # The tested variant of pause management. Other options don't work with 1.x.x.
+        # Do not change unless does not work as expected!
         if paused:
-            self.pause_torrent(info_hash)  # Tested variant. Other variants don't work with 1.x.x
+            self.pause_torrent(info_hash)
+        else:
+            self.resume_torrent(info_hash)
         self._torrent_added.set()
 
     def _add_torrent(self, torrent, save_path, resume_data=None, cookies=None):
@@ -199,7 +203,7 @@ class Torrenter(object):
             add_torrent_params['ti'] = libtorrent.torrent_info(torrent)
         elif torrent[:7] == 'magnet:':
             if isinstance(torrent, unicode):
-                torrent = torrent.encode('utf-8') # libtorrent doesn't like unicode objects here
+                torrent = torrent.encode('utf-8')  # libtorrent doesn't like unicode objects here
             add_torrent_params['url'] = torrent
         elif torrent[:7] in ('http://', 'https:/'):
             # Here external http/https client is used in case if libtorrent module is compiled without OpenSSL
