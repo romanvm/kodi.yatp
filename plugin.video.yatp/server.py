@@ -52,16 +52,14 @@ while not kodi_monitor.abortRequested():
         addon.log_notice('Torrent Server started')
         xbmcgui.Dialog().notification('YATP', _('Torrent server started.'), addon.icon, 3000, False)
         start_trigger = False
-addon.log_notice('Stopping Torrent Server...')
-addon.log_debug('Abort buffering')
-wsgi_app.torrent_client.abort_buffering()
+addon.log_debug('Stopping Torrent Server...')
 addon.log_debug('Close server socket')
 httpd.socket.close()
+addon.log_debug('Abort buffering')
+wsgi_app.torrent_client.abort_buffering()
 addon.log_debug('Stop timers')
 if addon.enable_limits:
     wsgi_app.limits_timer.abort()
 if addon.persistent:
     wsgi_app.save_resume_timer.abort()
-addon.log_debug('Delete torrent_client instance')
-del wsgi_app.torrent_client
 addon.log_notice('Torrent Server stopped')

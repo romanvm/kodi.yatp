@@ -109,11 +109,6 @@ class Torrenter(object):
         self._session.start_upnp()
         self._session.start_natpmp()
 
-    def __del__(self):
-        if self._add_torrent_thread.is_alive():
-            self._add_torrent_thread.join()
-        self._session.pause()
-
     def set_encryption_policy(self, enc_policy=1):
         """
         Set encryption policy for the session
@@ -461,11 +456,6 @@ class TorrenterPersistent(Torrenter):
                 self._save_session_state()
             self._load_torrents()
 
-    def __del__(self):
-        if self._persistent:
-            self.save_all_resume_data()
-        super(TorrenterPersistent, self).__del__()
-
     def add_torrent(self, torrent, save_path, paused=False, cookies=None):
         """
         Add a torrent download
@@ -633,10 +623,6 @@ class Streamer(TorrenterPersistent):
         self._streamed_file_data = Buffer()
         self._sliding_window_position = Buffer(-1)
         super(Streamer, self).__init__(*args, **kwargs)
-
-    def __del__(self):
-        self.abort_buffering()
-        super(Streamer, self).__del__()
 
     def buffer_file_async(self, file_index, buffer_duration, sliding_window_length, default_buffer_size,
                           info_hash=None):
