@@ -7,9 +7,10 @@
 Torrent streamer WSGI server
 """
 
-import xbmc
-xbmc.sleep(2000)
+import time
+time.sleep(2)
 
+import xbmc
 import xbmcgui
 from libs.server.wsgi_server import create_server
 from simpleplugin import Addon
