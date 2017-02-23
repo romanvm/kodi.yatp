@@ -783,9 +783,9 @@ class Streamer(TorrenterPersistent):
         """
         self._abort_buffering.set()
         self._abort_sliding.set()
-        if self._buffer_file_thread.is_alive():
+        if self._buffer_file_thread is not None and self._buffer_file_thread.is_alive():
             self._buffer_file_thread.join()
-        if self._sliding_window_thread.is_alive():
+        if self._sliding_window_thread is not None and self._sliding_window_thread.is_alive():
             self._sliding_window_thread.join()
 
     def remove_torrent(self, info_hash, delete_files=False):
