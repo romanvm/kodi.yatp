@@ -18,7 +18,7 @@ from simpleplugin import Addon
 addon = Addon()
 _ = addon.initialize_gettext()
 media_url = 'http://127.0.0.1:{0}/stream/'.format(addon.server_port)
-MEDIAFILES = ('.avi', '.mkv', '.mp4', '.ts', '.m2ts', '.mov', '.m4v')
+MEDIAFILES = ('.avi', '.mkv', '.mp4', '.ts', '.m2ts', '.mov', '.m4v', '.wmv')
 
 
 def get_videofiles(files):
