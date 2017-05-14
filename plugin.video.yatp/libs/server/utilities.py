@@ -23,7 +23,8 @@ MIME = {'.mkv': 'video/x-matroska',
         '.avi': 'video/avi',
         '.ts': 'video/MP2T',
         '.m2ts': 'video/MP2T',
-        '.mov': 'video/quicktime'}
+        '.mov': 'video/quicktime',
+        '.wmv': 'video/x-ms-wmv'}
 
 
 def _parse_file(filename):
