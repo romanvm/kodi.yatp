@@ -30,12 +30,9 @@ def _play(path):
 
 
 @plugin.action()
-def root(params):
+def root():
     """
     Plugin root
-
-    :param params:
-    :return:
     """
     return [{'label': _('Play .torrent file...'),
              'thumb': os.path.join(icons, 'play.png'),
@@ -106,12 +103,9 @@ def download_torrent(params):
 
 
 @plugin.action()
-def torrents(params):
+def torrents():
     """
     Display the list of torrents in the session
-
-    :param params:
-    :return:
     """
     torrent_list = sorted(jsonrq.get_all_torrent_info(), key=lambda i: i['added_time'], reverse=True)
     for torrent in torrent_list:
