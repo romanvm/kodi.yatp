@@ -25,8 +25,7 @@ def _play(path):
     :return:
     """
     plugin.log_notice('Path to play: {0}'.format(path))
-    success = True if path else False
-    return plugin.resolve_url(path, succeeded=success)
+    return plugin.resolve_url(path, succeeded=bool(path))
 
 
 @plugin.action()
