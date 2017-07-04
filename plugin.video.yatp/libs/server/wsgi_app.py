@@ -23,6 +23,7 @@ from timers import Timer, check_seeding_limits, save_resume_data
 from onscreen_label import OnScreenLabel
 from utilities import get_mime
 
+monitor = xbmc.Monitor()
 addon = Addon()
 _ = addon.initialize_gettext()
 
@@ -79,7 +80,7 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
     paused = False  # Needed to prevent unpausing video paused by a user.
     start_time = -1
     with file_:
-        while True:
+        while not monitor.abortRequested():
             current_piece = start_piece + int(float(byte_position) / piece_length)
             addon.log_debug('Checking piece #{0}'.format(current_piece))
             # Wait for the piece if it is not downloaded
@@ -100,7 +101,8 @@ def serve_file_from_torrent(file_, byte_position, torrent_handle, start_piece, p
                         torrent_handle.status().download_payload_rate / 1024)
                     oncreen_label.show()
                 addon.log_debug('Waiting for piece #{0}...'.format(current_piece))
-                xbmc.sleep(500)  # xbmc.sleep works better here
+                if monitor.waitForAbort(0.5):
+                    break
             if start_time != -1:
                 addon.log_debug('Piece #{0} downloaded.'.format(current_piece))
                 start_time = -1

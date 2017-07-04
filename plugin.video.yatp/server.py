@@ -7,15 +7,15 @@
 Torrent streamer WSGI server
 """
 
-import time
-time.sleep(2)
-
 import xbmc
+monitor = xbmc.Monitor()
+if monitor.waitForAbort(2.0):
+    raise SystemExit
+
 import xbmcgui
 from libs.server.wsgi_server import create_server
 from simpleplugin import Addon
 
-kodi_monitor = xbmc.Monitor()
 addon = Addon()
 _ = addon.initialize_gettext()
 addon.log_notice('Starting Torrent Server...')
@@ -47,7 +47,7 @@ if addon.persistent:
 httpd = create_server(wsgi_app.app, port=addon.server_port)
 httpd.timeout = 0.1
 start_trigger = True
-while not kodi_monitor.abortRequested():
+while not monitor.abortRequested():
     httpd.handle_request()
     if start_trigger:
         addon.log_notice('Torrent Server started')
