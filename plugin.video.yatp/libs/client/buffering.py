@@ -9,6 +9,7 @@ Buffering torrent
 
 import os
 from urllib import quote
+from urlparse import urljoin
 import xbmc
 import xbmcgui
 import json_requests as jsonrq
@@ -109,7 +110,7 @@ def stream_torrent(file_index, info_hash):
         xbmc.sleep(1000)
     if not progress_dialog.iscanceled():
         progress_dialog.close()
-        return media_url + quote(files[file_index][0].replace('\\', '/').encode('utf-8'))
+        return urljoin(media_url, quote(files[file_index][0].replace('\\', '/').encode('utf-8')))
     else:
         jsonrq.abort_buffering()
         return ''
